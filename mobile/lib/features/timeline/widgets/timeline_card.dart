@@ -3,10 +3,16 @@ import 'package:intl/intl.dart';
 import '../../../models/schedule_item.dart';
 
 class TimelineCard extends StatelessWidget {
-  const TimelineCard({super.key, required this.item, required this.onComplete});
+  const TimelineCard({
+    super.key,
+    required this.item,
+    required this.onComplete,
+    this.onTap,
+  });
 
   final ScheduleItem item;
   final VoidCallback onComplete;
+  final VoidCallback? onTap;
 
   IconData get _icon {
     switch (item.itemType) {
@@ -16,6 +22,8 @@ class TimelineCard extends StatelessWidget {
         return Icons.medication;
       case 'water':
         return Icons.water_drop;
+      case 'workout':
+        return Icons.fitness_center;
     }
     return Icons.check_circle_outline;
   }
@@ -41,6 +49,7 @@ class TimelineCard extends StatelessWidget {
           color: done ? Colors.green : null,
           onPressed: onComplete,
         ),
+        onTap: onTap,
       ),
     );
   }

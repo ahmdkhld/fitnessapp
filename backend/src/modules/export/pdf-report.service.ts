@@ -15,6 +15,24 @@ interface ReportData {
     bodyFatPct: any;
     energyLevel: number | null;
   }>;
+  workouts?: {
+    sessionCount: number;
+    totalDurationMin: number;
+    sessions: Array<{
+      date: Date | string;
+      name: string;
+      durationMin: number | null;
+      setCount: number;
+      totalVolumeKg: number;
+    }>;
+    personalRecords: Array<{
+      exercise: string;
+      recordType: string;
+      value: number;
+      unit: string;
+      achievedAt: Date | string;
+    }>;
+  };
 }
 
 /**
@@ -34,6 +52,7 @@ export class PdfReportService {
     this.summary(doc, data);
     this.adherenceTable(doc, data);
     this.bodyLogTable(doc, data);
+    this.workoutSection(doc, data);
 
     doc.end();
     await new Promise<void>((resolve) => stream.on('end', resolve));
@@ -121,6 +140,49 @@ export class PdfReportService {
       if (log.bodyFatPct != null) parts.push(`bf ${log.bodyFatPct}%`);
       if (log.energyLevel != null) parts.push(`energy ${log.energyLevel}/5`);
       doc.text(parts.join('  ·  '));
+    }
+  }
+
+  private workoutSection(doc: PDFKit.PDFDocument, data: ReportData) {
+    const w = data.workouts;
+    if (!w || w.sessionCount === 0) return;
+    doc.addPage();
+    doc.fontSize(18).fillColor('#2e7d5c').text('Workouts');
+    doc.moveDown(0.5);
+    doc
+      .fontSize(11)
+      .fillColor('#333')
+      .text(
+        `${w.sessionCount} session${w.sessionCount === 1 ? '' : 's'}  ·  ` +
+          `${w.totalDurationMin} total minutes`,
+      );
+    doc.moveDown(1);
+
+    if (w.sessions.length > 0) {
+      doc.fontSize(14).fillColor('#000').text('Sessions');
+      doc.moveDown(0.3);
+      doc.fontSize(10).fillColor('#333');
+      for (const s of w.sessions) {
+        doc.text(
+          `${this.formatDate(s.date)}  ·  ${s.name}  ·  ` +
+            `${s.setCount} sets  ·  ${Math.round(s.totalVolumeKg)} kg volume  ·  ` +
+            `${s.durationMin ?? 0} min`,
+        );
+      }
+      doc.moveDown(1);
+    }
+
+    if (w.personalRecords.length > 0) {
+      doc.fontSize(14).fillColor('#000').text('Personal records');
+      doc.moveDown(0.3);
+      doc.fontSize(10).fillColor('#333');
+      for (const pr of w.personalRecords) {
+        doc.text(
+          `${this.formatDate(pr.achievedAt)}  ·  ${pr.exercise}  ·  ` +
+            `${pr.recordType.replace(/_/g, ' ')}: ${pr.value} ${pr.unit}`,
+        );
+      }
+      doc.moveDown(1);
     }
   }
 

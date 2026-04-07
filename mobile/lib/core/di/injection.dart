@@ -10,6 +10,7 @@ import '../../features/tracking/repositories/body_log_repository.dart';
 import '../../features/tracking/repositories/water_repository.dart';
 import '../../features/analytics/repositories/analytics_repository.dart';
 import '../../features/workouts/repositories/exercises_repository.dart';
+import '../../features/workouts/repositories/session_cache.dart';
 import '../../features/workouts/repositories/workout_analytics_repository.dart';
 import '../../features/workouts/repositories/workout_plans_repository.dart';
 import '../../features/workouts/repositories/workout_sessions_repository.dart';
@@ -69,8 +70,12 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<WorkoutPlansRepository>(
     () => WorkoutPlansRepository(getIt<ApiClient>()),
   );
+  getIt.registerLazySingleton<SessionSetCache>(() => SessionSetCache());
   getIt.registerLazySingleton<WorkoutSessionsRepository>(
-    () => WorkoutSessionsRepository(getIt<ApiClient>()),
+    () => WorkoutSessionsRepository(
+      getIt<ApiClient>(),
+      getIt<SessionSetCache>(),
+    ),
   );
   getIt.registerLazySingleton<WorkoutAnalyticsRepository>(
     () => WorkoutAnalyticsRepository(getIt<ApiClient>()),

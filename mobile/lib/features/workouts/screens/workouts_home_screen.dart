@@ -54,6 +54,16 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
         title: const Text('Workouts'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.bar_chart),
+            tooltip: 'Analytics',
+            onPressed: () => context.push('/workouts/analytics'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.library_books),
+            tooltip: 'Exercise library',
+            onPressed: () => context.push('/workouts/library'),
+          ),
+          IconButton(
             icon: const Icon(Icons.history),
             tooltip: 'History',
             onPressed: () => context.push('/workouts/history'),

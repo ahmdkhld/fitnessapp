@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/connectivity/connectivity_monitor.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/notifications/local_notification_service.dart';
+import '../../../models/schedule_item.dart';
+import '../../workouts/repositories/workout_sessions_repository.dart';
 import '../bloc/timeline_bloc.dart';
 import '../bloc/timeline_event.dart';
 import '../bloc/timeline_state.dart';
@@ -28,6 +31,22 @@ class DailyTimelineScreen extends StatelessWidget {
 
 class _TimelineView extends StatelessWidget {
   const _TimelineView();
+
+  Future<void> _onTap(BuildContext context, ScheduleItem item) async {
+    if (item.itemType != 'workout' || item.referenceId == null) return;
+    try {
+      final session = await getIt<WorkoutSessionsRepository>().start(
+        workoutDayId: item.referenceId,
+      );
+      if (!context.mounted) return;
+      context.push('/workouts/sessions/${session.id}/active');
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not start workout: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +83,9 @@ class _TimelineView extends StatelessWidget {
                     final item = state.items[i];
                     return TimelineCard(
                       item: item,
+                      onTap: item.itemType == 'workout'
+                          ? () => _onTap(context, item)
+                          : null,
                       onComplete: () => context.read<TimelineBloc>().add(
                             TimelineItemStatusChanged(
                               itemId: item.id,

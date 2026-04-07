@@ -73,6 +73,26 @@ export default async function WorkoutsHomePage() {
           >
             History
           </Link>
+          <Link
+            href="/dashboard/workouts/library"
+            style={{
+              padding: '0.4rem 0.9rem',
+              border: '1px solid var(--border)',
+              borderRadius: 6,
+            }}
+          >
+            Library
+          </Link>
+          <Link
+            href="/dashboard/workouts/analytics"
+            style={{
+              padding: '0.4rem 0.9rem',
+              border: '1px solid var(--border)',
+              borderRadius: 6,
+            }}
+          >
+            Analytics
+          </Link>
         </div>
       </div>
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}

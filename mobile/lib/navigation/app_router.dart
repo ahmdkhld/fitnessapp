@@ -21,6 +21,8 @@ import '../features/workouts/screens/workout_templates_screen.dart';
 import '../features/workouts/screens/workout_plan_detail_screen.dart';
 import '../features/workouts/screens/session_active_screen.dart';
 import '../features/workouts/screens/session_history_screen.dart';
+import '../features/workouts/screens/exercises_library_screen.dart';
+import '../features/workouts/screens/workout_analytics_screen.dart';
 import 'auth_listenable.dart';
 import 'bottom_nav_shell.dart';
 
@@ -103,6 +105,14 @@ class AppRouter {
         GoRoute(
           path: '/workouts/history',
           builder: (_, __) => const SessionHistoryScreen(),
+        ),
+        GoRoute(
+          path: '/workouts/library',
+          builder: (_, __) => const ExercisesLibraryScreen(),
+        ),
+        GoRoute(
+          path: '/workouts/analytics',
+          builder: (_, __) => const WorkoutAnalyticsScreen(),
         ),
         ShellRoute(
           builder: (_, __, child) => BottomNavShell(child: child),

@@ -2,7 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 export interface Insight {
-  type: 'pattern' | 'missed' | 'stock' | 'hydration' | 'positive';
+  type:
+    | 'pattern'
+    | 'missed'
+    | 'stock'
+    | 'hydration'
+    | 'positive'
+    | 'workout_missed'
+    | 'workout_stagnation'
+    | 'workout_pr';
   severity: 'info' | 'warn' | 'critical';
   title: string;
   detail: string;
@@ -99,6 +107,97 @@ export class InsightsService {
         severity: 'warn',
         title: 'Hydration below target',
         detail: `${daysUnder} days in the last 14 were under 70% of your ${target}ml goal.`,
+      });
+    }
+
+    // ===== Workout rules =====
+
+    // 1. Missed workouts: active plan prescribes ≥ N days, user logged < 50%.
+    const activePlan = await this.prisma.workoutPlan.findFirst({
+      where: { userId, isActive: true },
+      select: { daysPerWeek: true, name: true },
+    });
+    if (activePlan?.daysPerWeek) {
+      const sessionsInWindow = await this.prisma.workoutSession.count({
+        where: {
+          userId,
+          status: 'completed',
+          date: { gte: since },
+        },
+      });
+      const expected = activePlan.daysPerWeek * 2; // 14-day window
+      if (sessionsInWindow < expected * 0.5) {
+        insights.push({
+          type: 'workout_missed',
+          severity: 'warn',
+          title: 'Workout frequency is slipping',
+          detail:
+            `Completed ${sessionsInWindow}/${expected} sessions for "${activePlan.name}" ` +
+            `over the last 14 days.`,
+        });
+      } else if (sessionsInWindow >= expected) {
+        insights.push({
+          type: 'positive',
+          severity: 'info',
+          title: 'On track with workouts',
+          detail: `${sessionsInWindow} sessions logged — keep it up!`,
+        });
+      }
+    }
+
+    // 2. Stagnation: primary lift hasn't hit a new estimated-1RM PR in 4+ weeks.
+    const fourWeeksAgo = new Date();
+    fourWeeksAgo.setUTCDate(fourWeeksAgo.getUTCDate() - 28);
+    const recentPRs = await this.prisma.personalRecord.groupBy({
+      by: ['exerciseId'],
+      where: {
+        userId,
+        recordType: 'estimated_1rm',
+        achievedAt: { gte: fourWeeksAgo },
+      },
+    });
+    const recentlyTrainedIds = (
+      await this.prisma.workoutSet.findMany({
+        where: { session: { userId }, loggedAt: { gte: fourWeeksAgo } },
+        select: { exerciseId: true },
+        distinct: ['exerciseId'],
+        take: 50,
+      })
+    ).map((s) => s.exerciseId);
+
+    const stagnantIds = recentlyTrainedIds.filter(
+      (id) => !recentPRs.some((pr) => pr.exerciseId === id),
+    );
+    if (stagnantIds.length > 0) {
+      const stagnantExercises = await this.prisma.exercise.findMany({
+        where: { id: { in: stagnantIds.slice(0, 3) } },
+        select: { name: true },
+      });
+      if (stagnantExercises.length > 0) {
+        insights.push({
+          type: 'workout_stagnation',
+          severity: 'info',
+          title: 'Lifts stagnating',
+          detail:
+            `No new estimated 1RM PR in 4 weeks for ` +
+            stagnantExercises.map((e) => e.name).join(', ') +
+            '. Consider a deload or switching the rep range.',
+        });
+      }
+    }
+
+    // 3. Celebrate PRs from the last 7 days.
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setUTCDate(sevenDaysAgo.getUTCDate() - 7);
+    const freshPRs = await this.prisma.personalRecord.count({
+      where: { userId, achievedAt: { gte: sevenDaysAgo } },
+    });
+    if (freshPRs > 0) {
+      insights.push({
+        type: 'workout_pr',
+        severity: 'info',
+        title: `${freshPRs} new PR${freshPRs === 1 ? '' : 's'} this week`,
+        detail: 'Progressive overload is working — nice work.',
       });
     }
 
