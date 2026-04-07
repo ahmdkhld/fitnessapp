@@ -46,3 +46,12 @@ tracking, smart insights.
 
 **Won't Have (v1):** AI meal suggestions, barcode scanning, social features,
 wearable integration.
+
+## Implementation status
+
+| Phase | Status   | Notes |
+|-------|----------|-------|
+| 1 — Foundation | ✅ complete | Auth, users, plans, schedule engine, timeline UI, dashboard shell |
+| 2 — Notifications & Tracking | ✅ complete | Cron-based overdue + evening + stock alerts, water/body/notes endpoints, adherence analytics |
+| 3 — Smart Features | ✅ complete | Text plan parser, insights engine, coach report |
+| 4 — Polish & Launch | ⏳ partial | Docker + CI ✅; PDF rendering, real FCM delivery, S3 upload integration, app store submission deferred |

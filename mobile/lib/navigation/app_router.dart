@@ -3,6 +3,7 @@ import '../features/auth/screens/login_screen.dart';
 import '../features/timeline/screens/daily_timeline_screen.dart';
 import '../features/analytics/screens/dashboard_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
+import '../features/tracking/screens/water_tracker_screen.dart';
 import 'bottom_nav_shell.dart';
 
 class AppRouter {
@@ -10,6 +11,7 @@ class AppRouter {
     initialLocation: '/timeline',
     routes: [
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+      GoRoute(path: '/water', builder: (_, __) => const WaterTrackerScreen()),
       ShellRoute(
         builder: (_, __, child) => BottomNavShell(child: child),
         routes: [

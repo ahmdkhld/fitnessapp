@@ -3,13 +3,22 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 import { AnalyticsService } from './analytics.service';
+import { InsightsService } from './insights.service';
 
 @ApiTags('analytics')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('analytics')
 export class AnalyticsController {
-  constructor(private readonly analytics: AnalyticsService) {}
+  constructor(
+    private readonly analytics: AnalyticsService,
+    private readonly insights: InsightsService,
+  ) {}
+
+  @Get('insights')
+  getInsights(@CurrentUser() user: AuthUser) {
+    return this.insights.forUser(user.userId);
+  }
 
   @Get('adherence')
   adherence(

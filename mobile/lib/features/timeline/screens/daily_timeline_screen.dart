@@ -1,57 +1,100 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import '../../../models/schedule_item.dart';
+import '../../../core/di/injection.dart';
+import '../bloc/timeline_bloc.dart';
+import '../bloc/timeline_event.dart';
+import '../bloc/timeline_state.dart';
+import '../repositories/timeline_repository.dart';
 import '../widgets/timeline_card.dart';
 
-class DailyTimelineScreen extends StatefulWidget {
+class DailyTimelineScreen extends StatelessWidget {
   const DailyTimelineScreen({super.key});
 
   @override
-  State<DailyTimelineScreen> createState() => _DailyTimelineScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => TimelineBloc(getIt<TimelineRepository>())
+        ..add(TimelineLoadRequested(DateTime.now())),
+      child: const _TimelineView(),
+    );
+  }
 }
 
-class _DailyTimelineScreenState extends State<DailyTimelineScreen> {
-  // Demo placeholder data; replace with TimelineBloc fetching from API.
-  late final List<ScheduleItem> _items = [
-    ScheduleItem(
-      id: '1',
-      itemType: 'meal',
-      title: 'Breakfast',
-      subtitle: 'Oats, berries, whey',
-      scheduledTime: DateTime.now().copyWith(hour: 8, minute: 0),
-      status: 'completed',
-    ),
-    ScheduleItem(
-      id: '2',
-      itemType: 'supplement',
-      title: 'Vitamin D3',
-      subtitle: '5000 IU · with food',
-      scheduledTime: DateTime.now().copyWith(hour: 8, minute: 30),
-      status: 'pending',
-    ),
-    ScheduleItem(
-      id: '3',
-      itemType: 'meal',
-      title: 'Lunch',
-      subtitle: 'Chicken, rice, veg',
-      scheduledTime: DateTime.now().copyWith(hour: 13, minute: 0),
-      status: 'pending',
-    ),
-  ];
+class _TimelineView extends StatelessWidget {
+  const _TimelineView();
 
   @override
   Widget build(BuildContext context) {
-    final today = DateFormat.yMMMMEEEEd().format(DateTime.now());
     return Scaffold(
-      appBar: AppBar(title: Text(today)),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: _items.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (_, i) => TimelineCard(
-          item: _items[i],
-          onComplete: () => setState(() {}),
-        ),
+      appBar: AppBar(title: Text(DateFormat.yMMMMEEEEd().format(DateTime.now()))),
+      body: BlocBuilder<TimelineBloc, TimelineState>(
+        builder: (context, state) {
+          switch (state.status) {
+            case TimelineStatus.initial:
+            case TimelineStatus.loading:
+              return const Center(child: CircularProgressIndicator());
+            case TimelineStatus.failure:
+              return _ErrorView(
+                error: state.error ?? 'Unknown error',
+                onRetry: () => context
+                    .read<TimelineBloc>()
+                    .add(TimelineLoadRequested(DateTime.now())),
+              );
+            case TimelineStatus.success:
+              if (state.items.isEmpty) {
+                return const Center(child: Text('Nothing scheduled today.'));
+              }
+              return RefreshIndicator(
+                onRefresh: () async {
+                  context
+                      .read<TimelineBloc>()
+                      .add(TimelineLoadRequested(DateTime.now()));
+                },
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: state.items.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (_, i) {
+                    final item = state.items[i];
+                    return TimelineCard(
+                      item: item,
+                      onComplete: () => context.read<TimelineBloc>().add(
+                            TimelineItemStatusChanged(
+                              itemId: item.id,
+                              status: item.status == 'completed'
+                                  ? 'pending'
+                                  : 'completed',
+                            ),
+                          ),
+                    );
+                  },
+                ),
+              );
+          }
+        },
+      ),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  const _ErrorView({required this.error, required this.onRetry});
+  final String error;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 48),
+          const SizedBox(height: 12),
+          Text(error, textAlign: TextAlign.center),
+          const SizedBox(height: 16),
+          FilledButton(onPressed: onRetry, child: const Text('Retry')),
+        ],
       ),
     );
   }

@@ -1,11 +1,46 @@
-export default function LoginPage() {
+import { redirect } from 'next/navigation';
+import { api } from '@/lib/api';
+import { setTokenCookie } from '@/lib/auth';
+
+async function loginAction(formData: FormData) {
+  'use server';
+  const email = String(formData.get('email') ?? '');
+  const password = String(formData.get('password') ?? '');
+  try {
+    const tokens = await api.login(email, password);
+    setTokenCookie(tokens.accessToken);
+  } catch {
+    redirect('/login?error=1');
+  }
+  redirect('/dashboard');
+}
+
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams: { error?: string };
+}) {
   return (
     <main style={{ padding: '4rem 2rem', maxWidth: 400, margin: '0 auto' }}>
       <h1>Sign in</h1>
-      <form style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '2rem' }}>
-        <input type="email" placeholder="Email" style={inputStyle} />
-        <input type="password" placeholder="Password" style={inputStyle} />
-        <button type="submit" style={buttonStyle}>Continue</button>
+      {searchParams.error && (
+        <p style={{ color: '#e07b5f' }}>Invalid credentials.</p>
+      )}
+      <form
+        action={loginAction}
+        style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '2rem' }}
+      >
+        <input name="email" type="email" placeholder="Email" style={inputStyle} required />
+        <input
+          name="password"
+          type="password"
+          placeholder="Password"
+          style={inputStyle}
+          required
+        />
+        <button type="submit" style={buttonStyle}>
+          Continue
+        </button>
       </form>
     </main>
   );

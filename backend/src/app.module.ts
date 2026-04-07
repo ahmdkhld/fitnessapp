@@ -10,6 +10,8 @@ import { ScheduleModule as NtScheduleModule } from './modules/schedule/schedule.
 import { TrackingModule } from './modules/tracking/tracking.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { PlanParserModule } from './modules/plan-parser/plan-parser.module';
+import { ExportModule } from './modules/export/export.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     TrackingModule,
     AnalyticsModule,
     NotificationsModule,
+    PlanParserModule,
+    ExportModule,
   ],
 })
 export class AppModule {}
