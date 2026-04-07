@@ -29,6 +29,10 @@ model User {
   notificationSettings NotificationSettings?
   uploadedPlans        UploadedPlan[]
   refreshTokens        RefreshToken[]
+  exercises            Exercise[]
+  workoutPlans         WorkoutPlan[]
+  workoutSessions      WorkoutSession[]
+  personalRecords      PersonalRecord[]
 
   @@map("users")
 }
@@ -254,4 +258,155 @@ model UploadedPlan {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("uploaded_plans")
+}
+
+// ===== Workouts =====
+
+model Exercise {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String?  @map("user_id") @db.Uuid // NULL = global library
+  name              String   @db.VarChar(100)
+  category          String?  @db.VarChar(30) // push, pull, legs, core, cardio, mobility
+  primaryMuscle     String?  @map("primary_muscle") @db.VarChar(30)
+  secondaryMuscles  String[] @map("secondary_muscles") @db.VarChar(30)
+  equipment         String?  @db.VarChar(30) // barbell, dumbbell, machine, bodyweight, cable, cardio_machine
+  isUnilateral      Boolean  @default(false) @map("is_unilateral")
+  isCardio          Boolean  @default(false) @map("is_cardio")
+  instructions      String?
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  user               User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dayExercises       WorkoutDayExercise[]
+  sets               WorkoutSet[]
+  personalRecords    PersonalRecord[]
+
+  @@index([userId])
+  @@index([category])
+  @@map("exercises")
+}
+
+model WorkoutPlan {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String?  @map("user_id") @db.Uuid // NULL = seeded template
+  name          String   @db.VarChar(100)
+  goal          String?  @db.VarChar(50)
+  splitType     String?  @map("split_type") @db.VarChar(30)
+  daysPerWeek   Int?     @map("days_per_week")
+  description   String?
+  isActive      Boolean  @default(false) @map("is_active")
+  isTemplate    Boolean  @default(false) @map("is_template")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  user User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  days WorkoutDay[]
+
+  @@index([userId, isActive])
+  @@index([isTemplate])
+  @@map("workout_plans")
+}
+
+model WorkoutDay {
+  id                    String   @id @default(uuid()) @db.Uuid
+  workoutPlanId         String   @map("workout_plan_id") @db.Uuid
+  name                  String   @db.VarChar(100)
+  dayOfWeek             Int?     @map("day_of_week") // 1..7, NULL = flexible
+  sortOrder             Int      @default(0) @map("sort_order")
+  estimatedDurationMin  Int?     @map("estimated_duration_min")
+  notes                 String?
+
+  plan        WorkoutPlan          @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
+  exercises   WorkoutDayExercise[]
+  sessions    WorkoutSession[]
+
+  @@map("workout_days")
+}
+
+model WorkoutDayExercise {
+  id               String   @id @default(uuid()) @db.Uuid
+  workoutDayId     String   @map("workout_day_id") @db.Uuid
+  exerciseId       String   @map("exercise_id") @db.Uuid
+  sortOrder        Int      @default(0) @map("sort_order")
+  targetSets       Int      @map("target_sets")
+  targetReps       String?  @map("target_reps") @db.VarChar(20)
+  targetWeightKg   Decimal? @map("target_weight_kg") @db.Decimal(6, 1)
+  targetRpe        Decimal? @map("target_rpe") @db.Decimal(3, 1)
+  targetDurationSec Int?    @map("target_duration_sec") // for cardio/holds
+  targetDistanceKm Decimal? @map("target_distance_km") @db.Decimal(6, 2)
+  restSeconds      Int?     @map("rest_seconds")
+  tempo            String?  @db.VarChar(10)
+  supersetGroup    String?  @map("superset_group") @db.VarChar(10)
+  progressionKg    Decimal  @default(0) @map("progression_kg") @db.Decimal(4, 1) // auto-add on success
+  notes            String?
+
+  day      WorkoutDay @relation(fields: [workoutDayId], references: [id], onDelete: Cascade)
+  exercise Exercise   @relation(fields: [exerciseId], references: [id])
+
+  @@map("workout_day_exercises")
+}
+
+model WorkoutSession {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  workoutDayId  String?   @map("workout_day_id") @db.Uuid
+  date          DateTime  @db.Date
+  startedAt     DateTime? @map("started_at") @db.Timestamptz()
+  completedAt   DateTime? @map("completed_at") @db.Timestamptz()
+  durationMin   Int?      @map("duration_min")
+  bodyweightKg  Decimal?  @map("bodyweight_kg") @db.Decimal(5, 1)
+  energyLevel   Int?      @map("energy_level")
+  notes         String?
+  status        String    @default("in_progress") @db.VarChar(20)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  day  WorkoutDay? @relation(fields: [workoutDayId], references: [id])
+  sets WorkoutSet[]
+
+  @@index([userId, date])
+  @@index([userId, status])
+  @@map("workout_sessions")
+}
+
+model WorkoutSet {
+  id              String    @id @default(uuid()) @db.Uuid
+  sessionId       String    @map("session_id") @db.Uuid
+  exerciseId      String    @map("exercise_id") @db.Uuid
+  setNumber       Int       @map("set_number")
+  reps            Int?
+  weightKg        Decimal?  @map("weight_kg") @db.Decimal(6, 1)
+  rpe             Decimal?  @db.Decimal(3, 1)
+  durationSec     Int?      @map("duration_sec")
+  distanceKm      Decimal?  @map("distance_km") @db.Decimal(6, 2)
+  isWarmup        Boolean   @default(false) @map("is_warmup")
+  isFailure       Boolean   @default(false) @map("is_failure")
+  restSeconds     Int?      @map("rest_seconds")
+  notes           String?
+  loggedAt        DateTime  @default(now()) @map("logged_at") @db.Timestamptz()
+
+  session  WorkoutSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exercise Exercise        @relation(fields: [exerciseId], references: [id])
+  prs      PersonalRecord[]
+
+  @@index([sessionId])
+  @@index([exerciseId])
+  @@map("workout_sets")
+}
+
+model PersonalRecord {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  exerciseId  String   @map("exercise_id") @db.Uuid
+  recordType  String   @map("record_type") @db.VarChar(20) // 1rm, 3rm, 5rm, 10rm, estimated_1rm, max_volume, max_reps, fastest_km
+  value       Decimal  @db.Decimal(8, 2)
+  unit        String   @db.VarChar(10) // kg, reps, seconds
+  setId       String?  @map("set_id") @db.Uuid
+  achievedAt  DateTime @default(now()) @map("achieved_at") @db.Timestamptz()
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise Exercise    @relation(fields: [exerciseId], references: [id])
+  set      WorkoutSet? @relation(fields: [setId], references: [id])
+
+  @@index([userId, exerciseId])
+  @@map("personal_records")
 }

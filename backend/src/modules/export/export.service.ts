@@ -11,27 +11,46 @@ export class ExportService {
   constructor(private readonly prisma: PrismaService) {}
 
   async report(userId: string, from: Date, to: Date) {
-    const [user, scheduleItems, waterLogs, bodyLogs, notes] = await Promise.all([
-      this.prisma.user.findUnique({
-        where: { id: userId },
-        select: { email: true, fullName: true, goal: true },
-      }),
-      this.prisma.dailyScheduleItem.findMany({
-        where: { userId, date: { gte: from, lte: to } },
-        orderBy: { date: 'asc' },
-      }),
-      this.prisma.waterLog.findMany({
-        where: { userId, date: { gte: from, lte: to } },
-      }),
-      this.prisma.bodyLog.findMany({
-        where: { userId, date: { gte: from, lte: to } },
-        orderBy: { date: 'asc' },
-      }),
-      this.prisma.dailyNote.findMany({
-        where: { userId, date: { gte: from, lte: to } },
-        orderBy: { date: 'asc' },
-      }),
-    ]);
+    const [user, scheduleItems, waterLogs, bodyLogs, notes, sessions, prs] =
+      await Promise.all([
+        this.prisma.user.findUnique({
+          where: { id: userId },
+          select: { email: true, fullName: true, goal: true },
+        }),
+        this.prisma.dailyScheduleItem.findMany({
+          where: { userId, date: { gte: from, lte: to } },
+          orderBy: { date: 'asc' },
+        }),
+        this.prisma.waterLog.findMany({
+          where: { userId, date: { gte: from, lte: to } },
+        }),
+        this.prisma.bodyLog.findMany({
+          where: { userId, date: { gte: from, lte: to } },
+          orderBy: { date: 'asc' },
+        }),
+        this.prisma.dailyNote.findMany({
+          where: { userId, date: { gte: from, lte: to } },
+          orderBy: { date: 'asc' },
+        }),
+        this.prisma.workoutSession.findMany({
+          where: {
+            userId,
+            status: 'completed',
+            date: { gte: from, lte: to },
+          },
+          include: {
+            sets: { include: { exercise: { select: { name: true } } } },
+            day: { select: { name: true } },
+          },
+          orderBy: { date: 'asc' },
+        }),
+        this.prisma.personalRecord.findMany({
+          where: { userId, achievedAt: { gte: from, lte: to } },
+          include: { exercise: { select: { name: true } } },
+          orderBy: { achievedAt: 'desc' },
+          take: 20,
+        }),
+      ]);
 
     const completed = scheduleItems.filter((i) => i.status === 'completed').length;
     const total = scheduleItems.length;
@@ -84,6 +103,30 @@ export class ExportService {
         symptoms: n.symptoms,
         notes: n.notes,
       })),
+      workouts: {
+        sessionCount: sessions.length,
+        totalDurationMin: sessions.reduce(
+          (sum, s) => sum + (s.durationMin ?? 0),
+          0,
+        ),
+        sessions: sessions.map((s) => ({
+          date: s.date,
+          name: s.day?.name ?? 'Freeform',
+          durationMin: s.durationMin,
+          setCount: s.sets.length,
+          totalVolumeKg: s.sets.reduce((sum, set) => {
+            if (set.weightKg == null || set.reps == null) return sum;
+            return sum + Number(set.weightKg) * set.reps;
+          }, 0),
+        })),
+        personalRecords: prs.map((pr) => ({
+          exercise: pr.exercise.name,
+          recordType: pr.recordType,
+          value: Number(pr.value),
+          unit: pr.unit,
+          achievedAt: pr.achievedAt,
+        })),
+      },
     };
   }
 }

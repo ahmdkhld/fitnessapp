@@ -45,7 +45,7 @@ export class ScheduleService {
     day.setUTCHours(0, 0, 0, 0);
     const dow = day.getUTCDay() === 0 ? 7 : day.getUTCDay(); // 1..7 (Mon..Sun)
 
-    const [dietPlan, supplementPlan] = await Promise.all([
+    const [dietPlan, supplementPlan, workoutPlan] = await Promise.all([
       this.prisma.dietPlan.findFirst({
         where: { userId, isActive: true },
         include: { meals: { include: { ingredients: true } } },
@@ -53,6 +53,19 @@ export class ScheduleService {
       this.prisma.supplementPlan.findFirst({
         where: { userId, isActive: true },
         include: { supplements: true },
+      }),
+      this.prisma.workoutPlan.findFirst({
+        where: { userId, isActive: true },
+        include: {
+          days: {
+            orderBy: { sortOrder: 'asc' },
+            include: {
+              exercises: {
+                include: { exercise: { select: { name: true } } },
+              },
+            },
+          },
+        },
       }),
     ]);
 
@@ -114,11 +127,46 @@ export class ScheduleService {
       }
     }
 
+    if (workoutPlan) {
+      const matchingDay =
+        workoutPlan.days.find((d) => d.dayOfWeek === dow) ??
+        this.roundRobinDay(workoutPlan.days, day);
+      if (matchingDay) {
+        const exerciseSummary = matchingDay.exercises
+          .slice(0, 4)
+          .map((e) => e.exercise.name)
+          .join(', ');
+        items.push({
+          userId,
+          date: day,
+          itemType: 'workout',
+          referenceId: matchingDay.id,
+          title: matchingDay.name,
+          subtitle: exerciseSummary || null,
+          scheduledTime: new Date('1970-01-01T07:00:00Z'),
+          sortOrder: 100,
+        });
+      }
+    }
+
     if (items.length > 0) {
       await this.prisma.dailyScheduleItem.createMany({ data: items });
     }
 
     return { count: items.length };
+  }
+
+  /**
+   * For plans whose days don't pin a day-of-week, rotate through the
+   * days based on the Unix day number so each day is deterministic.
+   */
+  private roundRobinDay<T>(days: T[], date: Date): T | null {
+    const flexibleDays = (days as Array<{ dayOfWeek: number | null }>).filter(
+      (d) => d.dayOfWeek == null,
+    );
+    if (flexibleDays.length === 0) return null;
+    const dayNumber = Math.floor(date.getTime() / (24 * 3600_000));
+    return flexibleDays[dayNumber % flexibleDays.length] as T;
   }
 
   async generateForAllUsers(daysAhead = 7) {

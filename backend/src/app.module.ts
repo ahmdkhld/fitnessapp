@@ -16,6 +16,7 @@ import { PlanParserModule } from './modules/plan-parser/plan-parser.module';
 import { ExportModule } from './modules/export/export.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
 import { HealthModule } from './modules/health/health.module';
+import { WorkoutsModule } from './modules/workouts/workouts.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { HealthModule } from './modules/health/health.module';
     ExportModule,
     UploadsModule,
     HealthModule,
+    WorkoutsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
