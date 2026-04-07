@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 class GoalSelectionScreen extends StatefulWidget {
@@ -11,23 +12,23 @@ class GoalSelectionScreen extends StatefulWidget {
 class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
   String? _selected;
 
-  static const _goals = [
-    ('fat_loss', 'Fat loss', Icons.local_fire_department),
-    ('muscle_gain', 'Muscle gain', Icons.fitness_center),
-    ('general_health', 'General health', Icons.favorite),
-    ('performance', 'Athletic performance', Icons.directions_run),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final goals = [
+      ('fat_loss', l.goalFatLoss, Icons.local_fire_department),
+      ('muscle_gain', l.goalMuscleGain, Icons.fitness_center),
+      ('general_health', l.goalGeneralHealth, Icons.favorite),
+      ('performance', l.goalPerformance, Icons.directions_run),
+    ];
     return Scaffold(
-      appBar: AppBar(title: const Text('Your goal')),
+      appBar: AppBar(title: const Text('')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Text(
-              'What are you working towards?',
+              l.goalHeadline,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
@@ -36,7 +37,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                children: _goals.map((g) {
+                children: goals.map((g) {
                   final selected = _selected == g.$1;
                   return InkWell(
                     onTap: () => setState(() => _selected = g.$1),
@@ -74,7 +75,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
               ),
-              child: const Text('Continue'),
+              child: Text(l.continueLabel),
             ),
           ],
         ),

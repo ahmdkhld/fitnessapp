@@ -1,5 +1,6 @@
 import { api, ScheduleItem } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { setTimelineStatus } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,58 +36,92 @@ export default async function TimelinePage() {
         <p style={{ color: 'var(--muted)' }}>Nothing scheduled today.</p>
       )}
       <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1.5rem' }}>
-        {items.map((item) => (
-          <div
-            key={item.id}
-            style={{
-              background: 'var(--card)',
-              border: '1px solid var(--border)',
-              borderRadius: 10,
-              padding: '1rem 1.25rem',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              opacity: item.status === 'completed' ? 0.6 : 1,
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: 12,
-                  color: 'var(--muted)',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {formatTime(item.scheduledTime)} · {item.itemType}
-              </div>
-              <div
-                style={{
-                  fontWeight: 600,
-                  textDecoration:
-                    item.status === 'completed' ? 'line-through' : 'none',
-                }}
-              >
-                {item.title}
-              </div>
-              {item.subtitle && (
-                <div style={{ color: 'var(--muted)', fontSize: 13 }}>
-                  {item.subtitle}
-                </div>
-              )}
-            </div>
-            <span
+        {items.map((item) => {
+          const done = item.status === 'completed';
+          const skipped = item.status === 'skipped';
+          return (
+            <div
+              key={item.id}
               style={{
-                padding: '4px 10px',
-                borderRadius: 999,
-                background: 'var(--border)',
-                fontSize: 12,
-                textTransform: 'capitalize',
+                background: 'var(--card)',
+                border: '1px solid var(--border)',
+                borderRadius: 10,
+                padding: '1rem 1.25rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                opacity: done || skipped ? 0.6 : 1,
               }}
             >
-              {item.status}
-            </span>
-          </div>
-        ))}
+              <div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: 'var(--muted)',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {formatTime(item.scheduledTime)} · {item.itemType}
+                </div>
+                <div
+                  style={{
+                    fontWeight: 600,
+                    textDecoration: done ? 'line-through' : 'none',
+                  }}
+                >
+                  {item.title}
+                </div>
+                {item.subtitle && (
+                  <div style={{ color: 'var(--muted)', fontSize: 13 }}>
+                    {item.subtitle}
+                  </div>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <form
+                  action={setTimelineStatus.bind(
+                    null,
+                    item.id,
+                    done ? 'pending' : 'completed',
+                  )}
+                >
+                  <button
+                    type="submit"
+                    aria-label={done ? 'Mark pending' : 'Mark completed'}
+                    style={{
+                      padding: '0.4rem 0.75rem',
+                      background: done ? 'var(--accent)' : 'transparent',
+                      color: done ? '#fff' : 'var(--fg)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {done ? 'Done' : 'Complete'}
+                  </button>
+                </form>
+                {!done && (
+                  <form action={setTimelineStatus.bind(null, item.id, 'skipped')}>
+                    <button
+                      type="submit"
+                      aria-label="Skip"
+                      style={{
+                        padding: '0.4rem 0.75rem',
+                        background: 'transparent',
+                        color: 'var(--muted)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Skip
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

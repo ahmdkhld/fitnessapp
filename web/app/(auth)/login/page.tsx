@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { api } from '@/lib/api';
 import { setTokenCookie } from '@/lib/auth';
 
@@ -41,6 +42,9 @@ export default function LoginPage({
         <button type="submit" style={buttonStyle}>
           Continue
         </button>
+        <Link href="/register" style={{ color: 'var(--muted)', textAlign: 'center' }}>
+          Create an account
+        </Link>
       </form>
     </main>
   );

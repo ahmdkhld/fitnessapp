@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import '../features/auth/bloc/auth_state.dart';
 import '../features/auth/screens/login_screen.dart';
+import '../features/auth/screens/register_screen.dart';
 import '../features/onboarding/screens/welcome_screen.dart';
 import '../features/onboarding/screens/goal_selection_screen.dart';
 import '../features/onboarding/screens/plan_setup_screen.dart';
@@ -27,6 +28,7 @@ class AppRouter {
         final loc = state.matchedLocation;
         final onPublic = loc == '/welcome' ||
             loc == '/login' ||
+            loc == '/register' ||
             loc.startsWith('/onboarding');
 
         if (status == AuthStatus.unknown) return null;
@@ -50,6 +52,7 @@ class AppRouter {
               PlanSetupScreen(goal: state.uri.queryParameters['goal']),
         ),
         GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+        GoRoute(path: '/register', builder: (_, __) => const RegisterScreen()),
         GoRoute(path: '/water', builder: (_, __) => const WaterTrackerScreen()),
         GoRoute(path: '/body-log', builder: (_, __) => const BodyLogScreen()),
         GoRoute(

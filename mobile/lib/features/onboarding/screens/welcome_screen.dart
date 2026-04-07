@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -6,6 +7,7 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -17,13 +19,12 @@ class WelcomeScreen extends StatelessWidget {
               const Icon(Icons.eco, size: 72, color: Color(0xFF2E7D5C)),
               const SizedBox(height: 24),
               Text(
-                'Welcome to NutriTrack',
+                l.welcomeHeadline,
                 style: Theme.of(context).textTheme.displaySmall,
               ),
               const SizedBox(height: 12),
               Text(
-                'Stick to your diet and supplements with daily timelines, '
-                'reminders and adherence insights.',
+                l.welcomeBody,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const Spacer(),
@@ -32,12 +33,12 @@ class WelcomeScreen extends StatelessWidget {
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(48),
                 ),
-                child: const Text('Get started'),
+                child: Text(l.getStarted),
               ),
               const SizedBox(height: 12),
               TextButton(
                 onPressed: () => context.go('/login'),
-                child: const Text('I already have an account'),
+                child: Text(l.alreadyHaveAccount),
               ),
             ],
           ),

@@ -11,6 +11,7 @@ import '../../features/tracking/repositories/water_repository.dart';
 import '../../features/analytics/repositories/analytics_repository.dart';
 import '../api/api_client.dart';
 import '../auth/token_manager.dart';
+import '../connectivity/connectivity_monitor.dart';
 import '../notifications/local_notification_service.dart';
 
 final getIt = GetIt.instance;
@@ -24,6 +25,8 @@ Future<void> setupDependencies() async {
     () => LocalNotificationService(),
   );
   await getIt<LocalNotificationService>().init();
+
+  getIt.registerLazySingleton<ConnectivityMonitor>(() => ConnectivityMonitor());
 
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(

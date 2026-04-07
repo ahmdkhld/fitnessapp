@@ -17,12 +17,38 @@ async function load() {
 
 export default async function ExportPage() {
   const { report, error } = await load();
+  const to = new Date().toISOString().slice(0, 10);
+  const from = new Date(Date.now() - 13 * 864e5).toISOString().slice(0, 10);
+  const pdfHref = `/api/proxy/export/report.pdf?from=${from}&to=${to}`;
+
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Coach report (last 14 days)</h1>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <h1 style={{ marginTop: 0 }}>Coach report (last 14 days)</h1>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <a
+            href={pdfHref}
+            style={{
+              padding: '0.5rem 1rem',
+              background: 'var(--accent)',
+              color: '#fff',
+              borderRadius: 6,
+              textDecoration: 'none',
+            }}
+          >
+            Download PDF
+          </a>
+        </div>
+      </div>
       <p style={{ color: 'var(--muted)' }}>
-        Download or print this JSON for sharing with a coach or doctor.
-        Wire this up to a PDF generator in a later iteration.
+        The JSON below is also rendered as a printable PDF from the backend.
+        Use your browser's print dialog as a fallback.
       </p>
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
       {report && (

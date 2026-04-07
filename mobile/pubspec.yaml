@@ -41,6 +41,9 @@ dependencies:
   # Observability
   sentry_flutter: ^8.0.0
 
+  # Connectivity
+  connectivity_plus: ^6.0.1
+
   # Misc
   intl: ^0.19.0
   permission_handler: ^11.3.0

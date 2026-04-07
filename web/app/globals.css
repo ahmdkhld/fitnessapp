@@ -18,3 +18,35 @@ html, body {
 }
 
 a { color: var(--accent); text-decoration: none; }
+
+/* Focus rings for keyboard navigation */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Print layout — used by the coach report page so users can "Save as PDF"
+   from the browser without hitting the backend pdf endpoint. */
+@media print {
+  :root {
+    --bg: #fff;
+    --fg: #000;
+    --card: #fff;
+    --border: #ccc;
+    --muted: #555;
+  }
+  html, body { background: #fff; color: #000; }
+  aside, nav, form, button { display: none !important; }
+  main { padding: 0 !important; }
+  pre {
+    white-space: pre-wrap !important;
+    background: #fff !important;
+    border: none !important;
+    font-size: 11px !important;
+  }
+  a { color: #000; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
