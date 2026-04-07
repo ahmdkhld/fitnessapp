@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { api, DietPlan } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { activateDietPlan, createDietPlan, deleteDietPlan } from './actions';
@@ -94,12 +95,15 @@ export default async function DietPlansPage() {
               justifyContent: 'space-between',
             }}
           >
-            <div>
+            <Link
+              href={`/dashboard/diet-plans/${p.id}`}
+              style={{ color: 'inherit', textDecoration: 'none' }}
+            >
               <div style={{ fontWeight: 600 }}>{p.name}</div>
               {p.goal && (
                 <div style={{ color: 'var(--muted)', fontSize: 13 }}>{p.goal}</div>
               )}
-            </div>
+            </Link>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               {!p.isActive && (
                 <form action={activateDietPlan.bind(null, p.id)}>

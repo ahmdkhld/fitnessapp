@@ -3,6 +3,7 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
 import { AppModule } from './app.module';
+import { SentryExceptionFilter } from './common/filters/sentry.filter';
 
 async function bootstrap() {
   if (process.env.SENTRY_DSN) {
@@ -23,6 +24,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+  app.useGlobalFilters(new SentryExceptionFilter());
 
   const config = new DocumentBuilder()
     .setTitle('NutriTrack API')

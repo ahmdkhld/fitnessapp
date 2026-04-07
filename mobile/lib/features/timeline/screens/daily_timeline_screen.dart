@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/notifications/local_notification_service.dart';
 import '../bloc/timeline_bloc.dart';
 import '../bloc/timeline_event.dart';
 import '../bloc/timeline_state.dart';
@@ -14,8 +15,10 @@ class DailyTimelineScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => TimelineBloc(getIt<TimelineRepository>())
-        ..add(TimelineLoadRequested(DateTime.now())),
+      create: (_) => TimelineBloc(
+        getIt<TimelineRepository>(),
+        getIt<LocalNotificationService>(),
+      )..add(TimelineLoadRequested(DateTime.now())),
       child: const _TimelineView(),
     );
   }

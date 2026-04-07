@@ -4,6 +4,7 @@ import '../../features/diet_plan/repositories/diet_plan_repository.dart';
 import '../../features/plan_import/repositories/plan_import_repository.dart';
 import '../../features/settings/repositories/notification_settings_repository.dart';
 import '../../features/supplements/repositories/supplement_repository.dart';
+import '../../features/timeline/repositories/timeline_cache.dart';
 import '../../features/timeline/repositories/timeline_repository.dart';
 import '../../features/tracking/repositories/body_log_repository.dart';
 import '../../features/tracking/repositories/water_repository.dart';
@@ -28,8 +29,9 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepository(getIt<ApiClient>(), getIt<TokenManager>()),
   );
+  getIt.registerLazySingleton<TimelineCache>(() => TimelineCache());
   getIt.registerLazySingleton<TimelineRepository>(
-    () => TimelineRepository(getIt<ApiClient>()),
+    () => TimelineRepository(getIt<ApiClient>(), getIt<TimelineCache>()),
   );
   getIt.registerLazySingleton<WaterRepository>(
     () => WaterRepository(getIt<ApiClient>()),

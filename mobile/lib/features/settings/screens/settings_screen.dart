@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/di/injection.dart';
-import '../../auth/repositories/auth_repository.dart';
+import '../../auth/bloc/auth_bloc.dart';
+import '../../auth/bloc/auth_event.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
-  Future<void> _signOut(BuildContext context) async {
-    await getIt<AuthRepository>().signOut();
-    if (context.mounted) context.go('/login');
+  void _signOut(BuildContext context) {
+    context.read<AuthBloc>().add(const AuthLogoutRequested());
   }
 
   @override
