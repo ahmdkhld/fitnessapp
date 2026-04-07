@@ -5,6 +5,7 @@ const nav = [
   { href: '/dashboard/timeline', label: 'Timeline' },
   { href: '/dashboard/diet-plans', label: 'Diet plans' },
   { href: '/dashboard/supplements', label: 'Supplements' },
+  { href: '/dashboard/workouts', label: 'Workouts' },
   { href: '/dashboard/tracking/water', label: 'Water' },
   { href: '/dashboard/tracking/body', label: 'Body log' },
   { href: '/dashboard/tracking/notes', label: 'Notes' },

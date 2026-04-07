@@ -15,6 +15,12 @@ import '../features/diet_plan/screens/diet_plans_list_screen.dart';
 import '../features/diet_plan/screens/diet_plan_detail_screen.dart';
 import '../features/supplements/screens/supplement_plans_screen.dart';
 import '../features/plan_import/screens/upload_screen.dart';
+import '../features/workouts/screens/workouts_home_screen.dart';
+import '../features/workouts/screens/workout_plans_list_screen.dart';
+import '../features/workouts/screens/workout_templates_screen.dart';
+import '../features/workouts/screens/workout_plan_detail_screen.dart';
+import '../features/workouts/screens/session_active_screen.dart';
+import '../features/workouts/screens/session_history_screen.dart';
 import 'auth_listenable.dart';
 import 'bottom_nav_shell.dart';
 
@@ -76,6 +82,28 @@ class AppRouter {
           path: '/settings/notifications',
           builder: (_, __) => const NotificationSettingsScreen(),
         ),
+        GoRoute(
+          path: '/workouts/plans',
+          builder: (_, __) => const WorkoutPlansListScreen(),
+        ),
+        GoRoute(
+          path: '/workouts/templates',
+          builder: (_, __) => const WorkoutTemplatesScreen(),
+        ),
+        GoRoute(
+          path: '/workouts/plans/:id',
+          builder: (_, state) =>
+              WorkoutPlanDetailScreen(planId: state.pathParameters['id']!),
+        ),
+        GoRoute(
+          path: '/workouts/sessions/:id/active',
+          builder: (_, state) =>
+              SessionActiveScreen(sessionId: state.pathParameters['id']!),
+        ),
+        GoRoute(
+          path: '/workouts/history',
+          builder: (_, __) => const SessionHistoryScreen(),
+        ),
         ShellRoute(
           builder: (_, __, child) => BottomNavShell(child: child),
           routes: [
@@ -86,6 +114,10 @@ class AppRouter {
             GoRoute(
               path: '/dashboard',
               builder: (_, __) => const DashboardScreen(),
+            ),
+            GoRoute(
+              path: '/workouts',
+              builder: (_, __) => const WorkoutsHomeScreen(),
             ),
             GoRoute(
               path: '/settings',

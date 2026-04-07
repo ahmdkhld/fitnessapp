@@ -6,7 +6,7 @@ class BottomNavShell extends StatelessWidget {
 
   final Widget child;
 
-  static const _tabs = ['/timeline', '/dashboard', '/settings'];
+  static const _tabs = ['/timeline', '/dashboard', '/workouts', '/settings'];
 
   int _currentIndex(BuildContext context) {
     final loc = GoRouterState.of(context).matchedLocation;
@@ -24,6 +24,7 @@ class BottomNavShell extends StatelessWidget {
         destinations: const [
           NavigationDestination(icon: Icon(Icons.today), label: 'Today'),
           NavigationDestination(icon: Icon(Icons.bar_chart), label: 'Stats'),
+          NavigationDestination(icon: Icon(Icons.fitness_center), label: 'Workouts'),
           NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
         ],
       ),

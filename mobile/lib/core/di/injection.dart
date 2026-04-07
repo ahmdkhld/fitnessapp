@@ -9,6 +9,10 @@ import '../../features/timeline/repositories/timeline_repository.dart';
 import '../../features/tracking/repositories/body_log_repository.dart';
 import '../../features/tracking/repositories/water_repository.dart';
 import '../../features/analytics/repositories/analytics_repository.dart';
+import '../../features/workouts/repositories/exercises_repository.dart';
+import '../../features/workouts/repositories/workout_analytics_repository.dart';
+import '../../features/workouts/repositories/workout_plans_repository.dart';
+import '../../features/workouts/repositories/workout_sessions_repository.dart';
 import '../api/api_client.dart';
 import '../auth/token_manager.dart';
 import '../connectivity/connectivity_monitor.dart';
@@ -56,5 +60,19 @@ Future<void> setupDependencies() async {
   );
   getIt.registerLazySingleton<NotificationSettingsRepository>(
     () => NotificationSettingsRepository(getIt<ApiClient>()),
+  );
+
+  // Workouts
+  getIt.registerLazySingleton<ExercisesRepository>(
+    () => ExercisesRepository(getIt<ApiClient>()),
+  );
+  getIt.registerLazySingleton<WorkoutPlansRepository>(
+    () => WorkoutPlansRepository(getIt<ApiClient>()),
+  );
+  getIt.registerLazySingleton<WorkoutSessionsRepository>(
+    () => WorkoutSessionsRepository(getIt<ApiClient>()),
+  );
+  getIt.registerLazySingleton<WorkoutAnalyticsRepository>(
+    () => WorkoutAnalyticsRepository(getIt<ApiClient>()),
   );
 }
