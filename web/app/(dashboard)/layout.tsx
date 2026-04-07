@@ -14,6 +14,7 @@ const nav = [
   { href: '/dashboard/export', label: 'Coach report' },
   { href: '/dashboard/notifications', label: 'Notifications' },
   { href: '/dashboard/coach', label: 'Coach portal' },
+  { href: '/dashboard/admin', label: 'Admin' },
   { href: '/dashboard/settings', label: 'Settings' },
 ];
 

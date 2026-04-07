@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
+import { MailerService } from '../mailer/mailer.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -21,6 +22,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly mailer: MailerService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -115,9 +117,10 @@ export class AuthService {
           userAgent: 'password-reset',
         },
       });
-      this.logger.log(
-        `[password-reset:${email}] ${process.env.APP_URL ?? 'https://app.nutritrack.app'}/reset?token=${rawToken}`,
-      );
+      const resetUrl =
+        `${process.env.APP_URL ?? 'https://app.nutritrack.app'}` +
+        `/reset?token=${rawToken}`;
+      await this.mailer.sendPasswordReset(email, resetUrl);
     }
     return { success: true };
   }
@@ -183,12 +186,55 @@ export class AuthService {
     return this.issueTokens(user.id, user.email);
   }
 
+  /**
+   * Verifies the provider's id_token against its JWKS endpoint and
+   * returns the verified email/name claims. Falls back to an unsigned
+   * decode in dev when `jose` isn't installed yet — production must
+   * set GOOGLE_CLIENT_ID / APPLE_CLIENT_ID so the audience is checked.
+   */
   private async verifySocialToken(
     provider: 'google' | 'apple',
     idToken: string,
   ): Promise<{ email: string | null; name: string | null }> {
-    // TODO: verify against Google/Apple JWKS when credentials are set.
-    // For now: decode the JWT body without verification as a dev aid.
+    const audience =
+      provider === 'google'
+        ? process.env.GOOGLE_CLIENT_ID
+        : process.env.APPLE_CLIENT_ID;
+
+    if (audience) {
+      try {
+        // Lazy require so the dependency is optional at boot time.
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const jose = require('jose');
+        const issuer =
+          provider === 'google'
+            ? 'https://accounts.google.com'
+            : 'https://appleid.apple.com';
+        const jwksUrl =
+          provider === 'google'
+            ? 'https://www.googleapis.com/oauth2/v3/certs'
+            : 'https://appleid.apple.com/auth/keys';
+        const jwks = jose.createRemoteJWKSet(new URL(jwksUrl));
+        const { payload } = await jose.jwtVerify(idToken, jwks, {
+          issuer,
+          audience,
+        });
+        return {
+          email: (payload.email as string | undefined) ?? null,
+          name:
+            (payload.name as string | undefined) ??
+            (payload.given_name as string | undefined) ??
+            null,
+        };
+      } catch (err) {
+        this.logger.warn(
+          `${provider} token verification failed: ${(err as Error).message}`,
+        );
+        throw new UnauthorizedException('Invalid social token');
+      }
+    }
+
+    // Dev fallback: decode without verification.
     try {
       const [, payload] = idToken.split('.');
       if (!payload) throw new Error('malformed token');

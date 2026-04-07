@@ -8,6 +8,11 @@ import { AuthService } from './auth.service';
  * suite runs without a database or JWT signing secret.
  */
 describe('AuthService rotation', () => {
+  const makeMailer = () =>
+    ({
+      sendPasswordReset: jest.fn(async () => undefined),
+    }) as any;
+
   const makeJwt = (): jest.Mocked<JwtService> =>
     ({
       sign: jest.fn((payload, opts) =>
@@ -75,7 +80,7 @@ describe('AuthService rotation', () => {
 
   it('refresh rotates the token and revokes the previous row', async () => {
     const prisma = makePrisma();
-    const svc = new AuthService(prisma, makeJwt());
+    const svc = new AuthService(prisma, makeJwt(), makeMailer());
     prisma.user.findUnique.mockResolvedValue({
       id: 'u1',
       email: 'a@b.com',
@@ -103,7 +108,7 @@ describe('AuthService rotation', () => {
 
   it('reusing a revoked refresh token revokes every session for the user', async () => {
     const prisma = makePrisma();
-    const svc = new AuthService(prisma, makeJwt());
+    const svc = new AuthService(prisma, makeJwt(), makeMailer());
     prisma.user.findUnique.mockResolvedValue(null);
     const first = await svc.register({ email: 'a@b.com', password: 'hunter222' } as any);
     await svc.refresh(first.refreshToken); // rotation
@@ -116,7 +121,7 @@ describe('AuthService rotation', () => {
 
   it('logout revokes the presented refresh token', async () => {
     const prisma = makePrisma();
-    const svc = new AuthService(prisma, makeJwt());
+    const svc = new AuthService(prisma, makeJwt(), makeMailer());
     prisma.user.findUnique.mockResolvedValue(null);
     const tokens = await svc.register({ email: 'a@b.com', password: 'hunter222' } as any);
 

@@ -1,12 +1,14 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TextParser, ParsedPlan } from './parsers/text.parser';
+import { PdfParser } from './parsers/pdf.parser';
 
 @Injectable()
 export class PlanParserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly textParser: TextParser,
+    private readonly pdfParser: PdfParser,
   ) {}
 
   async uploadText(userId: string, text: string) {
@@ -16,6 +18,19 @@ export class PlanParserService {
         userId,
         fileUrl: 'inline:text',
         fileType: 'text',
+        parsedData: parsed as any,
+        status: 'parsed',
+      },
+    });
+  }
+
+  async uploadPdf(userId: string, buffer: Buffer, originalName?: string) {
+    const parsed = await this.pdfParser.parse(buffer);
+    return this.prisma.uploadedPlan.create({
+      data: {
+        userId,
+        fileUrl: originalName ? `inline:pdf:${originalName}` : 'inline:pdf',
+        fileType: 'pdf',
         parsedData: parsed as any,
         status: 'parsed',
       },

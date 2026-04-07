@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/di/injection.dart';
 import '../models/workout_plan.dart';
@@ -49,28 +50,29 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Workouts'),
+        title: Text(l.workoutsTab),
         actions: [
           IconButton(
             icon: const Icon(Icons.bar_chart),
-            tooltip: 'Analytics',
+            tooltip: l.workoutAnalyticsTitle,
             onPressed: () => context.push('/workouts/analytics'),
           ),
           IconButton(
             icon: const Icon(Icons.library_books),
-            tooltip: 'Exercise library',
+            tooltip: l.workoutLibrary,
             onPressed: () => context.push('/workouts/library'),
           ),
           IconButton(
             icon: const Icon(Icons.history),
-            tooltip: 'History',
+            tooltip: l.workoutHistory,
             onPressed: () => context.push('/workouts/history'),
           ),
           IconButton(
             icon: const Icon(Icons.list_alt),
-            tooltip: 'Plans',
+            tooltip: l.workoutPlans,
             onPressed: () => context.push('/workouts/plans'),
           ),
         ],
@@ -86,11 +88,8 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                     Card(
                       child: ListTile(
                         leading: const Icon(Icons.auto_awesome, size: 36),
-                        title: const Text('Pick a plan to get started'),
-                        subtitle: const Text(
-                          'Browse proven templates like PPL, Upper/Lower, '
-                          'Starting Strength or 5/3/1.',
-                        ),
+                        title: Text(l.pickPlanPrompt),
+                        subtitle: Text(l.browseTemplates),
                         onTap: () => context.push('/workouts/templates'),
                       ),
                     )
@@ -102,7 +101,7 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Today',
+                            Text(l.workoutsToday,
                                 style: Theme.of(context)
                                     .textTheme
                                     .labelLarge),
@@ -115,7 +114,7 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${_todayDay!.exercises.length} exercises · '
+                              '${_todayDay!.exercises.length} ${l.exercises} · '
                               '${_todayDay!.estimatedDurationMin ?? 60} min',
                             ),
                             const SizedBox(height: 16),
@@ -124,7 +123,7 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                                 '/workouts/plans/${_activePlan!.id}',
                               ),
                               icon: const Icon(Icons.play_arrow),
-                              label: const Text('View & start'),
+                              label: Text(l.startWorkout),
                             ),
                           ],
                         ),
@@ -134,18 +133,17 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                     Card(
                       child: ListTile(
                         leading: const Icon(Icons.self_improvement, size: 36),
-                        title: const Text('Rest day'),
+                        title: Text(l.restDay),
                         subtitle: Text(
-                          'No workout scheduled today in "${_activePlan!.name}".',
+                          '"${_activePlan!.name}"',
                         ),
                       ),
                     ),
                   const SizedBox(height: 24),
-                  Text('Recent PRs',
+                  Text(l.personalRecords,
                       style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
-                  if (_prs.isEmpty)
-                    const Text('Keep logging — PRs will show up here.'),
+                  if (_prs.isEmpty) Text(l.noPrsYet),
                   ..._prs.take(5).map((pr) => Card(
                         child: ListTile(
                           leading: const Icon(Icons.emoji_events,

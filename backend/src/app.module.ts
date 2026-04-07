@@ -18,6 +18,8 @@ import { UploadsModule } from './modules/uploads/uploads.module';
 import { HealthModule } from './modules/health/health.module';
 import { WorkoutsModule } from './modules/workouts/workouts.module';
 import { CoachModule } from './modules/coach/coach.module';
+import { MailerModule } from './modules/mailer/mailer.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -28,6 +30,7 @@ import { CoachModule } from './modules/coach/coach.module';
       { name: 'medium', ttl: 60_000, limit: 120 },
     ]),
     PrismaModule,
+    MailerModule,
     AuthModule,
     UsersModule,
     DietPlansModule,
@@ -42,6 +45,7 @@ import { CoachModule } from './modules/coach/coach.module';
     HealthModule,
     WorkoutsModule,
     CoachModule,
+    AdminModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

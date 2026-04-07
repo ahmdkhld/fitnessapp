@@ -1,5 +1,16 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
@@ -23,6 +34,20 @@ export class PlanParserController {
   @Post('upload')
   upload(@CurrentUser() user: AuthUser, @Body() dto: UploadTextDto) {
     return this.parser.uploadText(user.userId, dto.text);
+  }
+
+  @Post('upload-pdf')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  uploadPdf(
+    @CurrentUser() user: AuthUser,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('PDF file required');
+    if (!file.mimetype.includes('pdf')) {
+      throw new BadRequestException('File must be a PDF');
+    }
+    return this.parser.uploadPdf(user.userId, file.buffer, file.originalname);
   }
 
   @Get(':id/result')

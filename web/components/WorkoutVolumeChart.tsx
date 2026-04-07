@@ -46,8 +46,12 @@ const MUSCLE_COLORS: Record<string, string> = {
   other: '#aaa',
 };
 
-export function WorkoutVolumeChart({ data }: { data: VolumePoint[] }) {
-  // Pivot: one row per bucket, one key per muscle
+/**
+ * Pure helper exposed for unit testing — same logic the chart runs at
+ * render time. Sums volumes per (bucket, muscle), returns sorted bucket
+ * rows + the unique muscle list.
+ */
+export function pivotVolume(data: VolumePoint[]) {
   const byBucket = new Map<string, Record<string, number | string>>();
   const musclesSeen = new Set<string>();
   for (const row of data) {
@@ -59,7 +63,11 @@ export function WorkoutVolumeChart({ data }: { data: VolumePoint[] }) {
   const rows = Array.from(byBucket.values()).sort((a, b) =>
     (a.bucket as string).localeCompare(b.bucket as string),
   );
-  const muscles = Array.from(musclesSeen).sort();
+  return { rows, muscles: Array.from(musclesSeen).sort() };
+}
+
+export function WorkoutVolumeChart({ data }: { data: VolumePoint[] }) {
+  const { rows, muscles } = pivotVolume(data);
 
   return (
     <div
