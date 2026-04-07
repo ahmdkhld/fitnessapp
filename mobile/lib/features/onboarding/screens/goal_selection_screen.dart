@@ -71,7 +71,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
             FilledButton(
               onPressed: _selected == null
                   ? null
-                  : () => context.go('/onboarding/plan?goal=$_selected'),
+                  : () => context.go('/onboarding/stats?goal=$_selected'),
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
               ),

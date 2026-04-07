@@ -186,30 +186,85 @@ class _SessionActiveScreenState extends State<SessionActiveScreen> {
         itemBuilder: (_, i) {
           final px = prescribedExercises[i];
           final logged = setsByExercise[px.exercise.id] ?? const [];
-          return _ExerciseLogger(
-            prescription: px,
-            loggedSets: logged,
-            onLogSet: ({
-              required int setNumber,
-              int? reps,
-              double? weightKg,
-              int? durationSec,
-              double? distanceKm,
-            }) =>
-                _logSet(
-              exerciseId: px.exercise.id,
-              setNumber: setNumber,
-              reps: reps,
-              weightKg: weightKg,
-              restSeconds: px.restSeconds,
-              isCardio: px.exercise.isCardio,
-              durationSec: durationSec,
-              distanceKm: distanceKm,
-            ),
+          // Show a superset header the first time we encounter a group.
+          final showSupersetHeader = px.supersetGroup != null &&
+              (i == 0 || prescribedExercises[i - 1].supersetGroup != px.supersetGroup);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (showSupersetHeader)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8, top: 4),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.link,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Superset ${px.supersetGroup}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              Container(
+                decoration: px.supersetGroup != null
+                    ? BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 3,
+                          ),
+                        ),
+                      )
+                    : null,
+                padding: px.supersetGroup != null
+                    ? const EdgeInsets.only(left: 8)
+                    : EdgeInsets.zero,
+                child: _ExerciseLogger(
+                  prescription: px,
+                  loggedSets: logged,
+                  onLogSet: ({
+                    required int setNumber,
+                    int? reps,
+                    double? weightKg,
+                    int? durationSec,
+                    double? distanceKm,
+                  }) =>
+                      _logSet(
+                    exerciseId: px.exercise.id,
+                    setNumber: setNumber,
+                    reps: reps,
+                    weightKg: weightKg,
+                    // Superset exercises skip rest between links; rest comes
+                    // after the final exercise in the group.
+                    restSeconds: _isLastInSuperset(prescribedExercises, i)
+                        ? px.restSeconds
+                        : null,
+                    isCardio: px.exercise.isCardio,
+                    durationSec: durationSec,
+                    distanceKm: distanceKm,
+                  ),
+                ),
+              ),
+            ],
           );
         },
       ),
     );
+  }
+
+  bool _isLastInSuperset(List<WorkoutDayExercise> list, int index) {
+    final current = list[index].supersetGroup;
+    if (current == null) return true;
+    final next = index + 1 < list.length ? list[index + 1].supersetGroup : null;
+    return next != current;
   }
 }
 

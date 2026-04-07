@@ -1,5 +1,6 @@
 import { authedFetch } from '@/lib/server-fetch';
 import { Exercise } from '@/lib/api';
+import { createExercise } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -99,6 +100,109 @@ export default async function ExerciseLibraryPage({
       </form>
 
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
+
+      <details
+        style={{
+          background: 'var(--card)',
+          border: '1px solid var(--border)',
+          padding: '1rem',
+          borderRadius: 10,
+          marginBottom: '1.5rem',
+        }}
+      >
+        <summary style={{ cursor: 'pointer', fontWeight: 600 }}>
+          + Create custom exercise
+        </summary>
+        <form
+          action={createExercise}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '2fr 1fr 1fr 1fr',
+            gap: '0.5rem',
+            marginTop: '0.75rem',
+            alignItems: 'end',
+          }}
+        >
+          <input
+            name="name"
+            placeholder="Exercise name"
+            required
+            style={{
+              padding: '0.6rem 0.75rem',
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 6,
+              color: 'var(--fg)',
+            }}
+          />
+          <select
+            name="category"
+            style={{
+              padding: '0.6rem 0.75rem',
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 6,
+              color: 'var(--fg)',
+            }}
+          >
+            {categories.slice(1).map((c) => (
+              <option key={c.key} value={c.key}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+          <input
+            name="primaryMuscle"
+            placeholder="Primary muscle"
+            style={{
+              padding: '0.6rem 0.75rem',
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 6,
+              color: 'var(--fg)',
+            }}
+          />
+          <input
+            name="equipment"
+            placeholder="Equipment"
+            style={{
+              padding: '0.6rem 0.75rem',
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 6,
+              color: 'var(--fg)',
+            }}
+          />
+          <label
+            style={{
+              gridColumn: '1 / span 2',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            <input type="checkbox" name="isCardio" /> Cardio
+          </label>
+          <label
+            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            <input type="checkbox" name="isUnilateral" /> Unilateral
+          </label>
+          <button
+            type="submit"
+            style={{
+              padding: '0.6rem 1rem',
+              background: 'var(--accent)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 6,
+              cursor: 'pointer',
+            }}
+          >
+            Create
+          </button>
+        </form>
+      </details>
 
       <div
         style={{

@@ -7,6 +7,7 @@ import '../../features/supplements/repositories/supplement_repository.dart';
 import '../../features/timeline/repositories/timeline_cache.dart';
 import '../../features/timeline/repositories/timeline_repository.dart';
 import '../../features/tracking/repositories/body_log_repository.dart';
+import '../../features/tracking/repositories/uploads_repository.dart';
 import '../../features/tracking/repositories/water_repository.dart';
 import '../../features/analytics/repositories/analytics_repository.dart';
 import '../../features/workouts/repositories/exercises_repository.dart';
@@ -46,6 +47,9 @@ Future<void> setupDependencies() async {
   );
   getIt.registerLazySingleton<BodyLogRepository>(
     () => BodyLogRepository(getIt<ApiClient>()),
+  );
+  getIt.registerLazySingleton<UploadsRepository>(
+    () => UploadsRepository(getIt<ApiClient>()),
   );
   getIt.registerLazySingleton<AnalyticsRepository>(
     () => AnalyticsRepository(getIt<ApiClient>()),

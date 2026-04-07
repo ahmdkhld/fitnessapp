@@ -5,6 +5,7 @@ import '../features/auth/screens/register_screen.dart';
 import '../features/onboarding/screens/welcome_screen.dart';
 import '../features/onboarding/screens/goal_selection_screen.dart';
 import '../features/onboarding/screens/plan_setup_screen.dart';
+import '../features/onboarding/screens/body_stats_screen.dart';
 import '../features/timeline/screens/daily_timeline_screen.dart';
 import '../features/analytics/screens/dashboard_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
@@ -23,6 +24,7 @@ import '../features/workouts/screens/session_active_screen.dart';
 import '../features/workouts/screens/session_history_screen.dart';
 import '../features/workouts/screens/exercises_library_screen.dart';
 import '../features/workouts/screens/workout_analytics_screen.dart';
+import '../features/workouts/screens/workout_plan_editor_screen.dart';
 import 'auth_listenable.dart';
 import 'bottom_nav_shell.dart';
 
@@ -53,6 +55,10 @@ class AppRouter {
         GoRoute(
           path: '/onboarding/goal',
           builder: (_, __) => const GoalSelectionScreen(),
+        ),
+        GoRoute(
+          path: '/onboarding/stats',
+          builder: (_, __) => const BodyStatsScreen(),
         ),
         GoRoute(
           path: '/onboarding/plan',
@@ -96,6 +102,11 @@ class AppRouter {
           path: '/workouts/plans/:id',
           builder: (_, state) =>
               WorkoutPlanDetailScreen(planId: state.pathParameters['id']!),
+        ),
+        GoRoute(
+          path: '/workouts/plans/:id/edit',
+          builder: (_, state) =>
+              WorkoutPlanEditorScreen(planId: state.pathParameters['id']!),
         ),
         GoRoute(
           path: '/workouts/sessions/:id/active',

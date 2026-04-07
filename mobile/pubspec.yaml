@@ -44,6 +44,10 @@ dependencies:
   # Connectivity
   connectivity_plus: ^6.0.1
 
+  # Media capture / upload
+  image_picker: ^1.0.7
+  http: ^1.2.0
+
   # Misc
   intl: ^0.19.0
   permission_handler: ^11.3.0

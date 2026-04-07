@@ -13,6 +13,7 @@ const nav = [
   { href: '/dashboard/import', label: 'Import' },
   { href: '/dashboard/export', label: 'Coach report' },
   { href: '/dashboard/notifications', label: 'Notifications' },
+  { href: '/dashboard/coach', label: 'Coach portal' },
   { href: '/dashboard/settings', label: 'Settings' },
 ];
 

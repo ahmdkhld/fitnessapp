@@ -16,6 +16,7 @@ model User {
   goal         String?  @db.VarChar(50)
   timezone     String   @default("UTC") @db.VarChar(50)
   unitSystem   String   @default("metric") @map("unit_system") @db.VarChar(10)
+  role         String   @default("user") @db.VarChar(20) // user | coach | admin
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
@@ -33,8 +34,27 @@ model User {
   workoutPlans         WorkoutPlan[]
   workoutSessions      WorkoutSession[]
   personalRecords      PersonalRecord[]
+  coachingClients      CoachLink[] @relation("CoachLinks")
+  coachedBy            CoachLink[] @relation("ClientLinks")
 
   @@map("users")
+}
+
+/// Coach ↔ client link. A coach with `role='coach'` can view a client's
+/// read-only summary once the client accepts the invite.
+model CoachLink {
+  id          String    @id @default(uuid()) @db.Uuid
+  coachId     String    @map("coach_id") @db.Uuid
+  clientId    String    @map("client_id") @db.Uuid
+  acceptedAt  DateTime? @map("accepted_at") @db.Timestamptz()
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  coach  User @relation("CoachLinks", fields: [coachId], references: [id], onDelete: Cascade)
+  client User @relation("ClientLinks", fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([coachId, clientId])
+  @@index([clientId, acceptedAt])
+  @@map("coach_links")
 }
 
 model RefreshToken {

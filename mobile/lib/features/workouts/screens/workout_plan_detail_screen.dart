@@ -55,6 +55,15 @@ class _WorkoutPlanDetailScreenState extends State<WorkoutPlanDetailScreen> {
       appBar: AppBar(
         title: Text(plan?.name ?? 'Plan'),
         actions: [
+          if (plan != null && !plan.isTemplate)
+            IconButton(
+              icon: const Icon(Icons.edit),
+              tooltip: 'Edit plan',
+              onPressed: () async {
+                await context.push('/workouts/plans/${plan.id}/edit');
+                await _load();
+              },
+            ),
           if (plan != null && !plan.isActive)
             TextButton(
               onPressed: () async {

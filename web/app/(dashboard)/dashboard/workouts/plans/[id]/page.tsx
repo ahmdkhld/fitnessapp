@@ -1,26 +1,59 @@
 import { authedFetch } from '@/lib/server-fetch';
-import { WorkoutPlan } from '@/lib/api';
+import { Exercise, WorkoutPlan } from '@/lib/api';
+import {
+  addDay,
+  addExerciseToDay,
+  removeDay,
+  removeDayExercise,
+  startSession,
+} from './actions';
 
 export const dynamic = 'force-dynamic';
 
 async function load(id: string) {
   try {
-    const res = await authedFetch(`/workout-plans/${id}`);
-    return { plan: (await res.json()) as WorkoutPlan, error: null as string | null };
+    const [planRes, libraryRes] = await Promise.all([
+      authedFetch(`/workout-plans/${id}`),
+      authedFetch('/exercises'),
+    ]);
+    return {
+      plan: (await planRes.json()) as WorkoutPlan,
+      library: (await libraryRes.json()) as Exercise[],
+      error: null as string | null,
+    };
   } catch (e) {
-    return { plan: null, error: (e as Error).message };
+    return { plan: null, library: [], error: (e as Error).message };
   }
 }
 
 const dayName = (d: number | null) =>
-  d == null ? '' : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][d - 1];
+  d == null ? 'Flexible' : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][d - 1];
+
+const input: React.CSSProperties = {
+  padding: '0.5rem 0.6rem',
+  background: 'var(--bg)',
+  border: '1px solid var(--border)',
+  borderRadius: 6,
+  color: 'var(--fg)',
+  fontSize: 13,
+};
+
+const button: React.CSSProperties = {
+  padding: '0.5rem 0.85rem',
+  background: 'var(--accent)',
+  color: '#fff',
+  border: 'none',
+  borderRadius: 6,
+  cursor: 'pointer',
+  fontSize: 13,
+};
 
 export default async function WorkoutPlanDetail({
   params,
 }: {
   params: { id: string };
 }) {
-  const { plan, error } = await load(params.id);
+  const { plan, library, error } = await load(params.id);
   return (
     <div>
       <h1 style={{ marginTop: 0 }}>{plan?.name ?? 'Workout plan'}</h1>
@@ -32,7 +65,37 @@ export default async function WorkoutPlanDetail({
               .filter(Boolean)
               .join(' · ')}
           </p>
-          <div style={{ display: 'grid', gap: '1rem', marginTop: '1.5rem' }}>
+
+          <form
+            action={addDay.bind(null, plan.id)}
+            style={{
+              background: 'var(--card)',
+              border: '1px solid var(--border)',
+              padding: '1rem',
+              borderRadius: 10,
+              display: 'flex',
+              gap: '0.5rem',
+              marginTop: '1rem',
+              marginBottom: '1.5rem',
+            }}
+          >
+            <input name="name" placeholder="Day name" required style={input} />
+            <select name="dayOfWeek" style={input}>
+              <option value="">Flexible</option>
+              <option value="1">Mon</option>
+              <option value="2">Tue</option>
+              <option value="3">Wed</option>
+              <option value="4">Thu</option>
+              <option value="5">Fri</option>
+              <option value="6">Sat</option>
+              <option value="7">Sun</option>
+            </select>
+            <button type="submit" style={button}>
+              Add day
+            </button>
+          </form>
+
+          <div style={{ display: 'grid', gap: '1rem' }}>
             {plan.days.map((d) => (
               <div
                 key={d.id}
@@ -66,27 +129,140 @@ export default async function WorkoutPlanDetail({
                         .join(' · ')}
                     </div>
                   </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <form action={startSession.bind(null, d.id)}>
+                      <button type="submit" style={button}>
+                        Start
+                      </button>
+                    </form>
+                    <form action={removeDay.bind(null, plan.id, d.id)}>
+                      <button
+                        type="submit"
+                        style={{
+                          ...button,
+                          background: 'transparent',
+                          color: '#e07b5f',
+                          border: '1px solid #6a2a2a',
+                        }}
+                      >
+                        Remove day
+                      </button>
+                    </form>
+                  </div>
                 </div>
-                <div style={{ marginTop: '0.75rem', display: 'grid', gap: '0.25rem' }}>
+
+                <div
+                  style={{
+                    marginTop: '0.75rem',
+                    display: 'grid',
+                    gap: '0.25rem',
+                  }}
+                >
                   {d.exercises.map((e) => (
                     <div
                       key={e.id}
                       style={{
                         display: 'flex',
                         justifyContent: 'space-between',
+                        alignItems: 'center',
                         padding: '0.5rem 0',
                         borderBottom: '1px solid var(--border)',
                       }}
                     >
-                      <div>{e.exercise.name}</div>
-                      <div style={{ color: 'var(--muted)', fontSize: 13 }}>
-                        {e.targetSets}×{e.targetReps ?? '?'}
-                        {e.targetWeightKg != null && ` @ ${e.targetWeightKg}kg`}
-                        {e.restSeconds != null && ` · rest ${e.restSeconds}s`}
+                      <div>
+                        <div>{e.exercise.name}</div>
+                        <div style={{ color: 'var(--muted)', fontSize: 12 }}>
+                          {e.targetSets}×{e.targetReps ?? '?'}
+                          {e.targetWeightKg != null && ` @ ${e.targetWeightKg}kg`}
+                          {e.restSeconds != null && ` · rest ${e.restSeconds}s`}
+                          {e.supersetGroup && ` · SS ${e.supersetGroup}`}
+                          {e.progressionKg > 0 &&
+                            ` · +${e.progressionKg}kg auto`}
+                        </div>
                       </div>
+                      <form
+                        action={removeDayExercise.bind(null, plan.id, e.id)}
+                      >
+                        <button
+                          type="submit"
+                          style={{
+                            padding: '4px 10px',
+                            background: 'transparent',
+                            color: '#e07b5f',
+                            border: '1px solid #6a2a2a',
+                            borderRadius: 6,
+                            fontSize: 12,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          ×
+                        </button>
+                      </form>
                     </div>
                   ))}
                 </div>
+
+                <form
+                  action={addExerciseToDay.bind(null, plan.id, d.id)}
+                  style={{
+                    marginTop: '0.75rem',
+                    display: 'grid',
+                    gridTemplateColumns: '2fr 60px 80px 80px 80px 60px 80px auto',
+                    gap: '0.5rem',
+                  }}
+                >
+                  <select name="exerciseId" required style={input}>
+                    <option value="">Pick exercise…</option>
+                    {library.map((ex) => (
+                      <option key={ex.id} value={ex.id}>
+                        {ex.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    name="targetSets"
+                    type="number"
+                    placeholder="Sets"
+                    defaultValue={3}
+                    style={input}
+                  />
+                  <input
+                    name="targetReps"
+                    placeholder="Reps"
+                    defaultValue="8-12"
+                    style={input}
+                  />
+                  <input
+                    name="targetWeightKg"
+                    type="number"
+                    step="0.5"
+                    placeholder="kg"
+                    style={input}
+                  />
+                  <input
+                    name="restSeconds"
+                    type="number"
+                    placeholder="Rest s"
+                    defaultValue={90}
+                    style={input}
+                  />
+                  <input
+                    name="supersetGroup"
+                    placeholder="SS"
+                    maxLength={2}
+                    style={input}
+                  />
+                  <input
+                    name="progressionKg"
+                    type="number"
+                    step="0.5"
+                    placeholder="+kg"
+                    style={input}
+                  />
+                  <button type="submit" style={button}>
+                    Add
+                  </button>
+                </form>
               </div>
             ))}
           </div>

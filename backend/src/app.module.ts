@@ -17,6 +17,7 @@ import { ExportModule } from './modules/export/export.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
 import { HealthModule } from './modules/health/health.module';
 import { WorkoutsModule } from './modules/workouts/workouts.module';
+import { CoachModule } from './modules/coach/coach.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { WorkoutsModule } from './modules/workouts/workouts.module';
     UploadsModule,
     HealthModule,
     WorkoutsModule,
+    CoachModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

@@ -1,10 +1,16 @@
 import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpsertProfileDto } from './dto/upsert-profile.dto';
+
+class UpdateGoalDto {
+  @IsString()
+  goal!: string;
+}
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -21,6 +27,11 @@ export class UsersController {
   @Patch()
   update(@CurrentUser() user: AuthUser, @Body() dto: UpdateUserDto) {
     return this.users.updateMe(user.userId, dto);
+  }
+
+  @Patch('goal')
+  updateGoal(@CurrentUser() user: AuthUser, @Body() dto: UpdateGoalDto) {
+    return this.users.updateMe(user.userId, { goal: dto.goal });
   }
 
   @Get('profile')

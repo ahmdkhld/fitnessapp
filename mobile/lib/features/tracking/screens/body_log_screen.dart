@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../core/di/injection.dart';
 import '../repositories/body_log_repository.dart';
+import '../repositories/uploads_repository.dart';
 
 class BodyLogScreen extends StatefulWidget {
   const BodyLogScreen({super.key});
@@ -12,6 +15,8 @@ class BodyLogScreen extends StatefulWidget {
 
 class _BodyLogScreenState extends State<BodyLogScreen> {
   final _repo = getIt<BodyLogRepository>();
+  final _uploads = getIt<UploadsRepository>();
+  final _picker = ImagePicker();
   List<BodyLogEntry> _logs = const [];
   bool _loading = true;
 
@@ -35,6 +40,7 @@ class _BodyLogScreenState extends State<BodyLogScreen> {
     final bodyFat = TextEditingController();
     int energy = 3;
     final notes = TextEditingController();
+    File? photoFile;
 
     final saved = await showModalBottomSheet<bool>(
       context: context,
@@ -47,58 +53,112 @@ class _BodyLogScreenState extends State<BodyLogScreen> {
           bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
         ),
         child: StatefulBuilder(
-          builder: (ctx, setSt) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('New body log', style: TextStyle(fontSize: 18)),
-              const SizedBox(height: 12),
-              TextField(
-                controller: weight,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Weight (kg)'),
-              ),
-              TextField(
-                controller: waist,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Waist (cm)'),
-              ),
-              TextField(
-                controller: bodyFat,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Body fat %'),
-              ),
-              const SizedBox(height: 12),
-              Text('Energy: $energy / 5'),
-              Slider(
-                value: energy.toDouble(),
-                min: 1,
-                max: 5,
-                divisions: 4,
-                onChanged: (v) => setSt(() => energy = v.round()),
-              ),
-              TextField(
-                controller: notes,
-                decoration: const InputDecoration(labelText: 'Notes'),
-              ),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Save'),
-              ),
-            ],
+          builder: (ctx, setSt) => SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('New body log', style: TextStyle(fontSize: 18)),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: weight,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Weight (kg)'),
+                ),
+                TextField(
+                  controller: waist,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Waist (cm)'),
+                ),
+                TextField(
+                  controller: bodyFat,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Body fat %'),
+                ),
+                const SizedBox(height: 12),
+                Text('Energy: $energy / 5'),
+                Slider(
+                  value: energy.toDouble(),
+                  min: 1,
+                  max: 5,
+                  divisions: 4,
+                  onChanged: (v) => setSt(() => energy = v.round()),
+                ),
+                TextField(
+                  controller: notes,
+                  decoration: const InputDecoration(labelText: 'Notes'),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.camera_alt),
+                      label: const Text('Camera'),
+                      onPressed: () async {
+                        final picked = await _picker.pickImage(
+                          source: ImageSource.camera,
+                          imageQuality: 75,
+                        );
+                        if (picked != null) {
+                          setSt(() => photoFile = File(picked.path));
+                        }
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.photo_library),
+                      label: const Text('Gallery'),
+                      onPressed: () async {
+                        final picked = await _picker.pickImage(
+                          source: ImageSource.gallery,
+                          imageQuality: 75,
+                        );
+                        if (picked != null) {
+                          setSt(() => photoFile = File(picked.path));
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                if (photoFile != null) ...[
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(photoFile!, height: 120),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('Save'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
 
     if (saved == true) {
+      String? photoUrl;
+      if (photoFile != null) {
+        try {
+          photoUrl = await _uploads.uploadBodyPhoto(photoFile!);
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Photo upload failed: $e')),
+            );
+          }
+        }
+      }
       await _repo.create(
         weightKg: double.tryParse(weight.text),
         waistCm: double.tryParse(waist.text),
         bodyFatPct: double.tryParse(bodyFat.text),
         energyLevel: energy,
         notes: notes.text.isEmpty ? null : notes.text,
+        photoUrl: photoUrl,
       );
       await _load();
     }
