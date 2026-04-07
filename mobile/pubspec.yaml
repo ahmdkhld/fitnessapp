@@ -1,0 +1,50 @@
+name: nutritrack
+description: NutriTrack — diet & supplement tracker
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.19.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+
+  # State management
+  flutter_bloc: ^8.1.5
+  equatable: ^2.0.5
+
+  # Networking
+  dio: ^5.4.1
+
+  # Local storage
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.2
+
+  # Notifications
+  flutter_local_notifications: ^17.0.0
+
+  # Navigation
+  go_router: ^14.0.0
+
+  # DI
+  get_it: ^7.6.7
+
+  # UI
+  fl_chart: ^0.68.0
+  cached_network_image: ^3.3.1
+
+  # Misc
+  intl: ^0.19.0
+  permission_handler: ^11.3.0
+  timezone: ^0.9.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true

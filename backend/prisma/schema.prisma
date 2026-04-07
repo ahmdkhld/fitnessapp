@@ -1,0 +1,241 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  fullName     String?  @map("full_name") @db.VarChar(100)
+  avatarUrl    String?  @map("avatar_url")
+  goal         String?  @db.VarChar(50)
+  timezone     String   @default("UTC") @db.VarChar(50)
+  unitSystem   String   @default("metric") @map("unit_system") @db.VarChar(10)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  profiles             UserProfile[]
+  dietPlans            DietPlan[]
+  supplementPlans      SupplementPlan[]
+  scheduleItems        DailyScheduleItem[]
+  waterLogs            WaterLog[]
+  bodyLogs             BodyLog[]
+  dailyNotes           DailyNote[]
+  notificationSettings NotificationSettings?
+  uploadedPlans        UploadedPlan[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  heightCm         Decimal?  @map("height_cm") @db.Decimal(5, 1)
+  weightKg         Decimal?  @map("weight_kg") @db.Decimal(5, 1)
+  bodyFatPct       Decimal?  @map("body_fat_pct") @db.Decimal(4, 1)
+  waistCm          Decimal?  @map("waist_cm") @db.Decimal(5, 1)
+  dateOfBirth      DateTime? @map("date_of_birth") @db.Date
+  gender           String?   @db.VarChar(20)
+  activityLevel    String?   @map("activity_level") @db.VarChar(30)
+  dailyWaterGoalMl Int       @default(2500) @map("daily_water_goal_ml")
+  recordedAt       DateTime  @default(now()) @map("recorded_at") @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model DietPlan {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  name        String   @db.VarChar(100)
+  goal        String?  @db.VarChar(50)
+  description String?
+  isActive    Boolean  @default(false) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meals Meal[]
+
+  @@index([userId, isActive])
+  @@map("diet_plans")
+}
+
+model Meal {
+  id            String   @id @default(uuid()) @db.Uuid
+  dietPlanId    String   @map("diet_plan_id") @db.Uuid
+  name          String   @db.VarChar(100)
+  scheduledTime DateTime @map("scheduled_time") @db.Time()
+  calories      Int?
+  proteinG      Decimal? @map("protein_g") @db.Decimal(6, 1)
+  carbsG        Decimal? @map("carbs_g") @db.Decimal(6, 1)
+  fatG          Decimal? @map("fat_g") @db.Decimal(6, 1)
+  notes         String?
+  sortOrder     Int      @default(0) @map("sort_order")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  dietPlan    DietPlan         @relation(fields: [dietPlanId], references: [id], onDelete: Cascade)
+  ingredients MealIngredient[]
+
+  @@map("meals")
+}
+
+model MealIngredient {
+  id        String   @id @default(uuid()) @db.Uuid
+  mealId    String   @map("meal_id") @db.Uuid
+  name      String   @db.VarChar(100)
+  quantity  String?  @db.VarChar(50)
+  calories  Int?
+  proteinG  Decimal? @map("protein_g") @db.Decimal(6, 1)
+  carbsG    Decimal? @map("carbs_g") @db.Decimal(6, 1)
+  fatG      Decimal? @map("fat_g") @db.Decimal(6, 1)
+  sortOrder Int      @default(0) @map("sort_order")
+
+  meal Meal @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@map("meal_ingredients")
+}
+
+model SupplementPlan {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  name      String   @db.VarChar(100)
+  isActive  Boolean  @default(false) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  supplements Supplement[]
+
+  @@index([userId, isActive])
+  @@map("supplement_plans")
+}
+
+model Supplement {
+  id               String   @id @default(uuid()) @db.Uuid
+  supplementPlanId String   @map("supplement_plan_id") @db.Uuid
+  name             String   @db.VarChar(100)
+  dosage           String?  @db.VarChar(50)
+  form             String?  @db.VarChar(30)
+  scheduledTime    DateTime @map("scheduled_time") @db.Time()
+  timingNote       String?  @map("timing_note") @db.VarChar(50)
+  frequency        String   @default("daily") @db.VarChar(20)
+  frequencyDays    Int[]    @map("frequency_days")
+  stockQuantity    Int?     @map("stock_quantity")
+  stockAlertAt     Int      @default(7) @map("stock_alert_at")
+  notes            String?
+  sortOrder        Int      @default(0) @map("sort_order")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  plan SupplementPlan @relation(fields: [supplementPlanId], references: [id], onDelete: Cascade)
+
+  @@map("supplements")
+}
+
+model DailyScheduleItem {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  date          DateTime  @db.Date
+  itemType      String    @map("item_type") @db.VarChar(20)
+  referenceId   String?   @map("reference_id") @db.Uuid
+  title         String    @db.VarChar(150)
+  subtitle      String?   @db.VarChar(200)
+  scheduledTime DateTime  @map("scheduled_time") @db.Time()
+  status        String    @default("pending") @db.VarChar(20)
+  completedAt   DateTime? @map("completed_at") @db.Timestamptz()
+  notes         String?
+  sortOrder     Int       @default(0) @map("sort_order")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@index([userId, date, status])
+  @@map("daily_schedule_items")
+}
+
+model WaterLog {
+  id       String   @id @default(uuid()) @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
+  date     DateTime @db.Date
+  amountMl Int      @map("amount_ml")
+  loggedAt DateTime @default(now()) @map("logged_at") @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@map("water_logs")
+}
+
+model BodyLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  date         DateTime @db.Date
+  weightKg     Decimal? @map("weight_kg") @db.Decimal(5, 1)
+  waistCm      Decimal? @map("waist_cm") @db.Decimal(5, 1)
+  bodyFatPct   Decimal? @map("body_fat_pct") @db.Decimal(4, 1)
+  energyLevel  Int?     @map("energy_level")
+  hungerLevel  Int?     @map("hunger_level")
+  sleepQuality Int?     @map("sleep_quality")
+  photoUrl     String?  @map("photo_url")
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@map("body_logs")
+}
+
+model DailyNote {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  date      DateTime @db.Date
+  symptoms  Json?
+  mood      Int?
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@map("daily_notes")
+}
+
+model NotificationSettings {
+  id                 String    @id @default(uuid()) @db.Uuid
+  userId             String    @unique @map("user_id") @db.Uuid
+  pushEnabled        Boolean   @default(true) @map("push_enabled")
+  mealReminder       Boolean   @default(true) @map("meal_reminder")
+  supplementReminder Boolean   @default(true) @map("supplement_reminder")
+  waterReminder      Boolean   @default(true) @map("water_reminder")
+  overdueReminder    Boolean   @default(true) @map("overdue_reminder")
+  advanceMinutes     Int       @default(5) @map("advance_minutes")
+  quietStart         DateTime? @map("quiet_start") @db.Time()
+  quietEnd           DateTime? @map("quiet_end") @db.Time()
+  fcmToken           String?   @map("fcm_token")
+  apnsToken          String?   @map("apns_token")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_settings")
+}
+
+model UploadedPlan {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  fileUrl    String   @map("file_url")
+  fileType   String?  @map("file_type") @db.VarChar(20)
+  parsedData Json?    @map("parsed_data")
+  status     String   @default("pending") @db.VarChar(20)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("uploaded_plans")
+}
