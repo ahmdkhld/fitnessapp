@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/auth/token_manager.dart';
 
@@ -30,7 +29,20 @@ class AuthRepository {
     );
   }
 
-  Future<void> signOut() => _tokens.clear();
+  Future<void> signOut() async {
+    final refresh = await _tokens.refreshToken;
+    if (refresh != null) {
+      try {
+        await _api.dio.post<void>(
+          '/auth/logout',
+          data: {'refreshToken': refresh},
+        );
+      } catch (_) {
+        // Best-effort; still clear local tokens.
+      }
+    }
+    await _tokens.clear();
+  }
 
   Future<bool> get isSignedIn async => (await _tokens.accessToken) != null;
 }

@@ -95,7 +95,12 @@ export const api = {
   supplementPlans: (token: string) =>
     request<SupplementPlan[]>(`/supplement-plans`, { token }),
   exportReport: (token: string, from: string, to: string) =>
-    request<Record<string, unknown>>(`/export/report?from=${from}&to=${to}`, { token }),
+    request<{
+      dailyAdherence: Array<{ date: string; percentage: number; total: number; completed: number }>;
+      dailyWaterMl: Array<{ date: string; amountMl: number }>;
+      bodyLogs: Array<Record<string, unknown>>;
+      summary: { totalItems: number; completed: number; adherencePct: number };
+    }>(`/export/report?from=${from}&to=${to}`, { token }),
   parseText: (token: string, text: string) =>
     request<{ id: string; parsedData: unknown }>(`/plan-parser/upload`, {
       method: 'POST',

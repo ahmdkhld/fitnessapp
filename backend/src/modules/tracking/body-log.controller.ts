@@ -14,6 +14,7 @@ class CreateBodyLogDto {
   @IsOptional() @IsInt() hungerLevel?: number;
   @IsOptional() @IsInt() sleepQuality?: number;
   @IsOptional() @IsString() notes?: string;
+  @IsOptional() @IsString() photoUrl?: string;
 }
 
 @ApiTags('body-logs')

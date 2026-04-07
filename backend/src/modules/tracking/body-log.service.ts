@@ -10,6 +10,7 @@ export interface CreateBodyLogInput {
   hungerLevel?: number;
   sleepQuality?: number;
   notes?: string;
+  photoUrl?: string;
 }
 
 @Injectable()
@@ -45,6 +46,7 @@ export class BodyLogService {
         hungerLevel: input.hungerLevel,
         sleepQuality: input.sleepQuality,
         notes: input.notes,
+        photoUrl: input.photoUrl,
       },
     });
   }

@@ -51,7 +51,7 @@ wearable integration.
 
 | Phase | Status   | Notes |
 |-------|----------|-------|
-| 1 — Foundation | ✅ complete | Auth, users, plans, schedule engine, timeline UI, dashboard shell |
-| 2 — Notifications & Tracking | ✅ complete | Cron-based overdue + evening + stock alerts, water/body/notes endpoints, adherence analytics |
-| 3 — Smart Features | ✅ complete | Text plan parser, insights engine, coach report |
-| 4 — Polish & Launch | ⏳ partial | Docker + CI ✅; PDF rendering, real FCM delivery, S3 upload integration, app store submission deferred |
+| 1 — Foundation | ✅ complete | Auth + refresh rotation, users, plans, schedule engine, timeline UI, onboarding, bottom-nav shell |
+| 2 — Notifications & Tracking | ✅ complete | Overdue + evening + stock crons, water/body/notes endpoints + screens, adherence + streak analytics, notification settings UI |
+| 3 — Smart Features | ✅ complete | Text plan parser (with mobile + web upload screens), insights engine, coach export report, stock alerts |
+| 4 — Polish & Launch | ✅ mostly complete | Docker + CI, e2e tests, throttling, presigned S3 uploads, Sentry, EN+AR localization, refresh-token rotation, web recharts. Deferred: real FCM/APNs creds, app-store submission, Drift full offline sync |
