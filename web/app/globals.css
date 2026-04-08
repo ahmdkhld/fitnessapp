@@ -1,73 +1,114 @@
-/* ── Google Fonts: Inter ────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* ── Fonts: Fraunces (display serif) + General Sans (body) ── */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
 
-/* ── Design Tokens ─────────────────────────────────────── */
+/* ── Design Tokens — "Quiet Athletic" ──────────────────── */
+/*
+ * Default theme is LIGHT (warm bone canvas + deep charcoal ink + a single
+ * burnt-sienna accent). Dark mode is an opt-in alternate. The neon
+ * cyberpunk palette (electric blue + purple + neon green) is gone — the
+ * named --accent-purple / --accent-green vars stay defined for backwards
+ * compatibility with existing dashboard pages but resolve to the new
+ * subdued tones.
+ */
 :root {
-  --bg: #121212;
-  --fg: #FFFFFF;
-  --accent: #0000FF;
-  --accent-purple: #A020F0;
-  --accent-green: #22C55E;
-  --green: #22C55E;
-  --purple: #A020F0;
-  --muted: #A9A9A9;
-  --card: #1E1E1E;
-  --border: #333333;
-  --glass-bg: rgba(30, 30, 30, 0.6);
-  --topnav-bg: rgba(30, 30, 30, 0.8);
-  --mobile-nav-bg: rgba(30, 30, 30, 0.95);
-  --hover-overlay: rgba(255, 255, 255, 0.05);
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
-  --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --decorative-1: rgba(160, 32, 240, 0.12);
-  --decorative-2: rgba(75, 0, 130, 0.10);
-  --glow-blue: 0 0 15px rgba(0, 0, 255, 0.3);
-  --glow-purple: 0 0 15px rgba(160, 32, 240, 0.3);
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --topnav-height: 64px;
-  --modal-backdrop: rgba(0, 0, 0, 0.75);
+  /* Surfaces */
+  --bg: #F5F1E8;          /* warm bone */
+  --fg: #1A1A19;          /* deep charcoal ink */
+  --muted: #6B6B66;       /* warm grey */
+  --card: #FFFCF5;        /* card surface, near-white warm */
+  --border: #E5DFD2;      /* hairline border */
+  --glass-bg: rgba(255, 252, 245, 0.75);
+  --topnav-bg: rgba(245, 241, 232, 0.85);
+  --mobile-nav-bg: rgba(245, 241, 232, 0.97);
+  --hover-overlay: rgba(26, 26, 25, 0.04);
+
+  /* Accents — single dominant + restrained secondary */
+  --accent: #C24914;          /* burnt sienna */
+  --accent-soft: #E27A4A;     /* lighter accent for hover */
+  --accent-purple: #5C5479;   /* deep dusty plum (replaces neon purple) */
+  --accent-green: #5C7148;    /* moss green (replaces neon) */
+  --green: #5C7148;
+  --purple: #5C5479;
+
+  /* Shadows + glows (subtle) */
+  --shadow-card: 0 1px 2px rgba(26, 26, 25, 0.04), 0 4px 16px rgba(26, 26, 25, 0.04);
+  --shadow-hover: 0 2px 6px rgba(26, 26, 25, 0.06), 0 12px 32px rgba(26, 26, 25, 0.08);
+  --glow-blue: none;
+  --glow-purple: none;
+
+  /* Decoratives — used by background blobs */
+  --decorative-1: rgba(194, 73, 20, 0.05);
+  --decorative-2: rgba(92, 84, 121, 0.04);
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --topnav-height: 68px;
+  --modal-backdrop: rgba(26, 26, 25, 0.50);
 
   /* ── Semantic colors (severity / state) ───────────────── */
-  --success: #22C55E;
-  --success-bg: rgba(34, 197, 94, 0.15);
-  --warning: #D8A24A;
-  --warning-bg: rgba(216, 162, 74, 0.15);
-  --danger: #E07B5F;
-  --danger-bg: rgba(224, 123, 95, 0.10);
-  --danger-border: rgba(224, 123, 95, 0.35);
-  --info: #6AD1E0;
-  --info-bg: rgba(106, 209, 224, 0.15);
+  --success: #5C7148;
+  --success-bg: rgba(92, 113, 72, 0.12);
+  --warning: #B8862E;
+  --warning-bg: rgba(184, 134, 46, 0.12);
+  --danger: #B23A2A;
+  --danger-bg: rgba(178, 58, 42, 0.08);
+  --danger-border: rgba(178, 58, 42, 0.30);
+  --info: #4A6B7A;
+  --info-bg: rgba(74, 107, 122, 0.10);
 
   /* ── Button size scale ────────────────────────────────── */
-  --btn-pad-sm: 0.4rem 0.85rem;
-  --btn-pad-md: 0.6rem 1.25rem;
-  --btn-pad-lg: 0.85rem 1.75rem;
+  --btn-pad-sm: 0.45rem 0.95rem;
+  --btn-pad-md: 0.65rem 1.4rem;
+  --btn-pad-lg: 0.9rem 1.9rem;
   --btn-fs-sm: 12px;
   --btn-fs-md: 14px;
   --btn-fs-lg: 16px;
+
+  /* Type families */
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-body: 'General Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* ── Light Theme Overrides ─────────────────────────────── */
-:root[data-theme='light'] {
-  --bg: #F5F5F7;
-  --fg: #1A1A1A;
-  --muted: #6B7280;
-  --card: #FFFFFF;
-  --border: #E0E0E0;
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --topnav-bg: rgba(255, 255, 255, 0.85);
-  --mobile-nav-bg: rgba(255, 255, 255, 0.95);
-  --hover-overlay: rgba(0, 0, 0, 0.04);
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
-  --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.10);
-  --decorative-1: rgba(160, 32, 240, 0.06);
-  --decorative-2: rgba(75, 0, 130, 0.04);
-  --glow-blue: 0 0 12px rgba(0, 0, 255, 0.18);
-  --glow-purple: 0 0 12px rgba(160, 32, 240, 0.18);
-  --modal-backdrop: rgba(20, 20, 20, 0.45);
+/* ── Dark Theme Overrides ──────────────────────────────── */
+:root[data-theme='dark'] {
+  --bg: #14130F;          /* warm near-black, NOT pure #000 */
+  --fg: #F2EFE6;
+  --muted: #8A857A;
+  --card: #1C1A15;
+  --border: #2A2620;
+  --glass-bg: rgba(28, 26, 21, 0.75);
+  --topnav-bg: rgba(20, 19, 15, 0.85);
+  --mobile-nav-bg: rgba(20, 19, 15, 0.97);
+  --hover-overlay: rgba(242, 239, 230, 0.05);
+
+  --accent: #E07A4A;        /* warmer/lighter accent for dark canvas */
+  --accent-soft: #F19A6E;
+  --accent-purple: #8E83A8;
+  --accent-green: #91A672;
+  --green: #91A672;
+  --purple: #8E83A8;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 24px rgba(0, 0, 0, 0.25);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.40), 0 16px 40px rgba(0, 0, 0, 0.35);
+
+  --decorative-1: rgba(224, 122, 74, 0.06);
+  --decorative-2: rgba(142, 131, 168, 0.05);
+
+  --modal-backdrop: rgba(0, 0, 0, 0.72);
+
+  --success: #91A672;
+  --success-bg: rgba(145, 166, 114, 0.14);
+  --warning: #D5A951;
+  --warning-bg: rgba(213, 169, 81, 0.14);
+  --danger: #E07A4A;
+  --danger-bg: rgba(224, 122, 74, 0.10);
+  --danger-border: rgba(224, 122, 74, 0.35);
+  --info: #7B9DAA;
+  --info-bg: rgba(123, 157, 170, 0.12);
 }
 
 /* ── Reset & Base ──────────────────────────────────────── */
@@ -76,15 +117,30 @@
 html, body {
   background: var(--bg);
   color: var(--fg);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-body);
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.55;
+  font-feature-settings: 'ss01', 'cv11';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a { color: var(--accent); text-decoration: none; }
-a:hover { opacity: 0.85; }
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  font-feature-settings: 'ss01';
+}
+
+a { color: var(--accent); text-decoration: none; transition: opacity 0.15s ease; }
+a:hover { opacity: 0.75; }
 
 /* ── Focus Rings ───────────────────────────────────────── */
 a:focus-visible,
@@ -109,7 +165,7 @@ select:focus-visible {
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--muted);
 }
 * {
   scrollbar-width: thin;
@@ -149,17 +205,17 @@ body::after {
 
 /* ── UXPilot Design System Classes ────────────────────── */
 
+/* .glass-card name kept for backwards compat with existing pages,
+ * but it's now a flat editorial surface (no blur). */
 .glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 24px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
 .glass-card:hover {
-  transform: translateY(-2px);
   box-shadow: var(--shadow-hover);
 }
 
@@ -194,12 +250,12 @@ body::after {
 .timeline-card::before {
   content: '';
   position: absolute;
-  left: -1px;
+  left: 0;
   top: 16px;
   bottom: 16px;
-  width: 3px;
-  background: linear-gradient(to bottom, var(--accent), var(--accent-purple));
-  border-radius: 2px;
+  width: 2px;
+  background: var(--accent);
+  border-radius: 0;
 }
 
 .input-field {
@@ -208,7 +264,7 @@ body::after {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--fg);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   width: 100%;
@@ -248,22 +304,21 @@ body::after {
 }
 
 .btn-primary {
-  padding: 12px 24px;
+  padding: 12px 26px;
   background: var(--accent);
-  color: #fff;
+  color: #FFFCF5;
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-weight: 500;
   font-size: 14px;
-  transition: opacity 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-  box-shadow: var(--glow-blue);
+  letter-spacing: 0.01em;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .btn-primary:hover {
-  opacity: 0.9;
-  box-shadow: 0 0 25px rgba(0, 0, 255, 0.4);
+  background: var(--accent-soft);
   transform: translateY(-1px);
 }
 
@@ -495,11 +550,13 @@ body::after {
 }
 
 .section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   color: var(--fg);
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
 }
 
 .list-card {
@@ -516,46 +573,60 @@ body::after {
 }
 
 .page-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .page-header h1 {
-  margin: 0 0 0.25rem 0;
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  margin: 0 0 0.35rem 0;
+  font-size: 2.25rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
   color: var(--fg);
 }
 
 .page-header p {
   color: var(--muted);
   margin: 0;
+  font-size: 0.95rem;
 }
 
+.stat-card {
+  padding: 1.5rem 1.4rem 1.6rem;
+}
 .stat-card .stat-accent {
   position: absolute;
   top: 0;
-  right: 0;
-  width: 60px;
-  height: 60px;
-  border-radius: 0 12px 0 60px;
-  opacity: 0.15;
+  left: 0;
+  width: 24px;
+  height: 2px;
+  border-radius: 0;
+  opacity: 1;
 }
 
 .stat-card .stat-label {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
+  font-weight: 500;
 }
 
 .stat-card .stat-value {
-  font-size: 28px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  font-feature-settings: 'tnum', 'ss01';
+  margin-top: 0.5rem;
 }
 
 .stat-card .stat-sub {
   color: var(--muted);
   font-size: 12px;
+  margin-top: 0.4rem;
 }
 
 .data-table {
@@ -645,10 +716,10 @@ body::after {
   display: flex;
   align-items: center;
   height: var(--topnav-height);
-  padding: 0 24px;
+  padding: 0 32px;
   background: var(--topnav-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: saturate(140%) blur(8px);
+  -webkit-backdrop-filter: saturate(140%) blur(8px);
   border-bottom: 1px solid var(--border);
 }
 
@@ -656,8 +727,10 @@ body::after {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 18px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   color: var(--fg);
   flex-shrink: 0;
   text-decoration: none;
@@ -700,12 +773,12 @@ body::after {
 .topnav-link--active::after {
   content: '';
   position: absolute;
-  bottom: -4px;
+  bottom: -1px;
   left: 12px;
   right: 12px;
-  height: 2px;
+  height: 1.5px;
   background: var(--accent);
-  border-radius: 1px;
+  border-radius: 0;
 }
 
 .topnav-actions {
@@ -735,18 +808,25 @@ body::after {
 }
 
 .topnav-avatar {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent-purple));
+  background: var(--fg);
+  color: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   flex-shrink: 0;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+.topnav-avatar:hover {
+  transform: scale(1.05);
+  opacity: 1;
 }
 
 /* ── Mobile Navigation (top-nav dropdown) ──────────────── */

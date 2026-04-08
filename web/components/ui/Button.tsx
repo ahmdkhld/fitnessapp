@@ -15,9 +15,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
   primary: {
     background: 'var(--accent)',
-    color: '#FFFFFF',
+    color: 'var(--card)',
     border: 'none',
-    boxShadow: 'var(--glow-blue)',
   },
   secondary: {
     background: 'transparent',
@@ -25,8 +24,8 @@ const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
     border: '1px solid var(--border)',
   },
   danger: {
-    background: '#EF4444',
-    color: '#FFFFFF',
+    background: 'var(--danger)',
+    color: 'var(--card)',
     border: 'none',
   },
   ghost: {
@@ -37,9 +36,9 @@ const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
 };
 
 const hoverBg: Record<ButtonVariant, string> = {
-  primary: '#0000CC',
+  primary: 'var(--accent-soft)',
   secondary: 'var(--hover-overlay)',
-  danger: '#DC2626',
+  danger: 'var(--accent-soft)',
   ghost: 'var(--hover-overlay)',
 };
 
@@ -88,17 +87,18 @@ export function Button({
   const merged: React.CSSProperties = {
     ...variantStyles[variant],
     ...sizeStyles[size],
-    borderRadius: 8,
+    borderRadius: 6,
     cursor: isDisabled ? 'not-allowed' : 'pointer',
-    opacity: isDisabled ? 0.6 : 1,
+    opacity: isDisabled ? 0.5 : 1,
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '0.5rem',
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: 'var(--font-body)',
     fontWeight: 500,
+    letterSpacing: '0.005em',
     lineHeight: 1.4,
-    transition: 'background 0.15s, opacity 0.15s, box-shadow 0.15s',
+    transition: 'background 0.18s ease, opacity 0.15s ease, transform 0.15s ease',
     ...(fullWidth ? { width: '100%' } : {}),
     ...(hovered && !isDisabled ? { background: hoverBg[variant] } : {}),
     ...style,

@@ -45,12 +45,12 @@ export function Card({
       }}
     >
       {title && (
-        <h2 style={{ fontSize: '1.1rem', marginTop: 0, marginBottom: subtitle ? 4 : '1rem', color: 'var(--fg)', fontFamily: "'Inter', sans-serif" }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 500, letterSpacing: '-0.01em', marginTop: 0, marginBottom: subtitle ? 4 : '1rem', color: 'var(--fg)', fontFamily: 'var(--font-display)' }}>
           {title}
         </h2>
       )}
       {subtitle && (
-        <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 0, marginBottom: '1rem', fontFamily: "'Inter', sans-serif" }}>
+        <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 0, marginBottom: '1rem' }}>
           {subtitle}
         </p>
       )}

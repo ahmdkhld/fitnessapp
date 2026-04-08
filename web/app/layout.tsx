@@ -23,24 +23,28 @@ export default async function RootLayout({
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
   // Inline script: read saved theme from localStorage and apply it before
-  // first paint to avoid a flash of the wrong theme. Falls back to OS pref.
+  // first paint to avoid a flash of the wrong theme. Default is LIGHT;
+  // dark mode is opt-in (either via OS pref or manual toggle).
   const themeInitScript = `
     try {
       var stored = localStorage.getItem('nt-theme');
-      var theme = stored || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      var theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', theme);
-    } catch (e) {}
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
   `;
 
   return (
-    <html lang={locale} dir={dir}>
+    <html lang={locale} dir={dir} data-theme="light">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
+        <link rel="preconnect" href="https://api.fontshare.com" />
+        {/*
+          Fraunces (display serif) + General Sans (body) — both loaded via
+          @import in globals.css. Preconnects above warm up the connections.
+        */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body>

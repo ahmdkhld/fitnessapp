@@ -15,7 +15,7 @@ const inputStyle: React.CSSProperties = {
   borderRadius: 8,
   color: 'var(--fg)',
   width: '100%',
-  fontFamily: "'Inter', sans-serif",
+  fontFamily: 'var(--font-body)',
   fontSize: 14,
   outline: 'none',
   transition: 'border-color 0.15s, box-shadow 0.15s',
@@ -29,14 +29,13 @@ const labelStyle: React.CSSProperties = {
   marginBottom: 6,
   textTransform: 'uppercase',
   letterSpacing: '0.05em',
-  fontFamily: "'Inter', sans-serif",
 };
 
 export function Input({ label, error, helperText, style, onFocus, onBlur, ...rest }: InputProps) {
   const [focused, setFocused] = React.useState(false);
 
   const focusRing: React.CSSProperties = focused && !error
-    ? { borderColor: 'var(--accent)', boxShadow: '0 0 0 2px rgba(0,0,255,0.2)' }
+    ? { borderColor: 'var(--accent)', boxShadow: '0 0 0 3px var(--danger-bg)' }
     : {};
 
   return (
@@ -45,7 +44,7 @@ export function Input({ label, error, helperText, style, onFocus, onBlur, ...res
       <input
         style={{
           ...inputStyle,
-          ...(error ? { borderColor: '#EF4444', boxShadow: '0 0 0 2px rgba(239,68,68,0.15)' } : {}),
+          ...(error ? { borderColor: 'var(--danger)', boxShadow: '0 0 0 3px var(--danger-bg)' } : {}),
           ...focusRing,
           ...style,
         }}
@@ -61,12 +60,12 @@ export function Input({ label, error, helperText, style, onFocus, onBlur, ...res
         {...rest}
       />
       {error && (
-        <span style={{ display: 'block', fontSize: 12, color: '#EF4444', marginTop: 4, fontFamily: "'Inter', sans-serif" }}>
+        <span style={{ display: 'block', fontSize: 12, color: 'var(--danger)', marginTop: 4 }}>
           {error}
         </span>
       )}
       {!error && helperText && (
-        <span style={{ display: 'block', fontSize: 12, color: 'var(--muted)', marginTop: 4, fontFamily: "'Inter', sans-serif" }}>
+        <span style={{ display: 'block', fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
           {helperText}
         </span>
       )}

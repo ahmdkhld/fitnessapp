@@ -31,7 +31,7 @@ export function Badge({ variant = 'neutral', children, style }: BadgeProps) {
         background: colors.bg,
         color: colors.fg,
         whiteSpace: 'nowrap',
-        fontFamily: "'Inter', sans-serif",
+        fontFamily: 'var(--font-body)',
         ...style,
       }}
     >
