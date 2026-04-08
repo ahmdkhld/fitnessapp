@@ -2,34 +2,70 @@ import Link from 'next/link';
 
 export default function HomePage() {
   return (
-    <main style={{ padding: '4rem 2rem', maxWidth: 720, margin: '0 auto' }}>
-      <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>NutriTrack</h1>
-      <p style={{ color: 'var(--muted)', fontSize: '1.1rem', lineHeight: 1.6 }}>
-        Diet & supplement tracking with daily timelines, adherence analytics
-        and coach-ready reports. Cross-platform Flutter app + web dashboard.
-      </p>
-      <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
-        <Link
-          href="/dashboard"
-          style={{
-            padding: '0.75rem 1.5rem',
-            background: 'var(--accent)',
-            color: '#fff',
-            borderRadius: 8,
-          }}
+    <main className="landing">
+      <div className="landing__inner">
+        <header className="landing__brand">
+          <span className="landing__brand-rule" aria-hidden="true" />
+          NutriTrack
+        </header>
+
+        <h1 className="landing__title reveal">
+          Quiet&nbsp;tracking<br />
+          for loud&nbsp;goals.
+        </h1>
+
+        <p
+          className="landing__lede reveal"
+          style={{ animationDelay: '0.08s' }}
         >
-          Open dashboard
-        </Link>
-        <Link
-          href="/login"
-          style={{
-            padding: '0.75rem 1.5rem',
-            border: '1px solid var(--border)',
-            borderRadius: 8,
-          }}
+          A nutrition, supplement and workout journal that stays out of the way.
+          Log your week, watch the chart, ship the report to your coach. No
+          streaks-as-anxiety, no leaderboards, no neon.
+        </p>
+
+        <div
+          className="landing__cta reveal"
+          style={{ animationDelay: '0.16s' }}
         >
-          Sign in
-        </Link>
+          <Link href="/register" className="landing__cta-primary">
+            Start tracking
+          </Link>
+          <Link href="/login" className="landing__cta-secondary">
+            I have an account →
+          </Link>
+        </div>
+
+        <ul
+          className="landing__pillars reveal"
+          style={{ animationDelay: '0.24s' }}
+        >
+          <li>
+            <span className="landing__pillar-num">01</span>
+            <span className="landing__pillar-label">
+              Daily timeline of meals, supplements &amp; sessions
+            </span>
+          </li>
+          <li>
+            <span className="landing__pillar-num">02</span>
+            <span className="landing__pillar-label">
+              Weekly adherence with computed insights
+            </span>
+          </li>
+          <li>
+            <span className="landing__pillar-num">03</span>
+            <span className="landing__pillar-label">
+              Coach-ready PDF report on demand
+            </span>
+          </li>
+        </ul>
+
+        <footer className="landing__footer">
+          <span>NutriTrack © {new Date().getFullYear()}</span>
+          <span className="landing__footer-dot">·</span>
+          <span>Free to start</span>
+          <span className="landing__footer-dot">·</span>
+          <span>No card required</span>
+        </footer>
       </div>
     </main>
   );
