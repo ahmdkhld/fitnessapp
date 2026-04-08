@@ -34,11 +34,17 @@ export default async function WorkoutAnalyticsPage() {
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{t('workoutAnalytics')}</h1>
-      {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
-      <WorkoutVolumeChart data={volume} />
+      <div className="page-header">
+        <h1><i className="fa-solid fa-chart-line" style={{ marginRight: 10, color: 'var(--green)' }} />{t('workoutAnalytics')}</h1>
+      </div>
+      {error && <div className="error-banner">{error}</div>}
 
-      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>
+      <div className="glass-card" style={{ marginTop: '1rem' }}>
+        <WorkoutVolumeChart data={volume} />
+      </div>
+
+      <h2 className="section-title">
+        <i className="fa-solid fa-trophy" style={{ marginRight: 8, color: 'var(--green)' }} />
         {t('recentPersonalRecords')}
       </h2>
       {topPrs.length === 0 ? (
@@ -46,18 +52,7 @@ export default async function WorkoutAnalyticsPage() {
       ) : (
         <div style={{ display: 'grid', gap: '0.5rem' }}>
           {topPrs.map((pr) => (
-            <div
-              key={pr.id}
-              style={{
-                background: 'var(--card)',
-                border: '1px solid var(--border)',
-                padding: '0.75rem 1rem',
-                borderRadius: 8,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
+            <div key={pr.id} className="list-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontWeight: 600 }}>{pr.exercise.name}</div>
                 <div style={{ color: 'var(--muted)', fontSize: 13 }}>

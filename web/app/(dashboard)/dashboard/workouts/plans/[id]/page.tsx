@@ -30,25 +30,6 @@ async function load(id: string) {
 const dayName = (d: number | null) =>
   d == null ? 'Flexible' : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][d - 1];
 
-const input: React.CSSProperties = {
-  padding: '0.5rem 0.6rem',
-  background: 'var(--bg)',
-  border: '1px solid var(--border)',
-  borderRadius: 6,
-  color: 'var(--fg)',
-  fontSize: 13,
-};
-
-const button: React.CSSProperties = {
-  padding: '0.5rem 0.85rem',
-  background: 'var(--accent)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: 6,
-  cursor: 'pointer',
-  fontSize: 13,
-};
-
 export default async function WorkoutPlanDetail({
   params,
 }: {
@@ -59,31 +40,26 @@ export default async function WorkoutPlanDetail({
   const tc = await getTranslations('common');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{plan?.name ?? t('workoutPlan')}</h1>
-      {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
-      {plan && (
-        <>
-          <p style={{ color: 'var(--muted)' }}>
+      <div className="page-header">
+        <h1>{plan?.name ?? t('workoutPlan')}</h1>
+        {plan && (
+          <p>
             {[plan.splitType, `${plan.daysPerWeek ?? '-'} ${t('daysPerWeek')}`, plan.goal]
               .filter(Boolean)
               .join(' · ')}
           </p>
-
+        )}
+      </div>
+      {error && <div className="error-banner">{error}</div>}
+      {plan && (
+        <>
           <form
             action={addDay.bind(null, plan.id)}
-            style={{
-              background: 'var(--card)',
-              border: '1px solid var(--border)',
-              padding: '1rem',
-              borderRadius: 10,
-              display: 'flex',
-              gap: '0.5rem',
-              marginTop: '1rem',
-              marginBottom: '1.5rem',
-            }}
+            className="glass-card"
+            style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', marginBottom: '1.5rem' }}
           >
-            <input name="name" placeholder={t('dayName')} required style={input} />
-            <select name="dayOfWeek" style={input}>
+            <input name="name" placeholder={t('dayName')} required className="input-field" style={{ flex: 1 }} />
+            <select name="dayOfWeek" className="input-field" style={{ width: 'auto', flex: 'none' }}>
               <option value="">{t('flexible')}</option>
               <option value="1">Mon</option>
               <option value="2">Tue</option>
@@ -93,39 +69,19 @@ export default async function WorkoutPlanDetail({
               <option value="6">Sat</option>
               <option value="7">Sun</option>
             </select>
-            <button type="submit" style={button}>
-              {t('addDay')}
-            </button>
+            <button type="submit" className="btn-primary">{t('addDay')}</button>
           </form>
 
           <div style={{ display: 'grid', gap: '1rem' }}>
             {plan.days.map((d) => (
-              <div
-                key={d.id}
-                style={{
-                  background: 'var(--card)',
-                  border: '1px solid var(--border)',
-                  padding: '1.25rem',
-                  borderRadius: 12,
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'baseline',
-                  }}
-                >
+              <div key={d.id} className="glass-card" style={{ borderRadius: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: '1.05rem' }}>
-                      {d.name}
-                    </div>
+                    <div style={{ fontWeight: 600, fontSize: '1.05rem' }}>{d.name}</div>
                     <div style={{ color: 'var(--muted)', fontSize: 13 }}>
                       {[
                         dayName(d.dayOfWeek),
-                        d.estimatedDurationMin
-                          ? `${d.estimatedDurationMin} ${t('min')}`
-                          : null,
+                        d.estimatedDurationMin ? `${d.estimatedDurationMin} ${t('min')}` : null,
                         `${d.exercises.length} ${t('exercises')}`,
                       ]
                         .filter(Boolean)
@@ -134,33 +90,17 @@ export default async function WorkoutPlanDetail({
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <form action={startSession.bind(null, d.id)}>
-                      <button type="submit" style={button}>
-                        {tc('start')}
+                      <button type="submit" className="btn-success">
+                        <i className="fa-solid fa-play" style={{ marginRight: 6 }} />{tc('start')}
                       </button>
                     </form>
                     <form action={removeDay.bind(null, plan.id, d.id)}>
-                      <button
-                        type="submit"
-                        style={{
-                          ...button,
-                          background: 'transparent',
-                          color: '#e07b5f',
-                          border: '1px solid #6a2a2a',
-                        }}
-                      >
-                        {t('removeDay')}
-                      </button>
+                      <button type="submit" className="btn-danger">{t('removeDay')}</button>
                     </form>
                   </div>
                 </div>
 
-                <div
-                  style={{
-                    marginTop: '0.75rem',
-                    display: 'grid',
-                    gap: '0.25rem',
-                  }}
-                >
+                <div style={{ marginTop: '0.75rem', display: 'grid', gap: '0.25rem' }}>
                   {d.exercises.map((e) => (
                     <div
                       key={e.id}
@@ -179,27 +119,11 @@ export default async function WorkoutPlanDetail({
                           {e.targetWeightKg != null && ` @ ${e.targetWeightKg}kg`}
                           {e.restSeconds != null && ` · rest ${e.restSeconds}s`}
                           {e.supersetGroup && ` · SS ${e.supersetGroup}`}
-                          {e.progressionKg > 0 &&
-                            ` · +${e.progressionKg}kg auto`}
+                          {e.progressionKg > 0 && ` · +${e.progressionKg}kg auto`}
                         </div>
                       </div>
-                      <form
-                        action={removeDayExercise.bind(null, plan.id, e.id)}
-                      >
-                        <button
-                          type="submit"
-                          style={{
-                            padding: '4px 10px',
-                            background: 'transparent',
-                            color: '#e07b5f',
-                            border: '1px solid #6a2a2a',
-                            borderRadius: 6,
-                            fontSize: 12,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          x
-                        </button>
+                      <form action={removeDayExercise.bind(null, plan.id, e.id)}>
+                        <button type="submit" className="btn-danger btn-sm">x</button>
                       </form>
                     </div>
                   ))}
@@ -214,57 +138,19 @@ export default async function WorkoutPlanDetail({
                     gap: '0.5rem',
                   }}
                 >
-                  <select name="exerciseId" required style={input}>
+                  <select name="exerciseId" required className="input-field">
                     <option value="">{t('pickExercise')}</option>
                     {library.map((ex) => (
-                      <option key={ex.id} value={ex.id}>
-                        {ex.name}
-                      </option>
+                      <option key={ex.id} value={ex.id}>{ex.name}</option>
                     ))}
                   </select>
-                  <input
-                    name="targetSets"
-                    type="number"
-                    placeholder={t('sets')}
-                    defaultValue={3}
-                    style={input}
-                  />
-                  <input
-                    name="targetReps"
-                    placeholder={t('reps')}
-                    defaultValue="8-12"
-                    style={input}
-                  />
-                  <input
-                    name="targetWeightKg"
-                    type="number"
-                    step="0.5"
-                    placeholder="kg"
-                    style={input}
-                  />
-                  <input
-                    name="restSeconds"
-                    type="number"
-                    placeholder="Rest s"
-                    defaultValue={90}
-                    style={input}
-                  />
-                  <input
-                    name="supersetGroup"
-                    placeholder="SS"
-                    maxLength={2}
-                    style={input}
-                  />
-                  <input
-                    name="progressionKg"
-                    type="number"
-                    step="0.5"
-                    placeholder="+kg"
-                    style={input}
-                  />
-                  <button type="submit" style={button}>
-                    {tc('add')}
-                  </button>
+                  <input name="targetSets" type="number" placeholder={t('sets')} defaultValue={3} className="input-field" />
+                  <input name="targetReps" placeholder={t('reps')} defaultValue="8-12" className="input-field" />
+                  <input name="targetWeightKg" type="number" step="0.5" placeholder="kg" className="input-field" />
+                  <input name="restSeconds" type="number" placeholder="Rest s" defaultValue={90} className="input-field" />
+                  <input name="supersetGroup" placeholder="SS" maxLength={2} className="input-field" />
+                  <input name="progressionKg" type="number" step="0.5" placeholder="+kg" className="input-field" />
+                  <button type="submit" className="btn-primary">{tc('add')}</button>
                 </form>
               </div>
             ))}

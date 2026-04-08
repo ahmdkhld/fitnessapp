@@ -21,8 +21,8 @@ export default async function SessionDetail({
   const { session, error } = await load(params.id);
   const t = await getTranslations('workouts');
   const tc = await getTranslations('common');
-  if (error) return <p style={{ color: '#e07b5f' }}>{error}</p>;
-  if (!session) return <p>{tc('notFound')}</p>;
+  if (error) return <div className="error-banner">{error}</div>;
+  if (!session) return <p style={{ color: 'var(--muted)' }}>{tc('notFound')}</p>;
 
   const byExercise = new Map<string, WorkoutSession['sets']>();
   for (const s of session.sets) {
@@ -32,43 +32,37 @@ export default async function SessionDetail({
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{session.day?.name ?? t('freeformWorkout')}</h1>
-      <p style={{ color: 'var(--muted)' }}>
-        {session.date.slice(0, 10)} · {session.durationMin ?? 0} {t('min')} ·{' '}
-        {session.sets.length} {t('sets')}
-      </p>
+      <div className="page-header">
+        <h1><i className="fa-solid fa-dumbbell" style={{ marginRight: 10, color: 'var(--accent)' }} />{session.day?.name ?? t('freeformWorkout')}</h1>
+        <p>
+          {session.date.slice(0, 10)} · {session.durationMin ?? 0} {t('min')} ·{' '}
+          {session.sets.length} {t('sets')}
+        </p>
+      </div>
       <div style={{ display: 'grid', gap: '1rem', marginTop: '1.5rem' }}>
         {[...byExercise.entries()].map(([exId, sets]) => (
-          <div
-            key={exId}
-            style={{
-              background: 'var(--card)',
-              border: '1px solid var(--border)',
-              padding: '1.25rem',
-              borderRadius: 10,
-            }}
-          >
-            <div style={{ fontWeight: 600 }}>
+          <div key={exId} className="glass-card">
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>
               {sets[0].exercise?.name ?? exId}
             </div>
-            <table style={{ width: '100%', marginTop: 8, borderCollapse: 'collapse' }}>
+            <table className="data-table">
               <thead>
-                <tr style={{ color: 'var(--muted)', fontSize: 12 }}>
-                  <th style={{ textAlign: 'left' }}>#</th>
-                  <th style={{ textAlign: 'left' }}>{t('weight')}</th>
-                  <th style={{ textAlign: 'left' }}>{t('reps')}</th>
-                  <th style={{ textAlign: 'left' }}>{t('duration')}</th>
-                  <th style={{ textAlign: 'left' }}>{t('distance')}</th>
+                <tr>
+                  <th>#</th>
+                  <th>{t('weight')}</th>
+                  <th>{t('reps')}</th>
+                  <th>{t('duration')}</th>
+                  <th>{t('distance')}</th>
                 </tr>
               </thead>
               <tbody>
                 {sets.map((s) => (
                   <tr key={s.id}>
                     <td>{s.setNumber}</td>
-                    <td>{s.weightKg != null ? `${s.weightKg} kg` : '—'}</td>
-                    <td>{s.reps ?? '—'}</td>
-                    <td>{s.durationSec != null ? `${s.durationSec}s` : '—'}</td>
-                    <td>{s.distanceKm != null ? `${s.distanceKm} km` : '—'}</td>
+                    <td>{s.weightKg != null ? `${s.weightKg} kg` : '\u2014'}</td>
+                    <td>{s.reps ?? '\u2014'}</td>
+                    <td>{s.durationSec != null ? `${s.durationSec}s` : '\u2014'}</td>
+                    <td>{s.distanceKm != null ? `${s.distanceKm} km` : '\u2014'}</td>
                   </tr>
                 ))}
               </tbody>

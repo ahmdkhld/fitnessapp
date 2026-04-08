@@ -41,7 +41,10 @@ async function loadData(): Promise<{
     const user = (await userRes.json()) as UserData;
     let profile: ProfileData | null = null;
     if (profileRes && profileRes.ok) {
-      profile = (await profileRes.json()) as ProfileData | null;
+      const text = await profileRes.text();
+      if (text) {
+        try { profile = JSON.parse(text) as ProfileData; } catch { /* empty body */ }
+      }
     }
     return { user, profile, error: null };
   } catch (e) {
@@ -55,27 +58,14 @@ export default async function ProfilePage() {
 
   return (
     <div style={{ maxWidth: 600 }}>
-      <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
-      <p style={{ color: 'var(--muted)' }}>
-        {t('description')}
-      </p>
-      {error && (
-        <div
-          style={{
-            padding: '0.75rem 1rem',
-            background: '#3a1f1f',
-            border: '1px solid #6a2a2a',
-            borderRadius: 8,
-            marginBottom: '1.5rem',
-          }}
-        >
-          {error}
-        </div>
-      )}
+      <div className="page-header">
+        <h1><i className="fa-solid fa-user-circle" style={{ marginRight: 10, color: 'var(--accent)' }} />{t('title')}</h1>
+        <p>{t('description')}</p>
+      </div>
+      {error && <div className="error-banner">{error}</div>}
 
       {user && (
         <>
-          {/* Account info section */}
           <Card title={t('account')} style={{ marginBottom: '1.5rem' }}>
             <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: '1rem', marginTop: '-0.5rem' }}>
               {user.email} &middot; {t('memberSince')}{' '}
@@ -85,12 +75,7 @@ export default async function ProfilePage() {
               action={updateUser}
               style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}
             >
-              <Input
-                label={t('fullName')}
-                name="fullName"
-                defaultValue={user.fullName ?? ''}
-                placeholder={t('fullName')}
-              />
+              <Input label={t('fullName')} name="fullName" defaultValue={user.fullName ?? ''} placeholder={t('fullName')} />
               <Select label={t('goal')} name="goal" defaultValue={user.goal ?? ''}>
                 <option value="">{t('selectGoal')}</option>
                 <option value="fat_loss">{t('fatLoss')}</option>
@@ -98,12 +83,7 @@ export default async function ProfilePage() {
                 <option value="general_health">{t('generalHealth')}</option>
                 <option value="performance">{t('performance')}</option>
               </Select>
-              <Input
-                label={t('timezone')}
-                name="timezone"
-                defaultValue={user.timezone}
-                placeholder="UTC"
-              />
+              <Input label={t('timezone')} name="timezone" defaultValue={user.timezone} placeholder="UTC" />
               <Select label={t('unitSystem')} name="unitSystem" defaultValue={user.unitSystem}>
                 <option value="metric">{t('metric')}</option>
                 <option value="imperial">{t('imperial')}</option>
@@ -114,64 +94,23 @@ export default async function ProfilePage() {
             </form>
           </Card>
 
-          {/* Body profile section */}
-          <Card
-            title={t('bodyProfile')}
-            subtitle={t('bodyProfileDesc')}
-          >
+          <Card title={t('bodyProfile')} subtitle={t('bodyProfileDesc')}>
             <form
               action={upsertProfile}
               style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}
             >
-              <Input
-                label={t('heightCm')}
-                name="heightCm"
-                type="number"
-                step="0.1"
-                defaultValue={profile?.heightCm ?? ''}
-                placeholder="170"
-              />
-              <Input
-                label={t('weightKg')}
-                name="weightKg"
-                type="number"
-                step="0.1"
-                defaultValue={profile?.weightKg ?? ''}
-                placeholder="75"
-              />
-              <Input
-                label={t('bodyFatPct')}
-                name="bodyFatPct"
-                type="number"
-                step="0.1"
-                defaultValue={profile?.bodyFatPct ?? ''}
-                placeholder="15"
-              />
-              <Input
-                label={t('waistCm')}
-                name="waistCm"
-                type="number"
-                step="0.1"
-                defaultValue={profile?.waistCm ?? ''}
-                placeholder="80"
-              />
-              <Input
-                label={t('dateOfBirth')}
-                name="dateOfBirth"
-                type="date"
-                defaultValue={profile?.dateOfBirth?.slice(0, 10) ?? ''}
-              />
+              <Input label={t('heightCm')} name="heightCm" type="number" step="0.1" defaultValue={profile?.heightCm ?? ''} placeholder="170" />
+              <Input label={t('weightKg')} name="weightKg" type="number" step="0.1" defaultValue={profile?.weightKg ?? ''} placeholder="75" />
+              <Input label={t('bodyFatPct')} name="bodyFatPct" type="number" step="0.1" defaultValue={profile?.bodyFatPct ?? ''} placeholder="15" />
+              <Input label={t('waistCm')} name="waistCm" type="number" step="0.1" defaultValue={profile?.waistCm ?? ''} placeholder="80" />
+              <Input label={t('dateOfBirth')} name="dateOfBirth" type="date" defaultValue={profile?.dateOfBirth?.slice(0, 10) ?? ''} />
               <Select label={t('gender')} name="gender" defaultValue={profile?.gender ?? ''}>
                 <option value="">{t('selectGoal')}</option>
                 <option value="male">{t('male')}</option>
                 <option value="female">{t('female')}</option>
                 <option value="other">{t('other')}</option>
               </Select>
-              <Select
-                label={t('activityLevel')}
-                name="activityLevel"
-                defaultValue={profile?.activityLevel ?? ''}
-              >
+              <Select label={t('activityLevel')} name="activityLevel" defaultValue={profile?.activityLevel ?? ''}>
                 <option value="">{t('selectGoal')}</option>
                 <option value="sedentary">{t('sedentary')}</option>
                 <option value="lightly_active">{t('lightlyActive')}</option>
@@ -179,13 +118,7 @@ export default async function ProfilePage() {
                 <option value="very_active">{t('veryActive')}</option>
                 <option value="extremely_active">{t('extremelyActive')}</option>
               </Select>
-              <Input
-                label={t('dailyWaterGoal')}
-                name="dailyWaterGoalMl"
-                type="number"
-                defaultValue={profile?.dailyWaterGoalMl ?? 2500}
-                placeholder="2500"
-              />
+              <Input label={t('dailyWaterGoal')} name="dailyWaterGoalMl" type="number" defaultValue={profile?.dailyWaterGoalMl ?? 2500} placeholder="2500" />
               <div style={{ gridColumn: '1 / -1', marginTop: 4 }}>
                 <Button type="submit">{t('saveProfile')}</Button>
               </div>

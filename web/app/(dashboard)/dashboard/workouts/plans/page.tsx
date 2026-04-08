@@ -19,43 +19,19 @@ async function load() {
   }
 }
 
-const input: React.CSSProperties = {
-  padding: '0.6rem 0.75rem',
-  background: 'var(--bg)',
-  border: '1px solid var(--border)',
-  borderRadius: 6,
-  color: 'var(--fg)',
-};
-
-const button: React.CSSProperties = {
-  padding: '0.6rem 1rem',
-  background: 'var(--accent)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: 6,
-  cursor: 'pointer',
-};
-
 export default async function WorkoutPlansPage() {
   const { plans, error } = await load();
   const t = await getTranslations('workouts');
   const tc = await getTranslations('common');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{t('myWorkoutPlans')}</h1>
-      {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
+      <div className="page-header">
+        <h1>{t('myWorkoutPlans')}</h1>
+      </div>
+      {error && <div className="error-banner">{error}</div>}
 
-      <div
-        style={{
-          background: 'var(--card)',
-          border: '1px solid var(--border)',
-          padding: '1.25rem',
-          borderRadius: 10,
-          marginTop: '1rem',
-          marginBottom: '2rem',
-        }}
-      >
-        <h3 style={{ marginTop: 0, fontSize: '1rem' }}>{t('createCustomPlan')}</h3>
+      <div className="glass-card" style={{ marginTop: '1rem', marginBottom: '2rem' }}>
+        <h3 style={{ marginTop: 0, fontSize: '1rem', fontWeight: 600 }}>{t('createCustomPlan')}</h3>
         <form
           action={createWorkoutPlan}
           style={{
@@ -64,25 +40,15 @@ export default async function WorkoutPlansPage() {
             gap: '0.5rem',
           }}
         >
-          <input name="name" placeholder={t('dayName')} required style={input} />
-          <input name="splitType" placeholder={t('splitPlaceholder')} style={input} />
-          <input
-            name="daysPerWeek"
-            type="number"
-            min="1"
-            max="7"
-            placeholder={t('daysPerWeek')}
-            style={input}
-          />
-          <input name="goal" placeholder={t('goalPlaceholder')} style={input} />
-          <button type="submit" style={button}>{tc('create')}</button>
+          <input name="name" placeholder={t('dayName')} required className="input-field" />
+          <input name="splitType" placeholder={t('splitPlaceholder')} className="input-field" />
+          <input name="daysPerWeek" type="number" min="1" max="7" placeholder={t('daysPerWeek')} className="input-field" />
+          <input name="goal" placeholder={t('goalPlaceholder')} className="input-field" />
+          <button type="submit" className="btn-primary">{tc('create')}</button>
         </form>
         <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 12 }}>
           {t('orStartFromTemplate')}{' '}
-          <Link
-            href="/dashboard/workouts/templates"
-            style={{ color: 'var(--accent)' }}
-          >
+          <Link href="/dashboard/workouts/templates" style={{ color: 'var(--accent)' }}>
             {t('browseTemplates')}
           </Link>
           .
@@ -92,22 +58,8 @@ export default async function WorkoutPlansPage() {
       <div style={{ display: 'grid', gap: '0.75rem' }}>
         {plans.length === 0 && <p style={{ color: 'var(--muted)' }}>{t('noPlans')}</p>}
         {plans.map((p) => (
-          <div
-            key={p.id}
-            style={{
-              background: 'var(--card)',
-              border: '1px solid var(--border)',
-              padding: '1rem 1.25rem',
-              borderRadius: 10,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <Link
-              href={`/dashboard/workouts/plans/${p.id}`}
-              style={{ color: 'inherit' }}
-            >
+          <div key={p.id} className="plan-card">
+            <Link href={`/dashboard/workouts/plans/${p.id}`} style={{ color: 'inherit' }}>
               <div style={{ fontWeight: 600 }}>{p.name}</div>
               <div style={{ color: 'var(--muted)', fontSize: 13 }}>
                 {[p.splitType, p.daysPerWeek ? `${p.daysPerWeek}x/${t('daysPerWeek')}` : null, p.goal]
@@ -117,37 +69,14 @@ export default async function WorkoutPlansPage() {
             </Link>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               {p.isActive ? (
-                <span
-                  style={{
-                    padding: '4px 10px',
-                    background: 'var(--accent)',
-                    color: '#fff',
-                    borderRadius: 999,
-                    fontSize: 12,
-                  }}
-                >
-                  {tc('active')}
-                </span>
+                <span className="badge-active">{tc('active')}</span>
               ) : (
                 <form action={activateWorkoutPlan.bind(null, p.id)}>
-                  <button type="submit" style={{ ...button, padding: '0.4rem 0.75rem' }}>
-                    {tc('activate')}
-                  </button>
+                  <button type="submit" className="btn-primary btn-sm">{tc('activate')}</button>
                 </form>
               )}
               <form action={deleteWorkoutPlan.bind(null, p.id)}>
-                <button
-                  type="submit"
-                  style={{
-                    padding: '0.4rem 0.75rem',
-                    background: 'transparent',
-                    color: '#e07b5f',
-                    border: '1px solid #6a2a2a',
-                    borderRadius: 6,
-                  }}
-                >
-                  {tc('delete')}
-                </button>
+                <button type="submit" className="btn-danger btn-sm">{tc('delete')}</button>
               </form>
             </div>
           </div>

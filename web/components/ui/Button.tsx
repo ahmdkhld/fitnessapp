@@ -14,25 +14,33 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
   primary: {
-    background: 'var(--accent)',
-    color: '#fff',
+    background: '#0000FF',
+    color: '#FFFFFF',
     border: 'none',
+    boxShadow: '0 0 15px rgba(0,0,255,0.3)',
   },
   secondary: {
     background: 'transparent',
-    color: 'var(--fg)',
-    border: '1px solid var(--border)',
+    color: '#FFFFFF',
+    border: '1px solid #333333',
   },
   danger: {
-    background: 'transparent',
-    color: '#e07b5f',
-    border: '1px solid #6a2a2a',
+    background: '#EF4444',
+    color: '#FFFFFF',
+    border: 'none',
   },
   ghost: {
     background: 'transparent',
-    color: 'var(--fg)',
+    color: '#FFFFFF',
     border: 'none',
   },
+};
+
+const hoverBg: Record<ButtonVariant, string> = {
+  primary: '#0000CC',
+  secondary: 'rgba(255,255,255,0.05)',
+  danger: '#DC2626',
+  ghost: 'rgba(255,255,255,0.05)',
 };
 
 const sizeStyles: Record<ButtonSize, React.CSSProperties> = {
@@ -65,8 +73,12 @@ export function Button({
   disabled,
   children,
   style,
+  onMouseEnter,
+  onMouseLeave,
   ...rest
 }: ButtonProps) {
+  const [hovered, setHovered] = React.useState(false);
+
   React.useEffect(() => {
     if (loading) injectSpinnerStyle();
   }, [loading]);
@@ -76,29 +88,43 @@ export function Button({
   const merged: React.CSSProperties = {
     ...variantStyles[variant],
     ...sizeStyles[size],
-    borderRadius: 6,
+    borderRadius: 8,
     cursor: isDisabled ? 'not-allowed' : 'pointer',
     opacity: isDisabled ? 0.6 : 1,
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '0.5rem',
-    fontFamily: 'inherit',
+    fontFamily: "'Inter', sans-serif",
+    fontWeight: 500,
     lineHeight: 1.4,
-    transition: 'opacity 0.15s',
+    transition: 'background 0.15s, opacity 0.15s, box-shadow 0.15s',
     ...(fullWidth ? { width: '100%' } : {}),
+    ...(hovered && !isDisabled ? { background: hoverBg[variant] } : {}),
     ...style,
   };
 
   return (
-    <button disabled={isDisabled} style={merged} {...rest}>
+    <button
+      disabled={isDisabled}
+      style={merged}
+      onMouseEnter={(e) => {
+        setHovered(true);
+        onMouseEnter?.(e);
+      }}
+      onMouseLeave={(e) => {
+        setHovered(false);
+        onMouseLeave?.(e);
+      }}
+      {...rest}
+    >
       {loading && (
         <span
           style={{
             display: 'inline-block',
             width: size === 'sm' ? 12 : 16,
             height: size === 'sm' ? 12 : 16,
-            border: '2px solid currentColor',
+            border: '2px solid #FFFFFF',
             borderTopColor: 'transparent',
             borderRadius: '50%',
             animation: 'ui-btn-spin 0.6s linear infinite',

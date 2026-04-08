@@ -14,91 +14,56 @@ async function load() {
   }
 }
 
-const input: React.CSSProperties = {
-  padding: '0.6rem 0.75rem',
-  background: 'var(--bg)',
-  border: '1px solid var(--border)',
-  borderRadius: 6,
-  color: 'var(--fg)',
-};
-
 export default async function DailyNotesPage() {
   const { note, error } = await load();
   const t = await getTranslations('tracking');
   const tc = await getTranslations('common');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{t('dailyNotesTitle')}</h1>
-      <p style={{ color: 'var(--muted)' }}>
-        {t('dailyNotesDesc')}
-      </p>
-      {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
+      <div className="page-header">
+        <h1><i className="fa-solid fa-note-sticky" style={{ marginRight: 10, color: 'var(--purple)' }} />{t('dailyNotesTitle')}</h1>
+        <p>{t('dailyNotesDesc')}</p>
+      </div>
+      {error && <div className="error-banner">{error}</div>}
       {note?.notes && (
-        <div
-          style={{
-            background: 'var(--card)',
-            border: '1px solid var(--border)',
-            padding: '1rem 1.25rem',
-            borderRadius: 10,
-            marginTop: '1rem',
-            marginBottom: '1.5rem',
-          }}
-        >
-          <div style={{ color: 'var(--muted)', fontSize: 12 }}>{t('latest')}</div>
+        <div className="glass-card" style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
+          <div className="form-label" style={{ marginBottom: 4 }}>{t('latest')}</div>
           <div>{note.notes}</div>
         </div>
       )}
 
-      <form
-        action={saveDailyNote}
-        style={{
-          background: 'var(--card)',
-          border: '1px solid var(--border)',
-          padding: '1.25rem',
-          borderRadius: 10,
-          display: 'grid',
-          gap: '0.75rem',
-        }}
-      >
-        <label>
-          {t('mood')}
+      <form action={saveDailyNote} className="glass-card" style={{ display: 'grid', gap: '1rem' }}>
+        <div>
+          <label className="form-label">{t('mood')}</label>
           <input
             name="mood"
             type="number"
             min="1"
             max="5"
-            style={{ ...input, display: 'block', marginTop: 4, width: 120 }}
+            className="input-field"
+            style={{ marginTop: 4, width: 120 }}
           />
-        </label>
-        <label>
-          {t('symptoms')}
+        </div>
+        <div>
+          <label className="form-label">{t('symptoms')}</label>
           <input
             name="symptoms"
             placeholder='e.g. {"bloating": true}'
-            style={{ ...input, display: 'block', marginTop: 4, width: '100%' }}
+            className="input-field"
+            style={{ marginTop: 4 }}
           />
-        </label>
-        <label>
-          {t('notesLabel')}
+        </div>
+        <div>
+          <label className="form-label">{t('notesLabel')}</label>
           <textarea
             name="notes"
             rows={5}
-            style={{ ...input, display: 'block', marginTop: 4, width: '100%' }}
+            className="input-field"
+            style={{ marginTop: 4, resize: 'vertical' }}
           />
-        </label>
-        <button
-          type="submit"
-          style={{
-            padding: '0.6rem 1rem',
-            background: 'var(--accent)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 6,
-            cursor: 'pointer',
-            justifySelf: 'start',
-          }}
-        >
-          {tc('save')}
+        </div>
+        <button type="submit" className="btn-primary" style={{ justifySelf: 'start' }}>
+          <i className="fa-solid fa-floppy-disk" style={{ marginRight: 6 }} />{tc('save')}
         </button>
       </form>
     </div>

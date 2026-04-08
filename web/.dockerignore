@@ -1,0 +1,10 @@
+node_modules
+.next
+.env
+.env.local
+e2e
+tests
+playwright-report
+test-results
+vitest.config.ts
+playwright.config.ts

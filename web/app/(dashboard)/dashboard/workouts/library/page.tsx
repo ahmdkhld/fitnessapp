@@ -41,10 +41,10 @@ export default async function ExerciseLibraryPage({
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{t('exerciseLibrary')}</h1>
-      <p style={{ color: 'var(--muted)' }}>
-        {t('exerciseCount', { count: exercises.length })}
-      </p>
+      <div className="page-header">
+        <h1><i className="fa-solid fa-book-open" style={{ marginRight: 10, color: 'var(--accent)' }} />{t('exerciseLibrary')}</h1>
+        <p>{t('exerciseCount', { count: exercises.length })}</p>
+      </div>
 
       <form
         method="get"
@@ -60,60 +60,22 @@ export default async function ExerciseLibraryPage({
           name="search"
           defaultValue={search}
           placeholder={t('searchExercises')}
-          style={{
-            flex: '1 1 240px',
-            padding: '0.6rem 0.75rem',
-            background: 'var(--bg)',
-            border: '1px solid var(--border)',
-            borderRadius: 6,
-            color: 'var(--fg)',
-          }}
+          className="input-field"
+          style={{ flex: '1 1 240px', width: 'auto' }}
         />
-        <select
-          name="category"
-          defaultValue={category}
-          style={{
-            padding: '0.6rem 0.75rem',
-            background: 'var(--bg)',
-            border: '1px solid var(--border)',
-            borderRadius: 6,
-            color: 'var(--fg)',
-          }}
-        >
+        <select name="category" defaultValue={category} className="input-field" style={{ width: 'auto', flex: 'none' }}>
           {categories.map((c) => (
-            <option key={c.key} value={c.key}>
-              {c.label}
-            </option>
+            <option key={c.key} value={c.key}>{c.label}</option>
           ))}
         </select>
-        <button
-          type="submit"
-          style={{
-            padding: '0.6rem 1rem',
-            background: 'var(--accent)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 6,
-            cursor: 'pointer',
-          }}
-        >
-          {tc('filter')}
-        </button>
+        <button type="submit" className="btn-primary">{tc('filter')}</button>
       </form>
 
-      {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
+      {error && <div className="error-banner">{error}</div>}
 
-      <details
-        style={{
-          background: 'var(--card)',
-          border: '1px solid var(--border)',
-          padding: '1rem',
-          borderRadius: 10,
-          marginBottom: '1.5rem',
-        }}
-      >
+      <details className="glass-card" style={{ marginBottom: '1.5rem' }}>
         <summary style={{ cursor: 'pointer', fontWeight: 600 }}>
-          {t('createCustomExercise')}
+          <i className="fa-solid fa-plus" style={{ marginRight: 8 }} />{t('createCustomExercise')}
         </summary>
         <form
           action={createExercise}
@@ -125,84 +87,21 @@ export default async function ExerciseLibraryPage({
             alignItems: 'end',
           }}
         >
-          <input
-            name="name"
-            placeholder={t('exerciseName')}
-            required
-            style={{
-              padding: '0.6rem 0.75rem',
-              background: 'var(--bg)',
-              border: '1px solid var(--border)',
-              borderRadius: 6,
-              color: 'var(--fg)',
-            }}
-          />
-          <select
-            name="category"
-            style={{
-              padding: '0.6rem 0.75rem',
-              background: 'var(--bg)',
-              border: '1px solid var(--border)',
-              borderRadius: 6,
-              color: 'var(--fg)',
-            }}
-          >
+          <input name="name" placeholder={t('exerciseName')} required className="input-field" />
+          <select name="category" className="input-field">
             {categories.slice(1).map((c) => (
-              <option key={c.key} value={c.key}>
-                {c.label}
-              </option>
+              <option key={c.key} value={c.key}>{c.label}</option>
             ))}
           </select>
-          <input
-            name="primaryMuscle"
-            placeholder={t('primaryMuscle')}
-            style={{
-              padding: '0.6rem 0.75rem',
-              background: 'var(--bg)',
-              border: '1px solid var(--border)',
-              borderRadius: 6,
-              color: 'var(--fg)',
-            }}
-          />
-          <input
-            name="equipment"
-            placeholder={t('equipment')}
-            style={{
-              padding: '0.6rem 0.75rem',
-              background: 'var(--bg)',
-              border: '1px solid var(--border)',
-              borderRadius: 6,
-              color: 'var(--fg)',
-            }}
-          />
-          <label
-            style={{
-              gridColumn: '1 / span 2',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-            }}
-          >
+          <input name="primaryMuscle" placeholder={t('primaryMuscle')} className="input-field" />
+          <input name="equipment" placeholder={t('equipment')} className="input-field" />
+          <label style={{ gridColumn: '1 / span 2', display: 'flex', alignItems: 'center', gap: 6 }}>
             <input type="checkbox" name="isCardio" /> {t('cardio')}
           </label>
-          <label
-            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-          >
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <input type="checkbox" name="isUnilateral" /> {t('unilateral')}
           </label>
-          <button
-            type="submit"
-            style={{
-              padding: '0.6rem 1rem',
-              background: 'var(--accent)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 6,
-              cursor: 'pointer',
-            }}
-          >
-            {tc('create')}
-          </button>
+          <button type="submit" className="btn-primary">{tc('create')}</button>
         </form>
       </details>
 
@@ -214,61 +113,20 @@ export default async function ExerciseLibraryPage({
         }}
       >
         {exercises.map((e) => (
-          <div
-            key={e.id}
-            style={{
-              background: 'var(--card)',
-              border: '1px solid var(--border)',
-              padding: '0.9rem 1rem',
-              borderRadius: 8,
-            }}
-          >
-            <div style={{ fontWeight: 600 }}>{e.name}</div>
+          <div key={e.id} className="list-card">
+            <div style={{ fontWeight: 600 }}>
+              <i className="fa-solid fa-dumbbell" style={{ marginRight: 8, color: 'var(--accent)', fontSize: 12 }} />
+              {e.name}
+            </div>
             <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 4 }}>
               {[e.primaryMuscle, e.equipment, e.category]
                 .filter(Boolean)
                 .join(' · ')}
             </div>
             <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {e.isCardio && (
-                <span
-                  style={{
-                    fontSize: 11,
-                    padding: '2px 8px',
-                    background: '#1e3a44',
-                    color: '#6ad1e0',
-                    borderRadius: 999,
-                  }}
-                >
-                  {t('cardio')}
-                </span>
-              )}
-              {e.isUnilateral && (
-                <span
-                  style={{
-                    fontSize: 11,
-                    padding: '2px 8px',
-                    background: '#3a2a1f',
-                    color: '#e0a66a',
-                    borderRadius: 999,
-                  }}
-                >
-                  {t('unilateral')}
-                </span>
-              )}
-              {e.userId && (
-                <span
-                  style={{
-                    fontSize: 11,
-                    padding: '2px 8px',
-                    background: '#2a3a1f',
-                    color: '#a8e06a',
-                    borderRadius: 999,
-                  }}
-                >
-                  {t('custom')}
-                </span>
-              )}
+              {e.isCardio && <span className="badge-cardio">{t('cardio')}</span>}
+              {e.isUnilateral && <span className="badge-unilateral">{t('unilateral')}</span>}
+              {e.userId && <span className="badge-custom">{t('custom')}</span>}
             </div>
           </div>
         ))}

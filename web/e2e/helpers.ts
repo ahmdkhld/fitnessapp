@@ -1,8 +1,8 @@
 import { type Page, type BrowserContext } from '@playwright/test';
 
 /** Default test credentials — these match the backend seed data or mock. */
-const TEST_EMAIL = 'test@nutritrack.local';
-const TEST_PASSWORD = 'TestPass123!';
+const TEST_EMAIL = 'test@nutritrack.app';
+const TEST_PASSWORD = 'Test1234!';
 
 /** Cookie name used by the Next.js middleware for auth checks. */
 const AUTH_COOKIE = 'nt_token';

@@ -30,56 +30,34 @@ export default function ImportPage() {
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
-      <p style={{ color: 'var(--muted)' }}>
-        {t('description')}
-      </p>
+      <div className="page-header">
+        <h1><i className="fa-solid fa-file-import" style={{ marginRight: 10, color: 'var(--accent)' }} />{t('title')}</h1>
+        <p>{t('description')}</p>
+      </div>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder={`Breakfast — 8:00\n40g oats, 1 scoop whey\n\nVitamin D3 5000 IU — 8:30 with food`}
         rows={14}
-        style={{
-          width: '100%',
-          background: 'var(--card)',
-          border: '1px solid var(--border)',
-          color: 'var(--fg)',
-          padding: '1rem',
-          borderRadius: 8,
-          fontFamily: 'monospace',
-          fontSize: 13,
-        }}
+        className="input-field"
+        style={{ fontFamily: 'monospace', fontSize: 13, resize: 'vertical', marginTop: '1rem' }}
       />
       <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
         <button
           onClick={parse}
           disabled={!text || loading}
-          style={{
-            padding: '0.75rem 1.5rem',
-            background: 'var(--accent)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 8,
-            cursor: 'pointer',
-            opacity: loading || !text ? 0.5 : 1,
-          }}
+          className="btn-primary"
+          style={{ opacity: loading || !text ? 0.5 : 1 }}
         >
+          <i className="fa-solid fa-wand-magic-sparkles" style={{ marginRight: 6 }} />
           {loading ? t('parsing') : t('parse')}
         </button>
       </div>
-      {error && (
-        <div style={{ marginTop: '1rem', color: '#e07b5f' }}>{error}</div>
-      )}
+      {error && <div className="error-banner" style={{ marginTop: '1rem' }}>{error}</div>}
       {result && (
         <pre
-          style={{
-            marginTop: '1rem',
-            background: 'var(--card)',
-            border: '1px solid var(--border)',
-            padding: '1rem',
-            borderRadius: 8,
-            overflow: 'auto',
-          }}
+          className="glass-card"
+          style={{ marginTop: '1rem', overflow: 'auto', fontSize: 13, fontFamily: 'monospace' }}
         >
           {JSON.stringify(result, null, 2)}
         </pre>

@@ -1,7 +1,6 @@
 import { api, AdherenceSummary } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { getTranslations } from 'next-intl/server';
-import { Card } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,94 +32,123 @@ export default async function DashboardOverviewPage() {
     {
       label: t('adherence7d'),
       value: summary ? `${summary.overallPercentage}%` : '—',
+      icon: '📊',
+      accentColor: '#22C55E',
     },
-    { label: t('currentStreak'), value: streak ? `${streak} ${t('days')}` : `0 ${t('days')}` },
+    {
+      label: t('currentStreak'),
+      value: streak ? `${streak} ${t('days')}` : `0 ${t('days')}`,
+      icon: '🔥',
+      accentColor: '#A020F0',
+    },
     {
       label: t('completed7d'),
       value: summary ? `${summary.completed} / ${summary.total}` : '—',
+      icon: '✅',
+      accentColor: '#0000FF',
     },
     {
       label: t('skipped7d'),
       value: summary ? `${summary.skipped}` : '—',
+      icon: '⏭',
+      accentColor: '#666666',
     },
   ];
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{t('overview')}</h1>
-      <p style={{ color: 'var(--muted)' }}>
-        {t('snapshot')}
-      </p>
-      {error && (
-        <div
-          style={{
-            padding: '0.75rem 1rem',
-            background: '#3a1f1f',
-            border: '1px solid #6a2a2a',
-            borderRadius: 8,
-            marginBottom: '1.5rem',
-          }}
-        >
-          {error}
+      {/* Page header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+        <div>
+          <h1 style={{ marginTop: 0, marginBottom: 4, fontSize: '1.75rem', fontWeight: 700 }}>
+            {t('overview')}
+          </h1>
+          <p style={{ color: 'var(--muted)', margin: 0, fontSize: 14 }}>
+            {t('snapshot')}
+          </p>
         </div>
-      )}
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <span style={{
+            padding: '0.4rem 0.75rem',
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
+            borderRadius: 8,
+            color: 'var(--muted)',
+            fontSize: 13,
+          }}>
+            {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          </span>
+        </div>
+      </div>
+
+      {error && <div className="error-banner">{error}</div>}
+
+      {/* Stat cards grid */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
           gap: '1rem',
-          marginTop: '2rem',
         }}
       >
         {cards.map((c) => (
-          <Card key={c.label} padding="1.25rem" style={{ borderRadius: 12 }}>
-            <div style={{ color: 'var(--muted)', fontSize: 13 }}>{c.label}</div>
-            <div style={{ fontSize: 28, fontWeight: 600, marginTop: 4 }}>
+          <div key={c.label} className="stat-card">
+            {/* Accent circle in top-right */}
+            <div style={{
+              position: 'absolute',
+              top: 12,
+              right: 12,
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              background: `${c.accentColor}20`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 16,
+            }}>
+              {c.icon}
+            </div>
+            <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 4 }}>{c.label}</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: '#FFF' }}>
               {c.value}
             </div>
-          </Card>
+          </div>
         ))}
       </div>
+
+      {/* Category breakdown */}
       {summary && (
         <div style={{ marginTop: '2rem' }}>
-          <h2 style={{ fontSize: '1.25rem' }}>{t('byCategory')}</h2>
-          <div style={{ display: 'grid', gap: '0.5rem', marginTop: '1rem' }}>
-            {summary.perType.map((pt) => (
-              <Card
-                key={pt.type}
-                padding="0.75rem 1rem"
-                style={{ borderRadius: 8 }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    marginBottom: 6,
-                  }}
-                >
-                  <span style={{ textTransform: 'capitalize' }}>{pt.type}</span>
-                  <span>
-                    {pt.completed}/{pt.total} · {pt.percentage}%
-                  </span>
-                </div>
-                <div
-                  style={{
-                    height: 6,
-                    background: 'var(--border)',
-                    borderRadius: 3,
-                  }}
-                >
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem' }}>
+            {t('byCategory')}
+          </h2>
+          <div className="glass-card">
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              {summary.perType.map((pt) => (
+                <div key={pt.type}>
                   <div
                     style={{
-                      width: `${pt.percentage}%`,
-                      height: '100%',
-                      background: 'var(--accent)',
-                      borderRadius: 3,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginBottom: 8,
+                      fontSize: 14,
                     }}
-                  />
+                  >
+                    <span style={{ textTransform: 'capitalize', fontWeight: 500 }}>{pt.type}</span>
+                    <span style={{ color: 'var(--muted)' }}>
+                      {pt.completed}/{pt.total} &middot; {pt.percentage}%
+                    </span>
+                  </div>
+                  <div className="progress-track">
+                    <div
+                      className="progress-fill"
+                      style={{ width: `${pt.percentage}%` }}
+                    />
+                  </div>
                 </div>
-              </Card>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}

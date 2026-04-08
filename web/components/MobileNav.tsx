@@ -3,10 +3,8 @@
 import { useState, useCallback, useEffect } from 'react';
 
 /**
- * Thin client wrapper that provides:
- * - A hamburger button (visible only on mobile via CSS)
- * - An overlay backdrop + sliding sidebar on mobile
- * - Keyboard support (Escape to close)
+ * Mobile navigation dropdown that drops down from the top nav bar.
+ * Visible only on mobile (<=768px) via CSS class rules in globals.css.
  *
  * The actual nav links are passed in as children so the server
  * layout keeps ownership of the link list.
@@ -26,8 +24,7 @@ export function MobileNav({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener('keydown', handler);
   }, [open, close]);
 
-  // Close when the route changes (user clicked a link)
-  // We detect this by listening for clicks on <a> inside the nav.
+  // Close when a link is clicked (route change)
   const handleNavClick = useCallback(
     (e: React.MouseEvent) => {
       if ((e.target as HTMLElement).closest('a')) {
@@ -39,71 +36,46 @@ export function MobileNav({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {/* Hamburger button — hidden on desktop via globals.css */}
+      {/* Hamburger button -- hidden on desktop via globals.css */}
       <button
         className="mobile-menu-btn"
         aria-label={open ? 'Close navigation' : 'Open navigation'}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         style={{
-          position: 'fixed',
-          top: 12,
-          left: 12,
-          zIndex: 1100,
-          background: 'var(--card)',
+          marginLeft: 'auto',
+          background: 'transparent',
           border: '1px solid var(--border)',
           borderRadius: 8,
           color: 'var(--fg)',
-          width: 44,
-          height: 44,
+          width: 40,
+          height: 40,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
-          fontSize: 22,
+          fontSize: 20,
         }}
       >
         {open ? '\u2715' : '\u2630'}
       </button>
 
       {/* Overlay backdrop */}
-      {open && (
-        <div
-          className="mobile-nav-overlay"
-          onClick={close}
-          aria-hidden
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.55)',
-            zIndex: 1000,
-          }}
-        />
-      )}
+      <div
+        className={`mobile-nav-overlay ${open ? 'mobile-nav-overlay--open' : ''}`}
+        onClick={close}
+        aria-hidden
+      />
 
-      {/* Sliding sidebar panel */}
-      <aside
-        className={`mobile-nav-drawer ${open ? 'mobile-nav-drawer--open' : ''}`}
-        aria-label="Primary navigation"
+      {/* Dropdown panel from top nav */}
+      <div
+        className={`mobile-nav-dropdown ${open ? 'mobile-nav-dropdown--open' : ''}`}
         onClick={handleNavClick}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          bottom: 0,
-          width: 260,
-          background: 'var(--card)',
-          borderRight: '1px solid var(--border)',
-          padding: '4.5rem 1rem 2rem',
-          zIndex: 1050,
-          transform: open ? 'translateX(0)' : 'translateX(-100%)',
-          transition: 'transform 0.25s ease',
-          overflowY: 'auto',
-          WebkitOverflowScrolling: 'touch',
-        }}
+        role="navigation"
+        aria-label="Mobile navigation"
       >
         {children}
-      </aside>
+      </div>
     </>
   );
 }

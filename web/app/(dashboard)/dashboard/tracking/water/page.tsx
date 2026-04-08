@@ -29,39 +29,21 @@ export default async function WaterPage() {
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{t('water')}</h1>
-      {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
+      <div className="page-header">
+        <h1><i className="fa-solid fa-droplet" style={{ marginRight: 10, color: '#3b82f6' }} />{t('water')}</h1>
+      </div>
+      {error && <div className="error-banner">{error}</div>}
 
-      <div
-        style={{
-          background: 'var(--card)',
-          border: '1px solid var(--border)',
-          borderRadius: 12,
-          padding: '1.5rem',
-          marginTop: '1rem',
-        }}
-      >
-        <div
-          style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}
-        >
-          <span style={{ fontSize: 20, fontWeight: 600 }}>{total} ml</span>
-          <span style={{ color: 'var(--muted)' }}>{tc('of')} {goal} ml</span>
+      <div className="glass-card" style={{ marginTop: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+          <span style={{ fontSize: 24, fontWeight: 700 }}>{total} ml</span>
+          <span style={{ color: 'var(--muted)', alignSelf: 'flex-end' }}>{tc('of')} {goal} ml</span>
         </div>
-        <div
-          style={{
-            height: 12,
-            background: 'var(--border)',
-            borderRadius: 6,
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              width: `${pct}%`,
-              height: '100%',
-              background: 'var(--accent)',
-            }}
-          />
+        <div className="progress-track" style={{ height: 12 }}>
+          <div className="progress-fill" style={{ width: `${pct}%` }} />
+        </div>
+        <div style={{ textAlign: 'right', marginTop: 4, color: 'var(--muted)', fontSize: 13 }}>
+          {pct}%
         </div>
       </div>
 
@@ -69,18 +51,8 @@ export default async function WaterPage() {
         {[100, 250, 500, 750].map((amt) => (
           <form key={amt} action={logWater}>
             <input type="hidden" name="amountMl" value={amt} />
-            <button
-              type="submit"
-              style={{
-                padding: '0.6rem 1rem',
-                background: 'var(--accent)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 6,
-                cursor: 'pointer',
-              }}
-            >
-              +{amt} ml
+            <button type="submit" className="btn-primary">
+              <i className="fa-solid fa-plus" style={{ marginRight: 6 }} />+{amt} ml
             </button>
           </form>
         ))}
@@ -88,20 +60,19 @@ export default async function WaterPage() {
 
       {day && day.logs.length > 0 && (
         <div style={{ marginTop: '2rem' }}>
-          <h2 style={{ fontSize: '1.1rem' }}>{t('todaysLog')}</h2>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
+          <h2 className="section-title">{t('todaysLog')}</h2>
+          <div style={{ display: 'grid', gap: '0.5rem' }}>
             {day.logs.map((l) => (
-              <li
-                key={l.id}
-                style={{
-                  padding: '0.5rem 0',
-                  borderBottom: '1px solid var(--border)',
-                }}
-              >
-                {new Date(l.loggedAt).toLocaleTimeString()} — {l.amountMl} ml
-              </li>
+              <div key={l.id} className="list-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: 'var(--muted)', fontSize: 13 }}>
+                  {new Date(l.loggedAt).toLocaleTimeString()}
+                </span>
+                <span style={{ fontWeight: 600, color: '#3b82f6' }}>
+                  <i className="fa-solid fa-droplet" style={{ marginRight: 6, fontSize: 11 }} />{l.amountMl} ml
+                </span>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
     </div>

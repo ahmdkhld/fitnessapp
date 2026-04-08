@@ -1,0 +1,25 @@
+{
+  "cookies": [
+    {
+      "name": "nt_token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYjI0MTRlZS1hZmExLTRjNzctOWRkMC1mNjgwZmYxNzRmOTYiLCJlbWFpbCI6InRlc3RAbnV0cml0cmFjay5hcHAiLCJyb2xlIjoidXNlciIsImlhdCI6MTc3NTY1Mzc0NCwiZXhwIjoxNzc1NjU0NjQ0fQ.0Rng8vo_hlLkyvVE7czjFR7wt6kRk-xm_7c8w1PL-p4",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1778245744.769804,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "nt_refresh",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYjI0MTRlZS1hZmExLTRjNzctOWRkMC1mNjgwZmYxNzRmOTYiLCJlbWFpbCI6InRlc3RAbnV0cml0cmFjay5hcHAiLCJyb2xlIjoidXNlciIsImlhdCI6MTc3NTY1Mzc0NCwiZXhwIjoxNzc4MjQ1NzQ0fQ.Bk8Wy_6AmlqPbQu9TgVgLtMabGbkK26_-FSOkj0dAEs",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1778245744.770111,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}

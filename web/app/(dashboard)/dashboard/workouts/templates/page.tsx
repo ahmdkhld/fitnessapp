@@ -17,38 +17,20 @@ async function load() {
   }
 }
 
-const card: React.CSSProperties = {
-  background: 'var(--card)',
-  border: '1px solid var(--border)',
-  padding: '1.5rem',
-  borderRadius: 12,
-};
-
-const button: React.CSSProperties = {
-  padding: '0.6rem 1.25rem',
-  background: 'var(--accent)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: 6,
-  cursor: 'pointer',
-};
-
 export default async function TemplatesPage() {
   const { templates, error } = await load();
   const t = await getTranslations('workouts');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{t('planTemplates')}</h1>
-      <p style={{ color: 'var(--muted)' }}>
-        {t('clonedTemplatesDesc')}
-      </p>
-      {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
+      <div className="page-header">
+        <h1>{t('planTemplates')}</h1>
+        <p>{t('clonedTemplatesDesc')}</p>
+      </div>
+      {error && <div className="error-banner">{error}</div>}
       <div style={{ display: 'grid', gap: '1rem', marginTop: '1.5rem' }}>
         {templates.map((tmpl) => (
-          <div key={tmpl.id} style={card}>
-            <div
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
-            >
+          <div key={tmpl.id} className="glass-card" style={{ borderRadius: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
                 <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{tmpl.name}</div>
                 <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 4 }}>
@@ -58,8 +40,8 @@ export default async function TemplatesPage() {
                 </div>
               </div>
               <form action={cloneTemplateAction.bind(null, tmpl.id)}>
-                <button type="submit" style={button}>
-                  {t('useThisPlan')}
+                <button type="submit" className="btn-primary">
+                  <i className="fa-solid fa-copy" style={{ marginRight: 6 }} />{t('useThisPlan')}
                 </button>
               </form>
             </div>
@@ -68,24 +50,9 @@ export default async function TemplatesPage() {
                 {tmpl.description}
               </p>
             )}
-            <div
-              style={{
-                display: 'flex',
-                gap: '0.5rem',
-                flexWrap: 'wrap',
-                marginTop: '0.75rem',
-              }}
-            >
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
               {tmpl.days.map((d) => (
-                <span
-                  key={d.id}
-                  style={{
-                    padding: '3px 10px',
-                    border: '1px solid var(--border)',
-                    borderRadius: 999,
-                    fontSize: 12,
-                  }}
-                >
+                <span key={d.id} className="btn-outline" style={{ cursor: 'default' }}>
                   {d.name} · {d.exercises.length} {t('exercises')}
                 </span>
               ))}

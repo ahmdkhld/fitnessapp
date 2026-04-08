@@ -50,21 +50,33 @@ export default async function DietPlanDetailPage({
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{plan?.name ?? t('dietPlan')}</h1>
-      {plan?.goal && <p style={{ color: 'var(--muted)' }}>{t('goal', { goal: plan.goal })}</p>}
-      {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
+      {/* Page header */}
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{ marginTop: 0, marginBottom: 4, fontSize: '1.75rem', fontWeight: 700 }}>
+          {plan?.name ?? t('dietPlan')}
+        </h1>
+        {plan?.goal && (
+          <span style={{
+            display: 'inline-block',
+            padding: '3px 10px',
+            background: 'rgba(160,32,240,0.12)',
+            color: 'var(--purple)',
+            borderRadius: 9999,
+            fontSize: 12,
+            marginTop: 4,
+          }}>
+            {t('goal', { goal: plan.goal })}
+          </span>
+        )}
+      </div>
 
-      <div
-        style={{
-          background: 'var(--card)',
-          border: '1px solid var(--border)',
-          padding: '1.25rem',
-          borderRadius: 10,
-          marginTop: '1rem',
-          marginBottom: '2rem',
-        }}
-      >
-        <h3 style={{ marginTop: 0, fontSize: '1rem' }}>{t('addMeal')}</h3>
+      {error && <div className="error-banner">{error}</div>}
+
+      {/* Add meal form */}
+      <div className="form-card" style={{ marginBottom: '2rem' }}>
+        <h3 style={{ marginTop: 0, marginBottom: '1rem', fontSize: '1rem', fontWeight: 600 }}>
+          {t('addMeal')}
+        </h3>
         <form
           action={createMeal.bind(null, params.id)}
           style={{
@@ -74,64 +86,89 @@ export default async function DietPlanDetailPage({
             alignItems: 'end',
           }}
         >
-          <input name="name" placeholder={t('mealName')} required style={input} />
-          <input name="scheduledTime" type="time" defaultValue="08:00" style={input} />
-          <input name="calories" type="number" placeholder="kcal" style={input} />
-          <input name="proteinG" type="number" placeholder="P" style={input} />
-          <input name="carbsG" type="number" placeholder="C" style={input} />
-          <input name="fatG" type="number" placeholder="F" style={input} />
-          <button type="submit" style={button}>
+          <div>
+            <label style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 4 }}>
+              {t('mealName')}
+            </label>
+            <input name="name" placeholder={t('mealName')} required className="input-field" />
+          </div>
+          <div>
+            <label style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 4 }}>
+              Time
+            </label>
+            <input name="scheduledTime" type="time" defaultValue="08:00" className="input-field" />
+          </div>
+          <div>
+            <label style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 4 }}>
+              kcal
+            </label>
+            <input name="calories" type="number" placeholder="kcal" className="input-field" />
+          </div>
+          <div>
+            <label style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 4 }}>
+              Protein
+            </label>
+            <input name="proteinG" type="number" placeholder="P" className="input-field" />
+          </div>
+          <div>
+            <label style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 4 }}>
+              Carbs
+            </label>
+            <input name="carbsG" type="number" placeholder="C" className="input-field" />
+          </div>
+          <div>
+            <label style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 4 }}>
+              Fat
+            </label>
+            <input name="fatG" type="number" placeholder="F" className="input-field" />
+          </div>
+          <button type="submit" className="btn-primary" style={{ alignSelf: 'end' }}>
             {tc('add')}
           </button>
         </form>
       </div>
 
-      <div style={{ display: 'grid', gap: '0.5rem' }}>
+      {/* Meals list */}
+      {plan?.meals.length === 0 && (
+        <div className="glass-card" style={{ textAlign: 'center', padding: '3rem 1.5rem' }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>🍽</div>
+          <p style={{ color: 'var(--muted)', margin: 0 }}>No meals yet. Add one above.</p>
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gap: '0.75rem' }}>
         {plan?.meals.map((m) => (
-          <div
-            key={m.id}
-            style={{
-              background: 'var(--card)',
-              border: '1px solid var(--border)',
-              padding: '1rem 1.25rem',
-              borderRadius: 10,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <div>
-              <div style={{ fontWeight: 600 }}>
-                {fmtTime(m.scheduledTime)} · {m.name}
+          <div key={m.id} className="plan-card">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
+              {/* Meal icon */}
+              <div className="icon-circle" style={{ background: 'rgba(34,197,94,0.15)' }}>
+                🍽
               </div>
-              <div style={{ color: 'var(--muted)', fontSize: 13 }}>
-                {[
-                  m.calories != null && `${m.calories} kcal`,
-                  m.proteinG != null && `P ${m.proteinG}g`,
-                  m.carbsG != null && `C ${m.carbsG}g`,
-                  m.fatG != null && `F ${m.fatG}g`,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </div>
-              {m.ingredients.length > 0 && (
-                <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 4 }}>
-                  {m.ingredients
-                    .map((i) => (i.quantity ? `${i.name} (${i.quantity})` : i.name))
-                    .join(', ')}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: 15 }}>
+                  {fmtTime(m.scheduledTime)} &middot; {m.name}
                 </div>
-              )}
+                <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 2 }}>
+                  {[
+                    m.calories != null && `${m.calories} kcal`,
+                    m.proteinG != null && `P ${m.proteinG}g`,
+                    m.carbsG != null && `C ${m.carbsG}g`,
+                    m.fatG != null && `F ${m.fatG}g`,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </div>
+                {m.ingredients.length > 0 && (
+                  <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 4 }}>
+                    {m.ingredients
+                      .map((i) => (i.quantity ? `${i.name} (${i.quantity})` : i.name))
+                      .join(', ')}
+                  </div>
+                )}
+              </div>
             </div>
             <form action={deleteMeal.bind(null, params.id, m.id)}>
-              <button
-                type="submit"
-                style={{
-                  ...button,
-                  background: 'transparent',
-                  color: '#e07b5f',
-                  border: '1px solid #6a2a2a',
-                }}
-              >
+              <button type="submit" className="btn-danger">
                 {tc('delete')}
               </button>
             </form>
@@ -141,20 +178,3 @@ export default async function DietPlanDetailPage({
     </div>
   );
 }
-
-const input: React.CSSProperties = {
-  padding: '0.6rem 0.75rem',
-  background: 'var(--bg)',
-  border: '1px solid var(--border)',
-  borderRadius: 6,
-  color: 'var(--fg)',
-};
-
-const button: React.CSSProperties = {
-  padding: '0.6rem 1rem',
-  background: 'var(--accent)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: 6,
-  cursor: 'pointer',
-};

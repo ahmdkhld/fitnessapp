@@ -20,139 +20,118 @@ export default async function DietPlansPage() {
   const { plans, error } = await load();
   const t = await getTranslations('dietPlans');
   const tc = await getTranslations('common');
+
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
-      {error && <p style={{ color: 'var(--muted)' }}>{error}</p>}
+      {/* Page header */}
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{ marginTop: 0, marginBottom: 4, fontSize: '1.75rem', fontWeight: 700 }}>
+          {t('title')}
+        </h1>
+        <p style={{ color: 'var(--muted)', margin: 0, fontSize: 14 }}>
+          {t('createNewPlan')}
+        </p>
+      </div>
 
-      <div
-        style={{
-          background: 'var(--card)',
-          border: '1px solid var(--border)',
-          padding: '1.25rem',
-          borderRadius: 10,
-          marginTop: '1rem',
-          marginBottom: '2rem',
-        }}
-      >
-        <h3 style={{ marginTop: 0, fontSize: '1rem' }}>{t('createNewPlan')}</h3>
+      {error && <div className="error-banner">{error}</div>}
+
+      {/* Create form */}
+      <div className="form-card" style={{ marginBottom: '2rem' }}>
+        <h3 style={{ marginTop: 0, marginBottom: '1rem', fontSize: '1rem', fontWeight: 600 }}>
+          {t('createNewPlan')}
+        </h3>
         <form
           action={createDietPlan}
-          style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}
+          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '0.75rem', alignItems: 'end' }}
         >
-          <input
-            name="name"
-            placeholder={t('planName')}
-            required
-            style={{
-              flex: '1 1 200px',
-              padding: '0.6rem 0.75rem',
-              background: 'var(--bg)',
-              border: '1px solid var(--border)',
-              borderRadius: 6,
-              color: 'var(--fg)',
-            }}
-          />
-          <input
-            name="goal"
-            placeholder={t('goalOptional')}
-            style={{
-              flex: '1 1 200px',
-              padding: '0.6rem 0.75rem',
-              background: 'var(--bg)',
-              border: '1px solid var(--border)',
-              borderRadius: 6,
-              color: 'var(--fg)',
-            }}
-          />
-          <button
-            type="submit"
-            style={{
-              padding: '0.6rem 1.25rem',
-              background: 'var(--accent)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 6,
-              cursor: 'pointer',
-            }}
-          >
+          <div>
+            <label style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 4 }}>
+              {t('planName')}
+            </label>
+            <input
+              name="name"
+              placeholder={t('planName')}
+              required
+              className="input-field"
+            />
+          </div>
+          <div>
+            <label style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 4 }}>
+              {t('goalOptional')}
+            </label>
+            <input
+              name="goal"
+              placeholder={t('goalOptional')}
+              className="input-field"
+            />
+          </div>
+          <button type="submit" className="btn-primary">
             {tc('create')}
           </button>
         </form>
       </div>
 
+      {/* Plans list */}
       {plans.length === 0 && !error && (
-        <p style={{ color: 'var(--muted)' }}>{t('noPlans')}</p>
+        <div className="glass-card" style={{ textAlign: 'center', padding: '3rem 1.5rem' }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>🍽</div>
+          <p style={{ color: 'var(--muted)', margin: 0 }}>{t('noPlans')}</p>
+        </div>
       )}
+
       <div style={{ display: 'grid', gap: '0.75rem' }}>
         {plans.map((p) => (
           <div
             key={p.id}
+            className="plan-card"
             style={{
-              background: 'var(--card)',
-              border: '1px solid var(--border)',
-              padding: '1rem 1.25rem',
-              borderRadius: 10,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              borderLeft: p.isActive ? '3px solid var(--accent)' : undefined,
+              boxShadow: p.isActive ? '0 0 12px rgba(0,0,255,0.08)' : undefined,
             }}
           >
             <Link
               href={`/dashboard/diet-plans/${p.id}`}
-              style={{ color: 'inherit', textDecoration: 'none' }}
+              style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}
             >
-              <div style={{ fontWeight: 600 }}>{p.name}</div>
-              {p.goal && (
-                <div style={{ color: 'var(--muted)', fontSize: 13 }}>{p.goal}</div>
-              )}
+              {/* Icon circle */}
+              <div className="icon-circle" style={{ background: 'rgba(34,197,94,0.15)' }}>
+                🥗
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: 15 }}>{p.name}</div>
+                {p.goal && (
+                  <span style={{
+                    display: 'inline-block',
+                    marginTop: 4,
+                    padding: '2px 8px',
+                    background: 'rgba(160,32,240,0.12)',
+                    color: 'var(--purple)',
+                    borderRadius: 9999,
+                    fontSize: 11,
+                  }}>
+                    {p.goal}
+                  </span>
+                )}
+              </div>
             </Link>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
+              {p.isActive && <span className="badge-active">{tc('active')}</span>}
               {!p.isActive && (
                 <form action={activateDietPlan.bind(null, p.id)}>
-                  <button
-                    type="submit"
-                    style={{
-                      padding: '0.4rem 0.75rem',
-                      background: 'transparent',
-                      color: 'var(--fg)',
-                      border: '1px solid var(--border)',
-                      borderRadius: 6,
-                      cursor: 'pointer',
-                    }}
-                  >
+                  <button type="submit" className="btn-outline">
                     {tc('activate')}
                   </button>
                 </form>
               )}
-              {p.isActive && (
-                <span
-                  style={{
-                    padding: '4px 10px',
-                    background: 'var(--accent)',
-                    color: '#fff',
-                    borderRadius: 999,
-                    fontSize: 12,
-                  }}
-                >
-                  {tc('active')}
-                </span>
-              )}
               <form action={deleteDietPlan.bind(null, p.id)}>
-                <button
-                  type="submit"
-                  style={{
-                    padding: '0.4rem 0.75rem',
-                    background: 'transparent',
-                    color: '#e07b5f',
-                    border: '1px solid #6a2a2a',
-                    borderRadius: 6,
-                    cursor: 'pointer',
-                  }}
-                >
+                <button type="submit" className="btn-danger">
                   {tc('delete')}
                 </button>
               </form>
+              {/* Chevron right */}
+              <Link href={`/dashboard/diet-plans/${p.id}`} style={{ color: 'var(--muted)', fontSize: 18, lineHeight: 1 }}>
+                ›
+              </Link>
             </div>
           </div>
         ))}

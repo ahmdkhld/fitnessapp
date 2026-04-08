@@ -23,14 +23,6 @@ async function load(): Promise<{ logs: BodyLog[]; error: string | null }> {
   }
 }
 
-const input: React.CSSProperties = {
-  padding: '0.6rem 0.75rem',
-  background: 'var(--bg)',
-  border: '1px solid var(--border)',
-  borderRadius: 6,
-  color: 'var(--fg)',
-};
-
 export default async function BodyLogPage() {
   const { logs, error } = await load();
   const t = await getTranslations('tracking');
@@ -38,45 +30,45 @@ export default async function BodyLogPage() {
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{t('bodyLogTitle')}</h1>
-      {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
+      <div className="page-header">
+        <h1><i className="fa-solid fa-weight-scale" style={{ marginRight: 10, color: 'var(--green)' }} />{t('bodyLogTitle')}</h1>
+      </div>
+      {error && <div className="error-banner">{error}</div>}
 
       <form
         action={createBodyLog}
+        className="glass-card"
         style={{
-          background: 'var(--card)',
-          border: '1px solid var(--border)',
-          borderRadius: 10,
-          padding: '1.25rem',
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '0.5rem',
+          gap: '0.75rem',
           marginTop: '1rem',
           marginBottom: '2rem',
         }}
       >
-        <input name="weightKg" type="number" step="0.1" placeholder={t('weightKg')} style={input} />
-        <input name="waistCm" type="number" step="0.1" placeholder={t('waistCm')} style={input} />
-        <input name="bodyFatPct" type="number" step="0.1" placeholder={t('bodyFatPct')} style={input} />
-        <input name="energyLevel" type="number" min="1" max="5" placeholder={t('energy')} style={input} />
-        <input
-          name="notes"
-          placeholder={t('notes')}
-          style={{ ...input, gridColumn: '1 / span 3' }}
-        />
-        <button
-          type="submit"
-          style={{
-            padding: '0.6rem 1rem',
-            background: 'var(--accent)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 6,
-            cursor: 'pointer',
-          }}
-        >
-          {tc('log')}
-        </button>
+        <div>
+          <label className="form-label">{t('weightKg')}</label>
+          <input name="weightKg" type="number" step="0.1" placeholder={t('weightKg')} className="input-field" style={{ marginTop: 4 }} />
+        </div>
+        <div>
+          <label className="form-label">{t('waistCm')}</label>
+          <input name="waistCm" type="number" step="0.1" placeholder={t('waistCm')} className="input-field" style={{ marginTop: 4 }} />
+        </div>
+        <div>
+          <label className="form-label">{t('bodyFatPct')}</label>
+          <input name="bodyFatPct" type="number" step="0.1" placeholder={t('bodyFatPct')} className="input-field" style={{ marginTop: 4 }} />
+        </div>
+        <div>
+          <label className="form-label">{t('energy')}</label>
+          <input name="energyLevel" type="number" min="1" max="5" placeholder={t('energy')} className="input-field" style={{ marginTop: 4 }} />
+        </div>
+        <div style={{ gridColumn: '1 / span 3' }}>
+          <label className="form-label">{t('notes')}</label>
+          <input name="notes" placeholder={t('notes')} className="input-field" style={{ marginTop: 4 }} />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+          <button type="submit" className="btn-primary" style={{ width: '100%' }}>{tc('log')}</button>
+        </div>
       </form>
 
       <div style={{ display: 'grid', gap: '0.5rem' }}>
@@ -88,19 +80,11 @@ export default async function BodyLogPage() {
             l.energyLevel != null && `energy ${l.energyLevel}/5`,
           ].filter(Boolean);
           return (
-            <div
-              key={l.id}
-              style={{
-                background: 'var(--card)',
-                border: '1px solid var(--border)',
-                padding: '0.75rem 1rem',
-                borderRadius: 8,
-              }}
-            >
+            <div key={l.id} className="list-card">
               <div style={{ color: 'var(--muted)', fontSize: 12 }}>
                 {l.date.slice(0, 10)}
               </div>
-              <div>{parts.join(' · ')}</div>
+              <div style={{ fontWeight: 500, marginTop: 2 }}>{parts.join(' · ')}</div>
               {l.notes && (
                 <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 4 }}>
                   {l.notes}

@@ -25,43 +25,20 @@ export default async function ExportPage() {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <a
-            href={pdfHref}
-            style={{
-              padding: '0.5rem 1rem',
-              background: 'var(--accent)',
-              color: '#fff',
-              borderRadius: 6,
-              textDecoration: 'none',
-            }}
-          >
-            {t('downloadPdf')}
-          </a>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div className="page-header">
+          <h1><i className="fa-solid fa-file-export" style={{ marginRight: 10, color: 'var(--green)' }} />{t('title')}</h1>
+          <p>{t('description')}</p>
         </div>
+        <a href={pdfHref} className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <i className="fa-solid fa-file-pdf" />{t('downloadPdf')}
+        </a>
       </div>
-      <p style={{ color: 'var(--muted)' }}>
-        {t('description')}
-      </p>
-      {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
+      {error && <div className="error-banner" style={{ marginTop: '1rem' }}>{error}</div>}
       {report && (
         <pre
-          style={{
-            background: 'var(--card)',
-            border: '1px solid var(--border)',
-            padding: '1rem',
-            borderRadius: 8,
-            overflow: 'auto',
-            maxHeight: '70vh',
-          }}
+          className="glass-card"
+          style={{ marginTop: '1.5rem', overflow: 'auto', maxHeight: '70vh', fontSize: 13, fontFamily: 'monospace' }}
         >
           {JSON.stringify(report, null, 2)}
         </pre>

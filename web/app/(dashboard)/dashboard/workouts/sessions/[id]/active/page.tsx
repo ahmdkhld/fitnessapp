@@ -38,26 +38,6 @@ async function load(id: string): Promise<ActiveSessionData> {
   }
 }
 
-const input: React.CSSProperties = {
-  padding: '0.45rem 0.55rem',
-  background: 'var(--bg)',
-  border: '1px solid var(--border)',
-  borderRadius: 6,
-  color: 'var(--fg)',
-  fontSize: 13,
-  width: '80px',
-};
-
-const button: React.CSSProperties = {
-  padding: '0.5rem 0.85rem',
-  background: 'var(--accent)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: 6,
-  cursor: 'pointer',
-  fontSize: 13,
-};
-
 export default async function ActiveSessionPage({
   params,
 }: {
@@ -66,8 +46,8 @@ export default async function ActiveSessionPage({
   const { session, day, error } = await load(params.id);
   const t = await getTranslations('workouts');
   const tc = await getTranslations('common');
-  if (error) return <p style={{ color: '#e07b5f' }}>{error}</p>;
-  if (!session) return <p>{tc('notFound')}</p>;
+  if (error) return <div className="error-banner">{error}</div>;
+  if (!session) return <p style={{ color: 'var(--muted)' }}>{tc('notFound')}</p>;
 
   const setsByExercise = new Map<string, typeof session.sets>();
   for (const s of session.sets) {
@@ -77,37 +57,25 @@ export default async function ActiveSessionPage({
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'baseline',
-        }}
-      >
-        <h1 style={{ marginTop: 0 }}>
-          {day?.name ?? session.day?.name ?? t('freeformWorkout')}
-        </h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <div className="page-header">
+          <h1>
+            <i className="fa-solid fa-fire" style={{ marginRight: 10, color: 'var(--green)' }} />
+            {day?.name ?? session.day?.name ?? t('freeformWorkout')}
+          </h1>
+          <p>
+            {t('started', { date: session.date.slice(0, 10) })} · {t('setsLogged', { count: session.sets.length })}
+          </p>
+        </div>
         <form action={completeSessionAction.bind(null, session.id)}>
-          <button type="submit" style={button}>
-            {t('finishWorkout')}
+          <button type="submit" className="btn-success" style={{ padding: '0.6rem 1.25rem' }}>
+            <i className="fa-solid fa-flag-checkered" style={{ marginRight: 6 }} />{t('finishWorkout')}
           </button>
         </form>
       </div>
-      <p style={{ color: 'var(--muted)' }}>
-        {t('started', { date: session.date.slice(0, 10) })} · {t('setsLogged', { count: session.sets.length })}
-      </p>
 
       {!day && session.sets.length === 0 && (
-        <div
-          style={{
-            background: 'var(--card)',
-            border: '1px solid var(--border)',
-            padding: '1rem 1.25rem',
-            borderRadius: 10,
-            marginTop: '1.5rem',
-            color: 'var(--muted)',
-          }}
-        >
+        <div className="glass-card" style={{ marginTop: '1.5rem', color: 'var(--muted)' }}>
           {t('freeformNote')}
         </div>
       )}
@@ -115,18 +83,8 @@ export default async function ActiveSessionPage({
       {!day && session.sets.length > 0 && (
         <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1.5rem' }}>
           {[...setsByExercise.entries()].map(([exId, sets]) => (
-            <div
-              key={exId}
-              style={{
-                background: 'var(--card)',
-                border: '1px solid var(--border)',
-                padding: '1rem 1.25rem',
-                borderRadius: 10,
-              }}
-            >
-              <div style={{ fontWeight: 600 }}>
-                {sets[0].exercise?.name ?? exId}
-              </div>
+            <div key={exId} className="glass-card">
+              <div style={{ fontWeight: 600 }}>{sets[0].exercise?.name ?? exId}</div>
               {sets.map((s) => (
                 <div
                   key={s.id}
@@ -138,9 +96,7 @@ export default async function ActiveSessionPage({
                     borderBottom: '1px solid var(--border)',
                   }}
                 >
-                  <span style={{ width: 30, fontWeight: 600 }}>
-                    #{s.setNumber}
-                  </span>
+                  <span style={{ width: 30, fontWeight: 600 }}>#{s.setNumber}</span>
                   <span>
                     {[
                       s.weightKg != null ? `${s.weightKg} kg` : null,
@@ -164,17 +120,12 @@ export default async function ActiveSessionPage({
           const isCardio = px.exercise.isCardio;
           const nextSetNumber = logged.length + 1;
           return (
-            <div
-              key={px.id}
-              style={{
-                background: 'var(--card)',
-                border: '1px solid var(--border)',
-                padding: '1rem 1.25rem',
-                borderRadius: 10,
-              }}
-            >
-              <div style={{ fontWeight: 600 }}>{px.exercise.name}</div>
-              <div style={{ color: 'var(--muted)', fontSize: 13 }}>
+            <div key={px.id} className="glass-card">
+              <div style={{ fontWeight: 600 }}>
+                <i className="fa-solid fa-dumbbell" style={{ marginRight: 8, color: 'var(--accent)', fontSize: 13 }} />
+                {px.exercise.name}
+              </div>
+              <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 2 }}>
                 {t('target')} {px.targetSets} x {px.targetReps ?? '?'}
                 {px.targetWeightKg != null && ` @ ${px.targetWeightKg}kg`}
                 {px.restSeconds != null && ` · rest ${px.restSeconds}s`}
@@ -193,9 +144,7 @@ export default async function ActiveSessionPage({
                       fontSize: 13,
                     }}
                   >
-                    <span style={{ fontWeight: 600, width: 30 }}>
-                      #{s.setNumber}
-                    </span>
+                    <span style={{ fontWeight: 600, width: 30 }}>#{s.setNumber}</span>
                     <span>
                       {[
                         s.weightKg != null ? `${s.weightKg} kg` : null,
@@ -208,17 +157,7 @@ export default async function ActiveSessionPage({
                     </span>
                     <div style={{ flex: 1 }} />
                     <form action={deleteSetAction.bind(null, session.id, s.id)}>
-                      <button
-                        type="submit"
-                        style={{
-                          border: 'none',
-                          background: 'transparent',
-                          color: '#e07b5f',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        x
-                      </button>
+                      <button type="submit" className="btn-danger btn-sm">x</button>
                     </form>
                   </div>
                 ))}
@@ -238,46 +177,17 @@ export default async function ActiveSessionPage({
                 <input type="hidden" name="setNumber" value={nextSetNumber} />
                 {isCardio ? (
                   <>
-                    <input
-                      name="durationSec"
-                      type="number"
-                      placeholder={`${t('duration')} s`}
-                      style={{ ...input, width: 120 }}
-                    />
-                    <input
-                      name="distanceKm"
-                      type="number"
-                      step="0.01"
-                      placeholder={`${t('distance')} km`}
-                      style={{ ...input, width: 120 }}
-                    />
+                    <input name="durationSec" type="number" placeholder={`${t('duration')} s`} className="input-field" style={{ width: 120 }} />
+                    <input name="distanceKm" type="number" step="0.01" placeholder={`${t('distance')} km`} className="input-field" style={{ width: 120 }} />
                   </>
                 ) : (
                   <>
-                    <input
-                      name="weightKg"
-                      type="number"
-                      step="0.5"
-                      placeholder="kg"
-                      defaultValue={px.targetWeightKg ?? ''}
-                      style={input}
-                    />
-                    <input
-                      name="reps"
-                      type="number"
-                      placeholder={t('reps').toLowerCase()}
-                      style={input}
-                    />
-                    <input
-                      name="rpe"
-                      type="number"
-                      step="0.5"
-                      placeholder="RPE"
-                      style={input}
-                    />
+                    <input name="weightKg" type="number" step="0.5" placeholder="kg" defaultValue={px.targetWeightKg ?? ''} className="input-field" style={{ width: 80 }} />
+                    <input name="reps" type="number" placeholder={t('reps').toLowerCase()} className="input-field" style={{ width: 80 }} />
+                    <input name="rpe" type="number" step="0.5" placeholder="RPE" className="input-field" style={{ width: 80 }} />
                   </>
                 )}
-                <button type="submit" style={button}>
+                <button type="submit" className="btn-primary">
                   {t('logSet', { number: nextSetNumber })}
                 </button>
               </form>

@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useTranslations } from 'next-intl';
-import * as Sentry from '@sentry/nextjs';
 
 export default function DashboardError({
   error,
@@ -11,16 +9,8 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const t = useTranslations('errors');
-
   useEffect(() => {
     console.error('Dashboard error:', error);
-
-    try {
-      Sentry.captureException(error);
-    } catch {
-      // Sentry import failed or runtime issue -- silent fallback
-    }
   }, [error]);
 
   return (
@@ -64,7 +54,7 @@ export default function DashboardError({
         </div>
 
         <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem' }}>
-          {t('somethingWentWrong')}
+          Something went wrong
         </h2>
 
         <p
@@ -75,7 +65,7 @@ export default function DashboardError({
             margin: '0 0 1.5rem',
           }}
         >
-          {t('unexpectedError')}
+          An unexpected error occurred. Please try again.
         </p>
 
         {error.digest && (
@@ -87,7 +77,7 @@ export default function DashboardError({
               fontFamily: 'monospace',
             }}
           >
-            {t('errorId', { id: error.digest })}
+            Error ID: {error.digest}
           </p>
         )}
 
@@ -105,7 +95,7 @@ export default function DashboardError({
               cursor: 'pointer',
             }}
           >
-            {t('tryAgain')}
+            Try again
           </button>
           <a
             href="/dashboard"
@@ -122,7 +112,7 @@ export default function DashboardError({
               alignItems: 'center',
             }}
           >
-            {t('goToOverview')}
+            Go to Overview
           </a>
         </div>
       </div>

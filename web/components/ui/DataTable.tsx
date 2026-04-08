@@ -15,18 +15,21 @@ interface DataTableProps<T = Record<string, unknown>> {
 
 const cellStyle: React.CSSProperties = {
   padding: '0.6rem 0.75rem',
-  borderBottom: '1px solid var(--border)',
+  borderBottom: '1px solid #333333',
   textAlign: 'left',
   fontSize: 14,
+  color: '#FFFFFF',
+  fontFamily: "'Inter', sans-serif",
 };
 
 const headerCellStyle: React.CSSProperties = {
   ...cellStyle,
   fontSize: 12,
   fontWeight: 600,
-  color: 'var(--muted)',
+  color: '#A9A9A9',
   textTransform: 'uppercase',
   letterSpacing: '0.04em',
+  background: '#121212',
 };
 
 export function DataTable<T extends Record<string, unknown>>({
@@ -39,9 +42,9 @@ export function DataTable<T extends Record<string, unknown>>({
     <div
       style={{
         overflowX: 'auto',
-        background: 'var(--card)',
-        border: '1px solid var(--border)',
-        borderRadius: 10,
+        background: '#1E1E1E',
+        border: '1px solid #333333',
+        borderRadius: 12,
         ...style,
       }}
     >
@@ -69,7 +72,7 @@ export function DataTable<T extends Record<string, unknown>>({
                 style={{
                   ...cellStyle,
                   textAlign: 'center',
-                  color: 'var(--muted)',
+                  color: '#A9A9A9',
                   padding: '2rem 1rem',
                   borderBottom: 'none',
                 }}
@@ -79,12 +82,12 @@ export function DataTable<T extends Record<string, unknown>>({
             </tr>
           ) : (
             data.map((row, i) => (
-              <tr key={i}>
+              <tr key={i} style={{ background: i % 2 === 0 ? '#1E1E1E' : '#191919' }}>
                 {columns.map((col) => (
                   <td key={col.key} style={i === data.length - 1 ? { ...cellStyle, borderBottom: 'none' } : cellStyle}>
                     {col.render
                       ? col.render(row[col.key], row)
-                      : (row[col.key] as React.ReactNode) ?? '—'}
+                      : (row[col.key] as React.ReactNode) ?? '\u2014'}
                   </td>
                 ))}
               </tr>

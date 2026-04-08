@@ -33,7 +33,7 @@ async function load(): Promise<{
 }
 
 const severityColor: Record<string, string> = {
-  info: '#4a9d7e',
+  info: '#22C55E',
   warn: '#d8a24a',
   critical: '#e07b5f',
 };
@@ -43,30 +43,28 @@ export default async function AnalyticsPage() {
   const t = await getTranslations('analytics');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
-      {error && <p style={{ color: 'var(--muted)' }}>{error}</p>}
+      <div className="page-header">
+        <h1><i className="fa-solid fa-chart-pie" style={{ marginRight: 10, color: 'var(--green)' }} />{t('title')}</h1>
+      </div>
+      {error && <div className="error-banner">{error}</div>}
       {chart.length > 0 && (
-        <div style={{ marginTop: '1.5rem' }}>
+        <div className="glass-card" style={{ marginTop: '1rem' }}>
           <WeeklyAdherenceChart data={chart} />
         </div>
       )}
-      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>{t('insights')}</h2>
+      <h2 className="section-title">
+        <i className="fa-solid fa-lightbulb" style={{ marginRight: 8, color: 'var(--purple)' }} />
+        {t('insights')}
+      </h2>
       {insights.length === 0 && !error && (
-        <p style={{ color: 'var(--muted)' }}>
-          {t('noInsights')}
-        </p>
+        <p style={{ color: 'var(--muted)' }}>{t('noInsights')}</p>
       )}
       <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1rem' }}>
         {insights.map((i, idx) => (
           <div
             key={idx}
-            style={{
-              background: 'var(--card)',
-              border: `1px solid ${severityColor[i.severity] ?? 'var(--border)'}`,
-              borderLeftWidth: 4,
-              padding: '1rem 1.25rem',
-              borderRadius: 8,
-            }}
+            className="insight-card"
+            style={{ borderLeftColor: severityColor[i.severity] ?? 'var(--border)' }}
           >
             <div style={{ fontWeight: 600 }}>{i.title}</div>
             <div style={{ color: 'var(--muted)', fontSize: 14, marginTop: 4 }}>

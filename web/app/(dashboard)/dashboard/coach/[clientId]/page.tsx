@@ -40,21 +40,11 @@ interface ClientSummary {
 async function load(clientId: string) {
   try {
     const res = await authedFetch(`/coach/clients/${clientId}/summary`);
-    return {
-      data: (await res.json()) as ClientSummary,
-      error: null as string | null,
-    };
+    return { data: (await res.json()) as ClientSummary, error: null as string | null };
   } catch (e) {
     return { data: null, error: (e as Error).message };
   }
 }
-
-const card: React.CSSProperties = {
-  background: 'var(--card)',
-  border: '1px solid var(--border)',
-  padding: '1.25rem',
-  borderRadius: 12,
-};
 
 export default async function ClientSummaryPage({
   params,
@@ -65,17 +55,15 @@ export default async function ClientSummaryPage({
   const t = await getTranslations('coach');
   const tc = await getTranslations('common');
   const tw = await getTranslations('workouts');
-  if (error) return <p style={{ color: '#e07b5f' }}>{error}</p>;
-  if (!data?.client) return <p>{tc('notFound')}</p>;
+  if (error) return <div className="error-banner">{error}</div>;
+  if (!data?.client) return <p style={{ color: 'var(--muted)' }}>{tc('notFound')}</p>;
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>
-        {data.client.fullName ?? data.client.email}
-      </h1>
-      <p style={{ color: 'var(--muted)' }}>
-        {data.client.goal ?? '—'} · {t('readOnlyView')}
-      </p>
+      <div className="page-header">
+        <h1><i className="fa-solid fa-user" style={{ marginRight: 10, color: 'var(--accent)' }} />{data.client.fullName ?? data.client.email}</h1>
+        <p>{data.client.goal ?? '\u2014'} · {t('readOnlyView')}</p>
+      </div>
 
       <div
         style={{
@@ -85,39 +73,31 @@ export default async function ClientSummaryPage({
           marginTop: '1.5rem',
         }}
       >
-        <div style={card}>
-          <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('adherence14d')}</div>
-          <div style={{ fontSize: 28, fontWeight: 600 }}>
-            {data.summary.adherencePct}%
-          </div>
-          <div style={{ color: 'var(--muted)', fontSize: 12 }}>
-            {data.summary.completedItems}/{data.summary.totalItems} {t('items')}
-          </div>
+        <div className="stat-card">
+          <div className="stat-accent" style={{ background: 'var(--green)' }} />
+          <div className="stat-label">{t('adherence14d')}</div>
+          <div className="stat-value" style={{ color: 'var(--green)' }}>{data.summary.adherencePct}%</div>
+          <div className="stat-sub">{data.summary.completedItems}/{data.summary.totalItems} {t('items')}</div>
         </div>
-        <div style={card}>
-          <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('workouts14d')}</div>
-          <div style={{ fontSize: 28, fontWeight: 600 }}>
-            {data.summary.workoutSessions}
-          </div>
+        <div className="stat-card">
+          <div className="stat-accent" style={{ background: 'var(--accent)' }} />
+          <div className="stat-label">{t('workouts14d')}</div>
+          <div className="stat-value">{data.summary.workoutSessions}</div>
         </div>
-        <div style={card}>
-          <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('prs14d')}</div>
-          <div style={{ fontSize: 28, fontWeight: 600 }}>
-            {data.summary.personalRecords}
-          </div>
+        <div className="stat-card">
+          <div className="stat-accent" style={{ background: 'var(--purple)' }} />
+          <div className="stat-label">{t('prs14d')}</div>
+          <div className="stat-value">{data.summary.personalRecords}</div>
         </div>
       </div>
 
-      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>{t('recentSessions')}</h2>
+      <h2 className="section-title"><i className="fa-solid fa-dumbbell" style={{ marginRight: 8, color: 'var(--accent)' }} />{t('recentSessions')}</h2>
       {data.recentSessions.length === 0 ? (
         <p style={{ color: 'var(--muted)' }}>{t('noRecentSessions')}</p>
       ) : (
         <div style={{ display: 'grid', gap: '0.5rem' }}>
           {data.recentSessions.map((s) => (
-            <div
-              key={s.id}
-              style={{ ...card, padding: '0.75rem 1rem' }}
-            >
+            <div key={s.id} className="list-card">
               <div style={{ fontWeight: 600 }}>{s.name}</div>
               <div style={{ color: 'var(--muted)', fontSize: 13 }}>
                 {s.date.slice(0, 10)} · {s.durationMin ?? 0} {tw('min')}
@@ -127,18 +107,20 @@ export default async function ClientSummaryPage({
         </div>
       )}
 
-      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>{t('recentPRs')}</h2>
+      <h2 className="section-title"><i className="fa-solid fa-trophy" style={{ marginRight: 8, color: 'var(--green)' }} />{t('recentPRs')}</h2>
       {data.recentPRs.length === 0 ? (
         <p style={{ color: 'var(--muted)' }}>{t('noRecentPRs')}</p>
       ) : (
         <div style={{ display: 'grid', gap: '0.5rem' }}>
           {data.recentPRs.map((pr, i) => (
-            <div key={i} style={{ ...card, padding: '0.75rem 1rem' }}>
-              <div style={{ fontWeight: 600 }}>{pr.exercise}</div>
-              <div style={{ color: 'var(--muted)', fontSize: 13 }}>
-                {pr.recordType.replace(/_/g, ' ')} · {pr.value} {pr.unit} ·{' '}
-                {pr.achievedAt.slice(0, 10)}
+            <div key={i} className="list-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontWeight: 600 }}>{pr.exercise}</div>
+                <div style={{ color: 'var(--muted)', fontSize: 13 }}>
+                  {pr.recordType.replace(/_/g, ' ')} · {pr.value} {pr.unit}
+                </div>
               </div>
+              <span style={{ color: 'var(--muted)', fontSize: 12 }}>{pr.achievedAt.slice(0, 10)}</span>
             </div>
           ))}
         </div>

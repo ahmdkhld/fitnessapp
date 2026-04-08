@@ -23,52 +23,25 @@ export default function ChangePasswordPage() {
     <div style={{ maxWidth: 460 }}>
       <Link
         href="/dashboard/settings"
-        style={{ color: 'var(--muted)', fontSize: 13, textDecoration: 'none' }}
+        style={{ color: 'var(--muted)', fontSize: 13, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
       >
-        &larr; Back to settings
+        <i className="fa-solid fa-arrow-left" /> Back to settings
       </Link>
-      <h1 style={{ marginTop: '0.75rem' }}>Change password</h1>
-      <p style={{ color: 'var(--muted)', marginBottom: '1.5rem' }}>
-        After changing your password you will be signed out and need to log in
-        again.
-      </p>
+      <div className="page-header" style={{ marginTop: '0.75rem' }}>
+        <h1><i className="fa-solid fa-key" style={{ marginRight: 10, color: 'var(--accent)' }} />Change password</h1>
+        <p>After changing your password you will be signed out and need to log in again.</p>
+      </div>
 
-      <Card padding="1.5rem" style={{ borderRadius: 10 }}>
+      <Card padding="1.5rem" style={{ borderRadius: 12 }}>
         <form action={formAction} style={{ display: 'grid', gap: '1rem' }}>
-          <Input
-            label="Current password"
-            name="currentPassword"
-            type="password"
-            required
-            autoComplete="current-password"
-          />
-          <Input
-            label="New password"
-            name="newPassword"
-            type="password"
-            required
-            minLength={8}
-            autoComplete="new-password"
-            helperText="Must be at least 8 characters"
-          />
-          <Input
-            label="Confirm new password"
-            name="confirmPassword"
-            type="password"
-            required
-            minLength={8}
-            autoComplete="new-password"
-          />
+          <Input label="Current password" name="currentPassword" type="password" required autoComplete="current-password" />
+          <Input label="New password" name="newPassword" type="password" required minLength={8} autoComplete="new-password" helperText="Must be at least 8 characters" />
+          <Input label="Confirm new password" name="confirmPassword" type="password" required minLength={8} autoComplete="new-password" />
 
-          {state.error && (
-            <p style={{ color: '#e07b5f', margin: 0, fontSize: 14 }}>
-              {state.error}
-            </p>
-          )}
-
+          {state.error && <div className="error-banner" style={{ margin: 0 }}>{state.error}</div>}
           {state.success && (
-            <p style={{ color: '#5fb06a', margin: 0, fontSize: 14 }}>
-              Password changed successfully.
+            <p style={{ color: 'var(--green)', margin: 0, fontSize: 14 }}>
+              <i className="fa-solid fa-check" style={{ marginRight: 6 }} />Password changed successfully.
             </p>
           )}
 

@@ -23,28 +23,31 @@ const navItems: NavItem[] = [
   { href: '/dashboard/settings', labelKey: 'settings' },
 ];
 
-async function NavLinks() {
+async function DesktopNavLinks() {
   const t = await getTranslations('nav');
 
   return (
-    <nav
-      aria-label={t('sections')}
-      style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
-    >
+    <nav className="topnav-links" aria-label={t('sections')}>
       {navItems.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          style={{
-            padding: '0.5rem 0.75rem',
-            borderRadius: 6,
-            color: 'var(--fg)',
-          }}
-        >
+        <Link key={item.href} href={item.href} className="topnav-link">
           {t(item.labelKey)}
         </Link>
       ))}
     </nav>
+  );
+}
+
+async function MobileNavLinks() {
+  const t = await getTranslations('nav');
+
+  return (
+    <>
+      {navItems.map((item) => (
+        <Link key={item.href} href={item.href}>
+          {t(item.labelKey)}
+        </Link>
+      ))}
+    </>
   );
 }
 
@@ -56,43 +59,64 @@ export default async function DashboardLayout({
   const t = await getTranslations('common');
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      {/* -- Desktop sidebar (hidden on mobile via CSS) -- */}
-      <aside
-        className="desktop-sidebar"
-        aria-label="Primary navigation"
-        style={{
-          width: 240,
-          flexShrink: 0,
-          background: 'var(--card)',
-          borderRight: '1px solid var(--border)',
-          padding: '2rem 1rem',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <h2 style={{ marginBottom: '2rem' }}>{t('appName')}</h2>
-        <NavLinks />
-        <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
-          <LanguageSwitcher />
-        </div>
-      </aside>
+    <div style={{ minHeight: '100vh', position: 'relative', zIndex: 1 }}>
+      {/* -- Top Navigation Bar -- */}
+      <header className="topnav">
+        {/* Logo */}
+        <Link href="/dashboard" className="topnav-logo">
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M6.5 6.5a2 2 0 0 1 3 0l.5.5.5-.5a2 2 0 0 1 3 0 2 2 0 0 1 0 3L10 13l-3.5-3.5a2 2 0 0 1 0-3z" />
+            <line x1="6" y1="12" x2="6" y2="19" />
+            <line x1="18" y1="12" x2="18" y2="19" />
+            <line x1="2" y1="12" x2="22" y2="12" />
+            <line x1="2" y1="7" x2="6" y2="7" />
+            <line x1="18" y1="7" x2="22" y2="7" />
+            <line x1="2" y1="17" x2="6" y2="17" />
+            <line x1="18" y1="17" x2="22" y2="17" />
+          </svg>
+          <span>{t('appName')}</span>
+        </Link>
 
-      {/* -- Mobile hamburger + drawer (hidden on desktop via CSS) -- */}
-      <MobileNav>
-        <h2 style={{ marginBottom: '1.5rem' }}>{t('appName')}</h2>
-        <NavLinks />
-        <div style={{ marginTop: '1.5rem' }}>
+        {/* Desktop horizontal nav links */}
+        <DesktopNavLinks />
+
+        {/* Right actions: language switcher, notification bell, avatar */}
+        <div className="topnav-actions">
           <LanguageSwitcher />
+          <Link href="/dashboard/notifications" className="topnav-icon-btn" aria-label="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </Link>
+          <Link href="/dashboard/settings" className="topnav-avatar" aria-label="User profile">
+            U
+          </Link>
         </div>
-      </MobileNav>
+
+        {/* Mobile hamburger (visible only on mobile via CSS) */}
+        <MobileNav>
+          <MobileNavLinks />
+          <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
+            <LanguageSwitcher />
+          </div>
+        </MobileNav>
+      </header>
 
       {/* -- Main content area -- */}
       <main
-        className="dashboard-main"
+        className="dashboard-main dashboard-content"
         style={{
           flex: 1,
-          padding: '2rem',
           maxWidth: '100%',
           overflowX: 'hidden',
         }}

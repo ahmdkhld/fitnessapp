@@ -11,21 +11,21 @@ interface SkeletonProps {
   style?: React.CSSProperties;
 }
 
-const pulseKeyframes = `
-@keyframes ui-skeleton-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.7; }
+const shimmerKeyframes = `
+@keyframes ui-skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 `;
 
-let pulseInjected = false;
+let shimmerInjected = false;
 
-function injectPulseStyle() {
-  if (pulseInjected || typeof document === 'undefined') return;
+function injectShimmerStyle() {
+  if (shimmerInjected || typeof document === 'undefined') return;
   const style = document.createElement('style');
-  style.textContent = pulseKeyframes;
+  style.textContent = shimmerKeyframes;
   document.head.appendChild(style);
-  pulseInjected = true;
+  shimmerInjected = true;
 }
 
 const variantDefaults: Record<SkeletonVariant, React.CSSProperties> = {
@@ -36,7 +36,7 @@ const variantDefaults: Record<SkeletonVariant, React.CSSProperties> = {
 
 export function Skeleton({ width, height, variant = 'text', style }: SkeletonProps) {
   React.useEffect(() => {
-    injectPulseStyle();
+    injectShimmerStyle();
   }, []);
 
   const defaults = variantDefaults[variant];
@@ -45,8 +45,9 @@ export function Skeleton({ width, height, variant = 'text', style }: SkeletonPro
     <div
       aria-hidden="true"
       style={{
-        background: 'var(--border)',
-        animation: 'ui-skeleton-pulse 1.5s ease-in-out infinite',
+        background: 'linear-gradient(90deg, #333333 25%, #1E1E1E 50%, #333333 75%)',
+        backgroundSize: '200% 100%',
+        animation: 'ui-skeleton-shimmer 1.5s ease-in-out infinite',
         ...defaults,
         ...(width !== undefined ? { width } : {}),
         ...(height !== undefined ? { height } : {}),

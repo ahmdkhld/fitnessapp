@@ -8,7 +8,8 @@ export const dynamic = 'force-dynamic';
 async function load() {
   try {
     const res = await authedFetch('/workout-sessions');
-    return { sessions: (await res.json()) as WorkoutSession[], error: null as string | null };
+    const body = await res.json();
+    return { sessions: (Array.isArray(body) ? body : (body.data ?? [])) as WorkoutSession[], error: null as string | null };
   } catch (e) {
     return { sessions: [], error: (e as Error).message };
   }
@@ -19,8 +20,10 @@ export default async function SessionsPage() {
   const t = await getTranslations('workouts');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{t('workoutHistory')}</h1>
-      {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
+      <div className="page-header">
+        <h1><i className="fa-solid fa-clock-rotate-left" style={{ marginRight: 10, color: 'var(--purple)' }} />{t('workoutHistory')}</h1>
+      </div>
+      {error && <div className="error-banner">{error}</div>}
       {sessions.length === 0 && <p style={{ color: 'var(--muted)' }}>{t('nothingYet')}</p>}
       <div style={{ display: 'grid', gap: '0.5rem', marginTop: '1rem' }}>
         {sessions.map((s) => {
@@ -35,31 +38,21 @@ export default async function SessionsPage() {
             <Link
               key={s.id}
               href={`/dashboard/workouts/sessions/${s.id}`}
-              style={{
-                background: 'var(--card)',
-                border: '1px solid var(--border)',
-                padding: '1rem 1.25rem',
-                borderRadius: 10,
-                color: 'inherit',
-              }}
+              className="list-card"
+              style={{ color: 'inherit', display: 'block' }}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontWeight: 600 }}>
+                    <i className="fa-solid fa-dumbbell" style={{ marginRight: 8, color: 'var(--accent)', fontSize: 12 }} />
                     {s.day?.name ?? t('freeform')}
                   </div>
-                  <div style={{ color: 'var(--muted)', fontSize: 13 }}>
+                  <div style={{ color: 'var(--muted)', fontSize: 13, marginLeft: 22 }}>
                     {s.date.slice(0, 10)} · {s.sets.length} {t('sets')} ·{' '}
                     {s.durationMin ?? 0} {t('min')}
                   </div>
                 </div>
-                <div style={{ color: 'var(--muted)', fontSize: 13 }}>
+                <div style={{ color: 'var(--green)', fontSize: 14, fontWeight: 600 }}>
                   {Math.round(volume)} kg
                 </div>
               </div>
