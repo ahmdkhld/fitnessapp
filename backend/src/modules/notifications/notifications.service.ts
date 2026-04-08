@@ -100,8 +100,16 @@ export class NotificationsService implements OnModuleInit {
    * @param dedupeKey  Optional deduplication key. When provided, duplicate
    *                   notifications with the same key within the TTL window
    *                   (1 hour) will be suppressed.
+   * @param type     Notification category (overdue, recap, stock, custom).
+   *                 Defaults to 'custom'.
    */
-  async send(userId: string, title: string, body: string, dedupeKey?: string) {
+  async send(
+    userId: string,
+    title: string,
+    body: string,
+    dedupeKey?: string,
+    type: string = 'custom',
+  ) {
     // --- Deduplication check ---
     if (dedupeKey) {
       this.pruneDedupeCache();
@@ -130,35 +138,74 @@ export class NotificationsService implements OnModuleInit {
       this.dedupeCache.set(dedupeKey, Date.now());
     }
 
+    // Track which channels actually delivered
+    const deliveredChannels: string[] = [];
+
     // --- Real-time WebSocket delivery (always attempted, independent of FCM) ---
     if (this.wsGateway) {
       this.wsGateway.emitNotification(userId, { title, body });
+      deliveredChannels.push('ws');
     }
 
     if (!this.fcmEnabled || !settings.fcmToken) {
       this.logger.log(`[push:${userId}] ${title} — ${body}`);
-      return;
-    }
-
-    try {
-      await admin.messaging().send({
-        token: settings.fcmToken,
-        notification: { title, body },
-        data: { userId, kind: 'reminder' },
-      });
-    } catch (err) {
-      const code = (err as { code?: string }).code;
-      this.logger.warn(`FCM send failed: ${(err as Error).message}`);
-      if (
-        code === 'messaging/registration-token-not-registered' ||
-        code === 'messaging/invalid-registration-token'
-      ) {
-        await this.prisma.notificationSettings.update({
-          where: { userId },
-          data: { fcmToken: null },
+    } else {
+      try {
+        await admin.messaging().send({
+          token: settings.fcmToken,
+          notification: { title, body },
+          data: { userId, kind: 'reminder' },
         });
+        deliveredChannels.push('push');
+      } catch (err) {
+        const code = (err as { code?: string }).code;
+        this.logger.warn(`FCM send failed: ${(err as Error).message}`);
+        if (
+          code === 'messaging/registration-token-not-registered' ||
+          code === 'messaging/invalid-registration-token'
+        ) {
+          await this.prisma.notificationSettings.update({
+            where: { userId },
+            data: { fcmToken: null },
+          });
+        }
       }
     }
+
+    // --- Persist notification log (best-effort) ---
+    try {
+      const channel = deliveredChannels[0] || 'push';
+      await this.prisma.notificationLog.create({
+        data: { userId, title, body, type, channel },
+      });
+    } catch (logErr) {
+      this.logger.warn(`Failed to persist notification log: ${(logErr as Error).message}`);
+    }
+  }
+
+  // ----------------------------------------------------------------
+  // Notification history
+  // ----------------------------------------------------------------
+
+  async getHistory(userId: string, page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    const [items, total] = await Promise.all([
+      this.prisma.notificationLog.findMany({
+        where: { userId },
+        orderBy: { sentAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.notificationLog.count({ where: { userId } }),
+    ]);
+    return { data: items, total, page, limit };
+  }
+
+  async markRead(userId: string, notificationId: string) {
+    return this.prisma.notificationLog.updateMany({
+      where: { id: notificationId, userId },
+      data: { readAt: new Date() },
+    });
   }
 
   // ----------------------------------------------------------------

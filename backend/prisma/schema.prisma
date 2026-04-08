@@ -40,6 +40,7 @@ model User {
   coachingClients      CoachLink[] @relation("CoachLinks")
   coachedBy            CoachLink[] @relation("ClientLinks")
   nutritionLogs        NutritionLog[]
+  notificationLogs     NotificationLog[]
 
   @@map("users")
 }
@@ -456,4 +457,22 @@ model PersonalRecord {
 
   @@index([userId, exerciseId])
   @@map("personal_records")
+}
+
+// ===== Notification History =====
+
+model NotificationLog {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  title     String    @db.VarChar(200)
+  body      String
+  type      String    @db.VarChar(30) // overdue, recap, stock, custom
+  channel   String    @db.VarChar(10) // push, ws, email
+  sentAt    DateTime  @default(now()) @map("sent_at") @db.Timestamptz()
+  readAt    DateTime? @map("read_at") @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sentAt])
+  @@map("notification_logs")
 }

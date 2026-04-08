@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import * as Sentry from '@sentry/nextjs';
 
 export default function DashboardError({
@@ -10,15 +11,15 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations('errors');
+
   useEffect(() => {
     console.error('Dashboard error:', error);
 
-    // Report to Sentry when available (captureException is safe to call
-    // even if Sentry.init was never invoked — it simply no-ops).
     try {
       Sentry.captureException(error);
     } catch {
-      // Sentry import failed or runtime issue — silent fallback
+      // Sentry import failed or runtime issue -- silent fallback
     }
   }, [error]);
 
@@ -63,7 +64,7 @@ export default function DashboardError({
         </div>
 
         <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem' }}>
-          Something went wrong
+          {t('somethingWentWrong')}
         </h2>
 
         <p
@@ -74,8 +75,7 @@ export default function DashboardError({
             margin: '0 0 1.5rem',
           }}
         >
-          An unexpected error occurred while loading this page. You can try
-          again, or head back to the dashboard overview.
+          {t('unexpectedError')}
         </p>
 
         {error.digest && (
@@ -87,7 +87,7 @@ export default function DashboardError({
               fontFamily: 'monospace',
             }}
           >
-            Error ID: {error.digest}
+            {t('errorId', { id: error.digest })}
           </p>
         )}
 
@@ -105,7 +105,7 @@ export default function DashboardError({
               cursor: 'pointer',
             }}
           >
-            Try again
+            {t('tryAgain')}
           </button>
           <a
             href="/dashboard"
@@ -122,7 +122,7 @@ export default function DashboardError({
               alignItems: 'center',
             }}
           >
-            Go to Overview
+            {t('goToOverview')}
           </a>
         </div>
       </div>

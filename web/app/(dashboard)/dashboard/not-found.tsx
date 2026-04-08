@@ -1,6 +1,9 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
-export default function DashboardNotFound() {
+export default async function DashboardNotFound() {
+  const t = await getTranslations('errors');
+
   return (
     <div
       style={{
@@ -35,7 +38,7 @@ export default function DashboardNotFound() {
         </div>
 
         <h2 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem' }}>
-          Page not found
+          {t('pageNotFound')}
         </h2>
 
         <p
@@ -46,8 +49,7 @@ export default function DashboardNotFound() {
             margin: '0 0 1.5rem',
           }}
         >
-          The dashboard page you are looking for does not exist or may have been
-          moved.
+          {t('pageNotFoundDesc')}
         </p>
 
         <Link
@@ -63,7 +65,7 @@ export default function DashboardNotFound() {
             textDecoration: 'none',
           }}
         >
-          Back to Overview
+          {t('backToOverview')}
         </Link>
       </div>
     </div>

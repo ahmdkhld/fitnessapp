@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { WorkoutPlan } from '@/lib/api';
 import {
   activateWorkoutPlan,
@@ -37,9 +38,11 @@ const button: React.CSSProperties = {
 
 export default async function WorkoutPlansPage() {
   const { plans, error } = await load();
+  const t = await getTranslations('workouts');
+  const tc = await getTranslations('common');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>My workout plans</h1>
+      <h1 style={{ marginTop: 0 }}>{t('myWorkoutPlans')}</h1>
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
 
       <div
@@ -52,7 +55,7 @@ export default async function WorkoutPlansPage() {
           marginBottom: '2rem',
         }}
       >
-        <h3 style={{ marginTop: 0, fontSize: '1rem' }}>Create custom plan</h3>
+        <h3 style={{ marginTop: 0, fontSize: '1rem' }}>{t('createCustomPlan')}</h3>
         <form
           action={createWorkoutPlan}
           style={{
@@ -61,33 +64,33 @@ export default async function WorkoutPlansPage() {
             gap: '0.5rem',
           }}
         >
-          <input name="name" placeholder="Plan name" required style={input} />
-          <input name="splitType" placeholder="Split (e.g. ppl)" style={input} />
+          <input name="name" placeholder={t('dayName')} required style={input} />
+          <input name="splitType" placeholder={t('splitPlaceholder')} style={input} />
           <input
             name="daysPerWeek"
             type="number"
             min="1"
             max="7"
-            placeholder="Days/wk"
+            placeholder={t('daysPerWeek')}
             style={input}
           />
-          <input name="goal" placeholder="Goal" style={input} />
-          <button type="submit" style={button}>Create</button>
+          <input name="goal" placeholder={t('goalPlaceholder')} style={input} />
+          <button type="submit" style={button}>{tc('create')}</button>
         </form>
         <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 12 }}>
-          Or start from a proven template —{' '}
+          {t('orStartFromTemplate')}{' '}
           <Link
             href="/dashboard/workouts/templates"
             style={{ color: 'var(--accent)' }}
           >
-            browse templates
+            {t('browseTemplates')}
           </Link>
           .
         </p>
       </div>
 
       <div style={{ display: 'grid', gap: '0.75rem' }}>
-        {plans.length === 0 && <p style={{ color: 'var(--muted)' }}>No plans yet.</p>}
+        {plans.length === 0 && <p style={{ color: 'var(--muted)' }}>{t('noPlans')}</p>}
         {plans.map((p) => (
           <div
             key={p.id}
@@ -107,7 +110,7 @@ export default async function WorkoutPlansPage() {
             >
               <div style={{ fontWeight: 600 }}>{p.name}</div>
               <div style={{ color: 'var(--muted)', fontSize: 13 }}>
-                {[p.splitType, p.daysPerWeek ? `${p.daysPerWeek}×/wk` : null, p.goal]
+                {[p.splitType, p.daysPerWeek ? `${p.daysPerWeek}x/${t('daysPerWeek')}` : null, p.goal]
                   .filter(Boolean)
                   .join(' · ')}
               </div>
@@ -123,12 +126,12 @@ export default async function WorkoutPlansPage() {
                     fontSize: 12,
                   }}
                 >
-                  Active
+                  {tc('active')}
                 </span>
               ) : (
                 <form action={activateWorkoutPlan.bind(null, p.id)}>
                   <button type="submit" style={{ ...button, padding: '0.4rem 0.75rem' }}>
-                    Activate
+                    {tc('activate')}
                   </button>
                 </form>
               )}
@@ -143,7 +146,7 @@ export default async function WorkoutPlansPage() {
                     borderRadius: 6,
                   }}
                 >
-                  Delete
+                  {tc('delete')}
                 </button>
               </form>
             </div>

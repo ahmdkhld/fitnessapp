@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function ImportPage() {
   const [text, setText] = useState('');
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations('import');
 
   const parse = async () => {
     setLoading(true);
@@ -28,10 +30,9 @@ export default function ImportPage() {
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Import plan</h1>
+      <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
       <p style={{ color: 'var(--muted)' }}>
-        Paste your diet/supplement plan below. NutriTrack will parse meal
-        headings, times, ingredients and supplement dosages for you to review.
+        {t('description')}
       </p>
       <textarea
         value={text}
@@ -63,7 +64,7 @@ export default function ImportPage() {
             opacity: loading || !text ? 0.5 : 1,
           }}
         >
-          {loading ? 'Parsing…' : 'Parse'}
+          {loading ? t('parsing') : t('parse')}
         </button>
       </div>
       {error && (

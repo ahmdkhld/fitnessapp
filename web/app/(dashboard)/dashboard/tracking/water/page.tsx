@@ -1,4 +1,5 @@
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { logWater } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -20,13 +21,15 @@ async function load(): Promise<{ day: WaterDay | null; error: string | null }> {
 
 export default async function WaterPage() {
   const { day, error } = await load();
+  const t = await getTranslations('tracking');
+  const tc = await getTranslations('common');
   const total = day?.totalMl ?? 0;
   const goal = 2500;
   const pct = Math.min(100, Math.round((total / goal) * 100));
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Water</h1>
+      <h1 style={{ marginTop: 0 }}>{t('water')}</h1>
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
 
       <div
@@ -42,7 +45,7 @@ export default async function WaterPage() {
           style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}
         >
           <span style={{ fontSize: 20, fontWeight: 600 }}>{total} ml</span>
-          <span style={{ color: 'var(--muted)' }}>of {goal} ml</span>
+          <span style={{ color: 'var(--muted)' }}>{tc('of')} {goal} ml</span>
         </div>
         <div
           style={{
@@ -85,7 +88,7 @@ export default async function WaterPage() {
 
       {day && day.logs.length > 0 && (
         <div style={{ marginTop: '2rem' }}>
-          <h2 style={{ fontSize: '1.1rem' }}>Today's log</h2>
+          <h2 style={{ fontSize: '1.1rem' }}>{t('todaysLog')}</h2>
           <ul style={{ listStyle: 'none', padding: 0 }}>
             {day.logs.map((l) => (
               <li

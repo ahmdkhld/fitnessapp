@@ -1,4 +1,5 @@
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { createBodyLog } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -32,10 +33,12 @@ const input: React.CSSProperties = {
 
 export default async function BodyLogPage() {
   const { logs, error } = await load();
+  const t = await getTranslations('tracking');
+  const tc = await getTranslations('common');
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Body log</h1>
+      <h1 style={{ marginTop: 0 }}>{t('bodyLogTitle')}</h1>
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
 
       <form
@@ -52,13 +55,13 @@ export default async function BodyLogPage() {
           marginBottom: '2rem',
         }}
       >
-        <input name="weightKg" type="number" step="0.1" placeholder="Weight (kg)" style={input} />
-        <input name="waistCm" type="number" step="0.1" placeholder="Waist (cm)" style={input} />
-        <input name="bodyFatPct" type="number" step="0.1" placeholder="Body fat %" style={input} />
-        <input name="energyLevel" type="number" min="1" max="5" placeholder="Energy 1-5" style={input} />
+        <input name="weightKg" type="number" step="0.1" placeholder={t('weightKg')} style={input} />
+        <input name="waistCm" type="number" step="0.1" placeholder={t('waistCm')} style={input} />
+        <input name="bodyFatPct" type="number" step="0.1" placeholder={t('bodyFatPct')} style={input} />
+        <input name="energyLevel" type="number" min="1" max="5" placeholder={t('energy')} style={input} />
         <input
           name="notes"
-          placeholder="Notes"
+          placeholder={t('notes')}
           style={{ ...input, gridColumn: '1 / span 3' }}
         />
         <button
@@ -72,7 +75,7 @@ export default async function BodyLogPage() {
             cursor: 'pointer',
           }}
         >
-          Log
+          {tc('log')}
         </button>
       </form>
 

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { setTokenCookies } from '@/lib/auth';
 
 async function registerAction(formData: FormData) {
@@ -25,7 +26,7 @@ async function registerAction(formData: FormData) {
   } catch {
     redirect('/register?error=1');
   }
-  redirect('/dashboard');
+  redirect('/dashboard/onboarding');
 }
 
 const input: React.CSSProperties = {
@@ -45,16 +46,18 @@ const button: React.CSSProperties = {
   cursor: 'pointer',
 };
 
-export default function RegisterPage({
+export default async function RegisterPage({
   searchParams,
 }: {
   searchParams: { error?: string };
 }) {
+  const t = await getTranslations('auth');
+
   return (
     <main style={{ padding: '4rem 2rem', maxWidth: 400, margin: '0 auto' }}>
-      <h1>Create account</h1>
+      <h1>{t('createAccount')}</h1>
       {searchParams.error && (
-        <p style={{ color: '#e07b5f' }}>Registration failed. Try a different email.</p>
+        <p style={{ color: '#e07b5f' }}>{t('registrationFailed')}</p>
       )}
       <form
         action={registerAction}
@@ -65,21 +68,21 @@ export default function RegisterPage({
           marginTop: '2rem',
         }}
       >
-        <input name="fullName" placeholder="Full name" style={input} />
-        <input name="email" type="email" placeholder="Email" style={input} required />
+        <input name="fullName" placeholder={t('fullName')} style={input} />
+        <input name="email" type="email" placeholder={t('emailPlaceholder')} style={input} required />
         <input
           name="password"
           type="password"
-          placeholder="Password (min 8 chars)"
+          placeholder={t('passwordPlaceholder')}
           minLength={8}
           style={input}
           required
         />
         <button type="submit" style={button}>
-          Create account
+          {t('createAccount')}
         </button>
         <Link href="/login" style={{ color: 'var(--muted)', textAlign: 'center' }}>
-          I already have an account
+          {t('alreadyHaveAccount')}
         </Link>
       </form>
     </main>

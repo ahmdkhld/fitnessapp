@@ -7,6 +7,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { SocialLoginDto } from './dto/social-login.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 
@@ -53,6 +54,15 @@ export class AuthController {
   @SetMetadata(IS_PUBLIC_KEY, false) // Override class-level @Public() — requires JWT
   resendVerification(@Request() req: { user: { userId: string } }) {
     return this.auth.resendVerification(req.user.userId);
+  }
+
+  @Post('change-password')
+  @SetMetadata(IS_PUBLIC_KEY, false) // Override class-level @Public() — requires JWT
+  changePassword(
+    @Request() req: { user: { userId: string } },
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.auth.changePassword(req.user.userId, dto.currentPassword, dto.newPassword);
   }
 
   @Post('forgot-password')

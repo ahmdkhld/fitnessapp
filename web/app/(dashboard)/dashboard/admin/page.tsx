@@ -1,4 +1,5 @@
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { setUserRole } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -12,6 +13,13 @@ interface AdminUser {
   createdAt: string;
 }
 
+interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 interface AdminStats {
   users: number;
   coaches: number;
@@ -19,27 +27,28 @@ interface AdminStats {
   completedSessions: number;
 }
 
-async function load(search: string) {
+async function load(search: string, page: number) {
   try {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
+    params.set('page', String(page));
+    params.set('limit', '20');
     const [usersRes, statsRes] = await Promise.all([
       authedFetch(`/admin/users?${params.toString()}`),
       authedFetch('/admin/stats'),
     ]);
+    const usersBody = await usersRes.json();
     return {
-      users: (await usersRes.json()) as AdminUser[],
+      users: usersBody.data as AdminUser[],
+      meta: usersBody.meta as PaginationMeta,
       stats: (await statsRes.json()) as AdminStats,
       forbidden: false,
       error: null as string | null,
     };
   } catch (e) {
     const message = (e as Error).message;
-    // server-fetch throws "API <status>: <body>" — sniff a 403 so we
-    // can render a friendly "you don't have access" view instead of a
-    // raw exception string.
     const forbidden = /^API 403/.test(message);
-    return { users: [], stats: null, forbidden, error: message };
+    return { users: [], meta: null, stats: null, forbidden, error: message };
   }
 }
 
@@ -70,20 +79,25 @@ const ghost: React.CSSProperties = {
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: { search?: string };
+  searchParams: { search?: string; page?: string };
 }) {
-  const { users, stats, forbidden, error } = await load(searchParams.search ?? '');
+  const t = await getTranslations('admin');
+  const tc = await getTranslations('common');
+  const currentPage = Math.max(1, parseInt(searchParams.page ?? '1', 10) || 1);
+  const { users, meta, stats, forbidden, error } = await load(
+    searchParams.search ?? '',
+    currentPage,
+  );
   if (forbidden) {
     return (
       <div>
-        <h1 style={{ marginTop: 0 }}>Admin</h1>
+        <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
         <div style={{ ...card, marginTop: '1rem' }}>
           <div style={{ fontWeight: 600, fontSize: '1.05rem' }}>
-            Admin role required
+            {t('adminRoleRequired')}
           </div>
           <p style={{ color: 'var(--muted)', marginTop: 6 }}>
-            Your account doesn't have access to this page. Ask an existing
-            admin to promote you (or use the API if you're the first user).
+            {t('noAccessDesc')}
           </p>
         </div>
       </div>
@@ -91,10 +105,9 @@ export default async function AdminPage({
   }
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Admin</h1>
+      <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
       <p style={{ color: 'var(--muted)' }}>
-        Promote users to coach or admin, browse the user table, and view
-        platform totals. Requires the <code>admin</code> role.
+        {t('description')}
       </p>
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
 
@@ -108,20 +121,20 @@ export default async function AdminPage({
           }}
         >
           <div style={card}>
-            <div style={{ color: 'var(--muted)', fontSize: 13 }}>Users</div>
+            <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('users')}</div>
             <div style={{ fontSize: 28, fontWeight: 600 }}>{stats.users}</div>
           </div>
           <div style={card}>
-            <div style={{ color: 'var(--muted)', fontSize: 13 }}>Coaches</div>
+            <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('coaches')}</div>
             <div style={{ fontSize: 28, fontWeight: 600 }}>{stats.coaches}</div>
           </div>
           <div style={card}>
-            <div style={{ color: 'var(--muted)', fontSize: 13 }}>Workout plans</div>
+            <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('workoutPlans')}</div>
             <div style={{ fontSize: 28, fontWeight: 600 }}>{stats.workoutPlans}</div>
           </div>
           <div style={card}>
             <div style={{ color: 'var(--muted)', fontSize: 13 }}>
-              Completed sessions
+              {t('completedSessions')}
             </div>
             <div style={{ fontSize: 28, fontWeight: 600 }}>
               {stats.completedSessions}
@@ -137,7 +150,7 @@ export default async function AdminPage({
         <input
           name="search"
           defaultValue={searchParams.search ?? ''}
-          placeholder="Search by email or name"
+          placeholder={t('searchPlaceholder')}
           style={{
             flex: 1,
             padding: '0.6rem 0.75rem',
@@ -147,11 +160,11 @@ export default async function AdminPage({
             color: 'var(--fg)',
           }}
         />
-        <button type="submit" style={ghost}>Filter</button>
+        <button type="submit" style={ghost}>{tc('filter')}</button>
       </form>
 
       <div style={{ display: 'grid', gap: '0.5rem', marginTop: '1rem' }}>
-        {users.length === 0 && <p style={{ color: 'var(--muted)' }}>No users.</p>}
+        {users.length === 0 && <p style={{ color: 'var(--muted)' }}>{t('noUsers')}</p>}
         {users.map((u) => (
           <div
             key={u.id}
@@ -160,7 +173,7 @@ export default async function AdminPage({
             <div>
               <div style={{ fontWeight: 600 }}>{u.fullName ?? u.email}</div>
               <div style={{ color: 'var(--muted)', fontSize: 12 }}>
-                {u.email} · {u.role} · joined {u.createdAt.slice(0, 10)}
+                {u.email} · {u.role} · {t('joined')} {u.createdAt.slice(0, 10)}
               </div>
             </div>
             <div style={{ display: 'flex', gap: '0.4rem' }}>
@@ -179,6 +192,66 @@ export default async function AdminPage({
           </div>
         ))}
       </div>
+
+      {meta && meta.totalPages > 1 && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1rem',
+            marginTop: '1.5rem',
+          }}
+        >
+          {currentPage > 1 ? (
+            <a
+              href={`?${new URLSearchParams({
+                ...(searchParams.search ? { search: searchParams.search } : {}),
+                page: String(currentPage - 1),
+              }).toString()}`}
+              style={{
+                ...ghost,
+                textDecoration: 'none',
+                display: 'inline-block',
+              }}
+            >
+              {tc('back')}
+            </a>
+          ) : (
+            <span
+              style={{ ...ghost, opacity: 0.4, cursor: 'default' }}
+            >
+              {tc('back')}
+            </span>
+          )}
+
+          <span style={{ color: 'var(--muted)', fontSize: 13 }}>
+            {meta.page} / {meta.totalPages} ({meta.total} {t('users').toLowerCase()})
+          </span>
+
+          {currentPage < meta.totalPages ? (
+            <a
+              href={`?${new URLSearchParams({
+                ...(searchParams.search ? { search: searchParams.search } : {}),
+                page: String(currentPage + 1),
+              }).toString()}`}
+              style={{
+                ...ghost,
+                textDecoration: 'none',
+                display: 'inline-block',
+              }}
+            >
+              {tc('next')}
+            </a>
+          ) : (
+            <span
+              style={{ ...ghost, opacity: 0.4, cursor: 'default' }}
+            >
+              {tc('next')}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

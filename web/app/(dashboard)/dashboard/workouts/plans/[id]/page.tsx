@@ -1,4 +1,5 @@
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { Exercise, WorkoutPlan } from '@/lib/api';
 import {
   addDay,
@@ -54,14 +55,16 @@ export default async function WorkoutPlanDetail({
   params: { id: string };
 }) {
   const { plan, library, error } = await load(params.id);
+  const t = await getTranslations('workouts');
+  const tc = await getTranslations('common');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{plan?.name ?? 'Workout plan'}</h1>
+      <h1 style={{ marginTop: 0 }}>{plan?.name ?? t('workoutPlan')}</h1>
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
       {plan && (
         <>
           <p style={{ color: 'var(--muted)' }}>
-            {[plan.splitType, `${plan.daysPerWeek ?? '-'} days/week`, plan.goal]
+            {[plan.splitType, `${plan.daysPerWeek ?? '-'} ${t('daysPerWeek')}`, plan.goal]
               .filter(Boolean)
               .join(' · ')}
           </p>
@@ -79,9 +82,9 @@ export default async function WorkoutPlanDetail({
               marginBottom: '1.5rem',
             }}
           >
-            <input name="name" placeholder="Day name" required style={input} />
+            <input name="name" placeholder={t('dayName')} required style={input} />
             <select name="dayOfWeek" style={input}>
-              <option value="">Flexible</option>
+              <option value="">{t('flexible')}</option>
               <option value="1">Mon</option>
               <option value="2">Tue</option>
               <option value="3">Wed</option>
@@ -91,7 +94,7 @@ export default async function WorkoutPlanDetail({
               <option value="7">Sun</option>
             </select>
             <button type="submit" style={button}>
-              Add day
+              {t('addDay')}
             </button>
           </form>
 
@@ -121,9 +124,9 @@ export default async function WorkoutPlanDetail({
                       {[
                         dayName(d.dayOfWeek),
                         d.estimatedDurationMin
-                          ? `${d.estimatedDurationMin} min`
+                          ? `${d.estimatedDurationMin} ${t('min')}`
                           : null,
-                        `${d.exercises.length} exercises`,
+                        `${d.exercises.length} ${t('exercises')}`,
                       ]
                         .filter(Boolean)
                         .join(' · ')}
@@ -132,7 +135,7 @@ export default async function WorkoutPlanDetail({
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <form action={startSession.bind(null, d.id)}>
                       <button type="submit" style={button}>
-                        Start
+                        {tc('start')}
                       </button>
                     </form>
                     <form action={removeDay.bind(null, plan.id, d.id)}>
@@ -145,7 +148,7 @@ export default async function WorkoutPlanDetail({
                           border: '1px solid #6a2a2a',
                         }}
                       >
-                        Remove day
+                        {t('removeDay')}
                       </button>
                     </form>
                   </div>
@@ -172,7 +175,7 @@ export default async function WorkoutPlanDetail({
                       <div>
                         <div>{e.exercise.name}</div>
                         <div style={{ color: 'var(--muted)', fontSize: 12 }}>
-                          {e.targetSets}×{e.targetReps ?? '?'}
+                          {e.targetSets}x{e.targetReps ?? '?'}
                           {e.targetWeightKg != null && ` @ ${e.targetWeightKg}kg`}
                           {e.restSeconds != null && ` · rest ${e.restSeconds}s`}
                           {e.supersetGroup && ` · SS ${e.supersetGroup}`}
@@ -195,7 +198,7 @@ export default async function WorkoutPlanDetail({
                             cursor: 'pointer',
                           }}
                         >
-                          ×
+                          x
                         </button>
                       </form>
                     </div>
@@ -212,7 +215,7 @@ export default async function WorkoutPlanDetail({
                   }}
                 >
                   <select name="exerciseId" required style={input}>
-                    <option value="">Pick exercise…</option>
+                    <option value="">{t('pickExercise')}</option>
                     {library.map((ex) => (
                       <option key={ex.id} value={ex.id}>
                         {ex.name}
@@ -222,13 +225,13 @@ export default async function WorkoutPlanDetail({
                   <input
                     name="targetSets"
                     type="number"
-                    placeholder="Sets"
+                    placeholder={t('sets')}
                     defaultValue={3}
                     style={input}
                   />
                   <input
                     name="targetReps"
-                    placeholder="Reps"
+                    placeholder={t('reps')}
                     defaultValue="8-12"
                     style={input}
                   />
@@ -260,7 +263,7 @@ export default async function WorkoutPlanDetail({
                     style={input}
                   />
                   <button type="submit" style={button}>
-                    Add
+                    {tc('add')}
                   </button>
                 </form>
               </div>

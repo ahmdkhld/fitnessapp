@@ -1,4 +1,5 @@
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { createMeal, deleteMeal } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -44,11 +45,13 @@ export default async function DietPlanDetailPage({
   params: { id: string };
 }) {
   const { plan, error } = await load(params.id);
+  const t = await getTranslations('dietPlans');
+  const tc = await getTranslations('common');
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{plan?.name ?? 'Diet plan'}</h1>
-      {plan?.goal && <p style={{ color: 'var(--muted)' }}>Goal: {plan.goal}</p>}
+      <h1 style={{ marginTop: 0 }}>{plan?.name ?? t('dietPlan')}</h1>
+      {plan?.goal && <p style={{ color: 'var(--muted)' }}>{t('goal', { goal: plan.goal })}</p>}
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
 
       <div
@@ -61,7 +64,7 @@ export default async function DietPlanDetailPage({
           marginBottom: '2rem',
         }}
       >
-        <h3 style={{ marginTop: 0, fontSize: '1rem' }}>Add meal</h3>
+        <h3 style={{ marginTop: 0, fontSize: '1rem' }}>{t('addMeal')}</h3>
         <form
           action={createMeal.bind(null, params.id)}
           style={{
@@ -71,14 +74,14 @@ export default async function DietPlanDetailPage({
             alignItems: 'end',
           }}
         >
-          <input name="name" placeholder="Meal name" required style={input} />
+          <input name="name" placeholder={t('mealName')} required style={input} />
           <input name="scheduledTime" type="time" defaultValue="08:00" style={input} />
           <input name="calories" type="number" placeholder="kcal" style={input} />
           <input name="proteinG" type="number" placeholder="P" style={input} />
           <input name="carbsG" type="number" placeholder="C" style={input} />
           <input name="fatG" type="number" placeholder="F" style={input} />
           <button type="submit" style={button}>
-            Add
+            {tc('add')}
           </button>
         </form>
       </div>
@@ -129,7 +132,7 @@ export default async function DietPlanDetailPage({
                   border: '1px solid #6a2a2a',
                 }}
               >
-                Delete
+                {tc('delete')}
               </button>
             </form>
           </div>

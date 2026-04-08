@@ -1,5 +1,6 @@
 import { api } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,6 +18,7 @@ async function load() {
 
 export default async function ExportPage() {
   const { report, error } = await load();
+  const t = await getTranslations('export');
   const to = new Date().toISOString().slice(0, 10);
   const from = new Date(Date.now() - 13 * 864e5).toISOString().slice(0, 10);
   const pdfHref = `/api/proxy/export/report.pdf?from=${from}&to=${to}`;
@@ -30,7 +32,7 @@ export default async function ExportPage() {
           alignItems: 'center',
         }}
       >
-        <h1 style={{ marginTop: 0 }}>Coach report (last 14 days)</h1>
+        <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <a
             href={pdfHref}
@@ -42,13 +44,12 @@ export default async function ExportPage() {
               textDecoration: 'none',
             }}
           >
-            Download PDF
+            {t('downloadPdf')}
           </a>
         </div>
       </div>
       <p style={{ color: 'var(--muted)' }}>
-        The JSON below is also rendered as a printable PDF from the backend.
-        Use your browser's print dialog as a fallback.
+        {t('description')}
       </p>
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
       {report && (

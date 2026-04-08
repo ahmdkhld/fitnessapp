@@ -1,4 +1,5 @@
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { WorkoutSession, WorkoutPlan } from '@/lib/api';
 import {
   completeSessionAction,
@@ -21,8 +22,6 @@ async function load(id: string): Promise<ActiveSessionData> {
       day?: { id: string; plan: { id: string } } | null;
     };
 
-    // If the session is tied to a workout day, load the parent plan so we
-    // can render the prescribed exercise list with targets.
     let day: ActiveSessionData['day'] = null;
     const sessionDay = session.day as
       | { id: string; plan: { id: string } }
@@ -65,8 +64,10 @@ export default async function ActiveSessionPage({
   params: { id: string };
 }) {
   const { session, day, error } = await load(params.id);
+  const t = await getTranslations('workouts');
+  const tc = await getTranslations('common');
   if (error) return <p style={{ color: '#e07b5f' }}>{error}</p>;
-  if (!session) return <p>Not found</p>;
+  if (!session) return <p>{tc('notFound')}</p>;
 
   const setsByExercise = new Map<string, typeof session.sets>();
   for (const s of session.sets) {
@@ -84,16 +85,16 @@ export default async function ActiveSessionPage({
         }}
       >
         <h1 style={{ marginTop: 0 }}>
-          {day?.name ?? session.day?.name ?? 'Freeform workout'}
+          {day?.name ?? session.day?.name ?? t('freeformWorkout')}
         </h1>
         <form action={completeSessionAction.bind(null, session.id)}>
           <button type="submit" style={button}>
-            Finish workout
+            {t('finishWorkout')}
           </button>
         </form>
       </div>
       <p style={{ color: 'var(--muted)' }}>
-        Started {session.date.slice(0, 10)} · {session.sets.length} sets logged
+        {t('started', { date: session.date.slice(0, 10) })} · {t('setsLogged', { count: session.sets.length })}
       </p>
 
       {!day && session.sets.length === 0 && (
@@ -107,13 +108,10 @@ export default async function ActiveSessionPage({
             color: 'var(--muted)',
           }}
         >
-          Freeform session — log sets from the mobile app, or pick a plan day
-          to start with prescribed targets.
+          {t('freeformNote')}
         </div>
       )}
 
-      {/* Freeform mode: render whatever has already been logged so the
-          user can at least see and finish the session from the web. */}
       {!day && session.sets.length > 0 && (
         <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1.5rem' }}>
           {[...setsByExercise.entries()].map(([exId, sets]) => (
@@ -146,7 +144,7 @@ export default async function ActiveSessionPage({
                   <span>
                     {[
                       s.weightKg != null ? `${s.weightKg} kg` : null,
-                      s.reps != null ? `${s.reps} reps` : null,
+                      s.reps != null ? `${s.reps} ${t('reps').toLowerCase()}` : null,
                       s.durationSec != null ? `${s.durationSec}s` : null,
                       s.distanceKm != null ? `${s.distanceKm} km` : null,
                     ]
@@ -177,7 +175,7 @@ export default async function ActiveSessionPage({
             >
               <div style={{ fontWeight: 600 }}>{px.exercise.name}</div>
               <div style={{ color: 'var(--muted)', fontSize: 13 }}>
-                Target {px.targetSets} × {px.targetReps ?? '?'}
+                {t('target')} {px.targetSets} x {px.targetReps ?? '?'}
                 {px.targetWeightKg != null && ` @ ${px.targetWeightKg}kg`}
                 {px.restSeconds != null && ` · rest ${px.restSeconds}s`}
               </div>
@@ -201,7 +199,7 @@ export default async function ActiveSessionPage({
                     <span>
                       {[
                         s.weightKg != null ? `${s.weightKg} kg` : null,
-                        s.reps != null ? `${s.reps} reps` : null,
+                        s.reps != null ? `${s.reps} ${t('reps').toLowerCase()}` : null,
                         s.durationSec != null ? `${s.durationSec}s` : null,
                         s.distanceKm != null ? `${s.distanceKm} km` : null,
                       ]
@@ -219,7 +217,7 @@ export default async function ActiveSessionPage({
                           cursor: 'pointer',
                         }}
                       >
-                        ×
+                        x
                       </button>
                     </form>
                   </div>
@@ -243,14 +241,14 @@ export default async function ActiveSessionPage({
                     <input
                       name="durationSec"
                       type="number"
-                      placeholder="Duration s"
+                      placeholder={`${t('duration')} s`}
                       style={{ ...input, width: 120 }}
                     />
                     <input
                       name="distanceKm"
                       type="number"
                       step="0.01"
-                      placeholder="Distance km"
+                      placeholder={`${t('distance')} km`}
                       style={{ ...input, width: 120 }}
                     />
                   </>
@@ -267,7 +265,7 @@ export default async function ActiveSessionPage({
                     <input
                       name="reps"
                       type="number"
-                      placeholder="reps"
+                      placeholder={t('reps').toLowerCase()}
                       style={input}
                     />
                     <input
@@ -280,7 +278,7 @@ export default async function ActiveSessionPage({
                   </>
                 )}
                 <button type="submit" style={button}>
-                  Log set #{nextSetNumber}
+                  {t('logSet', { number: nextSetNumber })}
                 </button>
               </form>
             </div>

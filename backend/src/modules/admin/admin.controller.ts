@@ -15,7 +15,12 @@ export class AdminController {
 
   @Get('users')
   list(@CurrentUser() user: AuthUser, @Query() query: ListUsersQueryDto) {
-    return this.admin.listUsers(user.userId, { search: query.search, role: query.role });
+    return this.admin.listUsers(user.userId, {
+      search: query.search,
+      role: query.role,
+      page: query.page ?? 1,
+      limit: query.limit ?? 20,
+    });
   }
 
   @Patch('users/:id/role')

@@ -1,4 +1,5 @@
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { WorkoutSession } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
@@ -18,8 +19,10 @@ export default async function SessionDetail({
   params: { id: string };
 }) {
   const { session, error } = await load(params.id);
+  const t = await getTranslations('workouts');
+  const tc = await getTranslations('common');
   if (error) return <p style={{ color: '#e07b5f' }}>{error}</p>;
-  if (!session) return <p>Not found</p>;
+  if (!session) return <p>{tc('notFound')}</p>;
 
   const byExercise = new Map<string, WorkoutSession['sets']>();
   for (const s of session.sets) {
@@ -29,10 +32,10 @@ export default async function SessionDetail({
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>{session.day?.name ?? 'Freeform workout'}</h1>
+      <h1 style={{ marginTop: 0 }}>{session.day?.name ?? t('freeformWorkout')}</h1>
       <p style={{ color: 'var(--muted)' }}>
-        {session.date.slice(0, 10)} · {session.durationMin ?? 0} min ·{' '}
-        {session.sets.length} sets
+        {session.date.slice(0, 10)} · {session.durationMin ?? 0} {t('min')} ·{' '}
+        {session.sets.length} {t('sets')}
       </p>
       <div style={{ display: 'grid', gap: '1rem', marginTop: '1.5rem' }}>
         {[...byExercise.entries()].map(([exId, sets]) => (
@@ -52,10 +55,10 @@ export default async function SessionDetail({
               <thead>
                 <tr style={{ color: 'var(--muted)', fontSize: 12 }}>
                   <th style={{ textAlign: 'left' }}>#</th>
-                  <th style={{ textAlign: 'left' }}>Weight</th>
-                  <th style={{ textAlign: 'left' }}>Reps</th>
-                  <th style={{ textAlign: 'left' }}>Duration</th>
-                  <th style={{ textAlign: 'left' }}>Distance</th>
+                  <th style={{ textAlign: 'left' }}>{t('weight')}</th>
+                  <th style={{ textAlign: 'left' }}>{t('reps')}</th>
+                  <th style={{ textAlign: 'left' }}>{t('duration')}</th>
+                  <th style={{ textAlign: 'left' }}>{t('distance')}</th>
                 </tr>
               </thead>
               <tbody>

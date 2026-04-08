@@ -25,7 +25,8 @@ async function bootstrap() {
     origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3001'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
+    exposedHeaders: ['X-Request-Id'],
   });
 
   app.setGlobalPrefix('api');

@@ -11,6 +11,7 @@ import '../features/analytics/screens/dashboard_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
 import '../features/settings/screens/notification_settings_screen.dart';
 import '../features/settings/screens/profile_screen.dart';
+import '../features/settings/screens/change_password_screen.dart';
 import '../features/tracking/screens/water_tracker_screen.dart';
 import '../features/tracking/screens/body_log_screen.dart';
 import '../features/diet_plan/screens/diet_plans_list_screen.dart';
@@ -96,6 +97,10 @@ class AppRouter {
         GoRoute(
           path: '/settings/profile',
           builder: (_, __) => const ProfileScreen(),
+        ),
+        GoRoute(
+          path: '/settings/change-password',
+          builder: (_, __) => const ChangePasswordScreen(),
         ),
         GoRoute(
           path: '/workouts/plans',

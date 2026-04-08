@@ -1,19 +1,9 @@
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { Exercise } from '@/lib/api';
 import { createExercise } from './actions';
 
 export const dynamic = 'force-dynamic';
-
-const categories = [
-  { key: '', label: 'All' },
-  { key: 'push', label: 'Push' },
-  { key: 'pull', label: 'Pull' },
-  { key: 'legs', label: 'Legs' },
-  { key: 'core', label: 'Core' },
-  { key: 'cardio', label: 'Cardio' },
-  { key: 'full_body', label: 'Full body' },
-  { key: 'mobility', label: 'Mobility' },
-];
 
 async function load(category: string, search: string) {
   const params = new URLSearchParams();
@@ -35,13 +25,25 @@ export default async function ExerciseLibraryPage({
   const category = searchParams.category ?? '';
   const search = searchParams.search ?? '';
   const { exercises, error } = await load(category, search);
+  const t = await getTranslations('workouts');
+  const tc = await getTranslations('common');
+
+  const categories = [
+    { key: '', label: t('all') },
+    { key: 'push', label: t('push') },
+    { key: 'pull', label: t('pull') },
+    { key: 'legs', label: t('legs') },
+    { key: 'core', label: t('core') },
+    { key: 'cardio', label: t('cardio') },
+    { key: 'full_body', label: t('fullBody') },
+    { key: 'mobility', label: t('mobility') },
+  ];
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Exercise library</h1>
+      <h1 style={{ marginTop: 0 }}>{t('exerciseLibrary')}</h1>
       <p style={{ color: 'var(--muted)' }}>
-        {exercises.length} exercises · browse, filter and search the built-in
-        library plus any custom exercises you've created.
+        {t('exerciseCount', { count: exercises.length })}
       </p>
 
       <form
@@ -57,7 +59,7 @@ export default async function ExerciseLibraryPage({
         <input
           name="search"
           defaultValue={search}
-          placeholder="Search exercises"
+          placeholder={t('searchExercises')}
           style={{
             flex: '1 1 240px',
             padding: '0.6rem 0.75rem',
@@ -95,7 +97,7 @@ export default async function ExerciseLibraryPage({
             cursor: 'pointer',
           }}
         >
-          Filter
+          {tc('filter')}
         </button>
       </form>
 
@@ -111,7 +113,7 @@ export default async function ExerciseLibraryPage({
         }}
       >
         <summary style={{ cursor: 'pointer', fontWeight: 600 }}>
-          + Create custom exercise
+          {t('createCustomExercise')}
         </summary>
         <form
           action={createExercise}
@@ -125,7 +127,7 @@ export default async function ExerciseLibraryPage({
         >
           <input
             name="name"
-            placeholder="Exercise name"
+            placeholder={t('exerciseName')}
             required
             style={{
               padding: '0.6rem 0.75rem',
@@ -153,7 +155,7 @@ export default async function ExerciseLibraryPage({
           </select>
           <input
             name="primaryMuscle"
-            placeholder="Primary muscle"
+            placeholder={t('primaryMuscle')}
             style={{
               padding: '0.6rem 0.75rem',
               background: 'var(--bg)',
@@ -164,7 +166,7 @@ export default async function ExerciseLibraryPage({
           />
           <input
             name="equipment"
-            placeholder="Equipment"
+            placeholder={t('equipment')}
             style={{
               padding: '0.6rem 0.75rem',
               background: 'var(--bg)',
@@ -181,12 +183,12 @@ export default async function ExerciseLibraryPage({
               gap: 6,
             }}
           >
-            <input type="checkbox" name="isCardio" /> Cardio
+            <input type="checkbox" name="isCardio" /> {t('cardio')}
           </label>
           <label
             style={{ display: 'flex', alignItems: 'center', gap: 6 }}
           >
-            <input type="checkbox" name="isUnilateral" /> Unilateral
+            <input type="checkbox" name="isUnilateral" /> {t('unilateral')}
           </label>
           <button
             type="submit"
@@ -199,7 +201,7 @@ export default async function ExerciseLibraryPage({
               cursor: 'pointer',
             }}
           >
-            Create
+            {tc('create')}
           </button>
         </form>
       </details>
@@ -238,7 +240,7 @@ export default async function ExerciseLibraryPage({
                     borderRadius: 999,
                   }}
                 >
-                  cardio
+                  {t('cardio')}
                 </span>
               )}
               {e.isUnilateral && (
@@ -251,7 +253,7 @@ export default async function ExerciseLibraryPage({
                     borderRadius: 999,
                   }}
                 >
-                  unilateral
+                  {t('unilateral')}
                 </span>
               )}
               {e.userId && (
@@ -264,7 +266,7 @@ export default async function ExerciseLibraryPage({
                     borderRadius: 999,
                   }}
                 >
-                  custom
+                  {t('custom')}
                 </span>
               )}
             </div>

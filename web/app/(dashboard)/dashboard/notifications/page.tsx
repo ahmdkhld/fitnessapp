@@ -1,11 +1,23 @@
+import { getTranslations } from 'next-intl/server';
 import { updateNotifications } from './actions';
 
-export default function NotificationSettingsPage() {
+export default async function NotificationSettingsPage() {
+  const t = await getTranslations('notifications');
+  const tc = await getTranslations('common');
+
+  const checkboxes: [string, string][] = [
+    ['pushEnabled', t('pushEnabled')],
+    ['mealReminder', t('mealReminder')],
+    ['supplementReminder', t('supplementReminder')],
+    ['waterReminder', t('waterReminder')],
+    ['overdueReminder', t('overdueReminder')],
+  ];
+
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Notification settings</h1>
+      <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
       <p style={{ color: 'var(--muted)' }}>
-        Control which reminders you receive and how far in advance.
+        {t('description')}
       </p>
       <form
         action={updateNotifications}
@@ -20,13 +32,7 @@ export default function NotificationSettingsPage() {
           maxWidth: 500,
         }}
       >
-        {[
-          ['pushEnabled', 'Push notifications'],
-          ['mealReminder', 'Meal reminders'],
-          ['supplementReminder', 'Supplement reminders'],
-          ['waterReminder', 'Water reminders'],
-          ['overdueReminder', 'Overdue alerts'],
-        ].map(([name, label]) => (
+        {checkboxes.map(([name, label]) => (
           <label
             key={name}
             style={{ display: 'flex', alignItems: 'center', gap: 12 }}
@@ -36,7 +42,7 @@ export default function NotificationSettingsPage() {
           </label>
         ))}
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          Advance notice (minutes)
+          {t('advanceMinutes')}
           <input
             name="advanceMinutes"
             type="number"
@@ -65,7 +71,7 @@ export default function NotificationSettingsPage() {
             justifySelf: 'start',
           }}
         >
-          Save
+          {tc('save')}
         </button>
       </form>
     </div>

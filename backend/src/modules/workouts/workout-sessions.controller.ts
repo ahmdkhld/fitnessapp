@@ -15,6 +15,7 @@ import { StartSessionDto } from './dto/start-session.dto';
 import { CompleteSessionDto } from './dto/complete-session.dto';
 import { CreateSetDto } from './dto/create-set.dto';
 import { UpdateSetDto } from './dto/update-set.dto';
+import { ListSessionsQueryDto } from './dto/list-sessions-query.dto';
 
 @ApiTags('workout-sessions')
 @ApiBearerAuth()
@@ -28,16 +29,13 @@ export class WorkoutSessionsController {
   }
 
   @Get()
-  list(
-    @CurrentUser() user: AuthUser,
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-  ) {
-    return this.service.list(
-      user.userId,
-      from ? new Date(from) : undefined,
-      to ? new Date(to) : undefined,
-    );
+  list(@CurrentUser() user: AuthUser, @Query() query: ListSessionsQueryDto) {
+    return this.service.list(user.userId, {
+      from: query.from ? new Date(query.from) : undefined,
+      to: query.to ? new Date(query.to) : undefined,
+      page: query.page ?? 1,
+      limit: query.limit ?? 20,
+    });
   }
 
   @Get(':id')

@@ -103,5 +103,17 @@
   "coachReportSessions": "sessions",
   "coachReportMinutes": "minutes",
   "coachReportDownloadPdf": "Download PDF",
-  "coachReportPdfError": "Could not download PDF"
+  "coachReportPdfError": "Could not download PDF",
+  "changePasswordTitle": "Change password",
+  "changePasswordSubtitle": "After changing your password you will be signed out and need to log in again.",
+  "changePasswordCurrent": "Current password",
+  "changePasswordNew": "New password",
+  "changePasswordConfirm": "Confirm new password",
+  "changePasswordMinLength": "Must be at least 8 characters",
+  "changePasswordMismatch": "Passwords do not match",
+  "changePasswordRequired": "This field is required",
+  "changePasswordSubmit": "Change password",
+  "changePasswordSuccess": "Password changed successfully",
+  "changePasswordWrongCurrent": "Current password is incorrect",
+  "changePasswordError": "Something went wrong. Please try again."
 }

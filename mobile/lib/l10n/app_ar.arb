@@ -103,5 +103,17 @@
   "coachReportSessions": "جلسات",
   "coachReportMinutes": "دقيقة",
   "coachReportDownloadPdf": "تحميل PDF",
-  "coachReportPdfError": "تعذر تحميل PDF"
+  "coachReportPdfError": "تعذر تحميل PDF",
+  "changePasswordTitle": "تغيير كلمة المرور",
+  "changePasswordSubtitle": "بعد تغيير كلمة المرور ستحتاج إلى تسجيل الدخول مرة أخرى.",
+  "changePasswordCurrent": "كلمة المرور الحالية",
+  "changePasswordNew": "كلمة المرور الجديدة",
+  "changePasswordConfirm": "تأكيد كلمة المرور الجديدة",
+  "changePasswordMinLength": "يجب أن تكون 8 أحرف على الأقل",
+  "changePasswordMismatch": "كلمتا المرور غير متطابقتين",
+  "changePasswordRequired": "هذا الحقل مطلوب",
+  "changePasswordSubmit": "تغيير كلمة المرور",
+  "changePasswordSuccess": "تم تغيير كلمة المرور بنجاح",
+  "changePasswordWrongCurrent": "كلمة المرور الحالية غير صحيحة",
+  "changePasswordError": "حدث خطأ. يرجى المحاولة مرة أخرى."
 }

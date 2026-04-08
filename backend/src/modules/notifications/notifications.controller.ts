@@ -1,5 +1,15 @@
-import { Body, Controller, Patch, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 import { NotificationsService } from './notifications.service';
 import { RegisterDeviceDto } from './dto/register-device.dto';
@@ -22,5 +32,21 @@ export class NotificationsController {
     @Body() dto: UpdateNotificationSettingsDto,
   ) {
     return this.notifs.updateSettings(user.userId, dto);
+  }
+
+  @Get('history')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  getHistory(
+    @CurrentUser() user: AuthUser,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
+  ) {
+    return this.notifs.getHistory(user.userId, page, Math.min(limit, 100));
+  }
+
+  @Patch(':id/read')
+  markRead(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.notifs.markRead(user.userId, id);
   }
 }

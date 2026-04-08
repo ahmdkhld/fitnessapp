@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { api } from '@/lib/api';
 import { setTokenCookies } from '@/lib/auth';
 
@@ -21,16 +22,18 @@ async function loginAction(formData: FormData) {
   redirect(safeDest);
 }
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
   searchParams: { error?: string; redirect?: string };
 }) {
+  const t = await getTranslations('auth');
+
   return (
     <main style={{ padding: '4rem 2rem', maxWidth: 400, margin: '0 auto' }}>
-      <h1>Sign in</h1>
+      <h1>{t('signIn')}</h1>
       {searchParams.error && (
-        <p style={{ color: '#e07b5f' }}>Invalid credentials.</p>
+        <p style={{ color: '#e07b5f' }}>{t('invalidCredentials')}</p>
       )}
       <form
         action={loginAction}
@@ -39,19 +42,19 @@ export default function LoginPage({
         {searchParams.redirect && (
           <input type="hidden" name="redirect" value={searchParams.redirect} />
         )}
-        <input name="email" type="email" placeholder="Email" style={inputStyle} required />
+        <input name="email" type="email" placeholder={t('emailPlaceholder')} style={inputStyle} required />
         <input
           name="password"
           type="password"
-          placeholder="Password"
+          placeholder={t('passwordMin')}
           style={inputStyle}
           required
         />
         <button type="submit" style={buttonStyle}>
-          Continue
+          {t('continue')}
         </button>
         <Link href="/register" style={{ color: 'var(--muted)', textAlign: 'center' }}>
-          Create an account
+          {t('createAnAccount')}
         </Link>
       </form>
     </main>

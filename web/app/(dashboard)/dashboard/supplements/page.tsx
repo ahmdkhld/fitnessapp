@@ -1,5 +1,6 @@
 import { api, SupplementPlan } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { getTranslations } from 'next-intl/server';
 import {
   activateSupplementPlan,
   addSupplement,
@@ -21,16 +22,18 @@ async function load(): Promise<{ plans: SupplementPlan[]; error: string | null }
 
 export default async function SupplementsPage() {
   const { plans, error } = await load();
+  const t = await getTranslations('supplements');
+  const tc = await getTranslations('common');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Supplements</h1>
+      <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
       {error && <p style={{ color: 'var(--muted)' }}>{error}</p>}
 
       <div style={card}>
-        <h3 style={{ marginTop: 0, fontSize: '1rem' }}>New supplement plan</h3>
+        <h3 style={{ marginTop: 0, fontSize: '1rem' }}>{t('newPlan')}</h3>
         <form action={createSupplementPlan} style={{ display: 'flex', gap: '0.5rem' }}>
-          <input name="name" placeholder="Plan name" required style={input} />
-          <button type="submit" style={button}>Create</button>
+          <input name="name" placeholder={t('planName')} required style={input} />
+          <button type="submit" style={button}>{tc('create')}</button>
         </form>
       </div>
 
@@ -39,21 +42,21 @@ export default async function SupplementsPage() {
           <h2 style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
             {plan.name}
             {plan.isActive ? (
-              <span style={pill}>Active</span>
+              <span style={pill}>{tc('active')}</span>
             ) : (
               <form action={activateSupplementPlan.bind(null, plan.id)}>
                 <button
                   type="submit"
                   style={{ ...button, padding: '4px 10px', fontSize: 12 }}
                 >
-                  Activate
+                  {tc('activate')}
                 </button>
               </form>
             )}
           </h2>
 
           <div style={card}>
-            <h3 style={{ marginTop: 0, fontSize: 14 }}>Add supplement</h3>
+            <h3 style={{ marginTop: 0, fontSize: 14 }}>{t('addSupplement')}</h3>
             <form
               action={addSupplement.bind(null, plan.id)}
               style={{
@@ -62,11 +65,11 @@ export default async function SupplementsPage() {
                 gap: '0.5rem',
               }}
             >
-              <input name="name" placeholder="Name" required style={input} />
+              <input name="name" placeholder={t('name')} required style={input} />
               <input name="scheduledTime" type="time" defaultValue="08:00" style={input} />
-              <input name="dosage" placeholder="5000 IU" style={input} />
-              <input name="stockQuantity" type="number" placeholder="Stock" style={input} />
-              <button type="submit" style={button}>Add</button>
+              <input name="dosage" placeholder={t('dosage')} style={input} />
+              <input name="stockQuantity" type="number" placeholder={t('stock')} style={input} />
+              <button type="submit" style={button}>{tc('add')}</button>
             </form>
           </div>
 
@@ -98,7 +101,7 @@ export default async function SupplementsPage() {
                         fontSize: 13,
                       }}
                     >
-                      {s.stockQuantity} left
+                      {t('left', { count: s.stockQuantity })}
                     </span>
                   )}
                   <form action={deleteSupplement.bind(null, plan.id, s.id)}>
@@ -113,7 +116,7 @@ export default async function SupplementsPage() {
                         fontSize: 12,
                       }}
                     >
-                      Delete
+                      {tc('delete')}
                     </button>
                   </form>
                 </div>

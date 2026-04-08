@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { buildPaginatedResponse } from '../../common/dto/pagination-query.dto';
 
 const ALLOWED_ROLES = new Set(['user', 'coach', 'admin']);
 
@@ -7,31 +8,46 @@ const ALLOWED_ROLES = new Set(['user', 'coach', 'admin']);
 export class AdminService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listUsers(actorId: string, opts: { search?: string; role?: string } = {}) {
+  async listUsers(
+    actorId: string,
+    opts: { search?: string; role?: string; page?: number; limit?: number } = {},
+  ) {
     await this.ensureAdmin(actorId);
-    return this.prisma.user.findMany({
-      where: {
-        ...(opts.role ? { role: opts.role } : {}),
-        ...(opts.search
-          ? {
-              OR: [
-                { email: { contains: opts.search, mode: 'insensitive' } },
-                { fullName: { contains: opts.search, mode: 'insensitive' } },
-              ],
-            }
-          : {}),
-      },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        role: true,
-        goal: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 200,
-    });
+
+    const page = opts.page ?? 1;
+    const limit = opts.limit ?? 20;
+
+    const where = {
+      ...(opts.role ? { role: opts.role } : {}),
+      ...(opts.search
+        ? {
+            OR: [
+              { email: { contains: opts.search, mode: 'insensitive' as const } },
+              { fullName: { contains: opts.search, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
+    };
+
+    const [data, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          email: true,
+          fullName: true,
+          role: true,
+          goal: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return buildPaginatedResponse(data, total, page, limit);
   }
 
   async setRole(actorId: string, userId: string, role: string) {

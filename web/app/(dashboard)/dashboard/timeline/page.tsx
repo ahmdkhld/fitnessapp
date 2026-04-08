@@ -1,5 +1,6 @@
 import { api, ScheduleItem } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { getTranslations } from 'next-intl/server';
 import { setTimelineStatus, startWorkoutFromTimeline } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -25,15 +26,16 @@ function formatTime(iso: string) {
 
 export default async function TimelinePage() {
   const { items, error } = await load();
+  const t = await getTranslations('timeline');
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Daily timeline</h1>
+      <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
       {error && (
-        <p style={{ color: 'var(--muted)' }}>Error loading timeline: {error}</p>
+        <p style={{ color: 'var(--muted)' }}>{t('errorLoading', { error })}</p>
       )}
       {!error && items.length === 0 && (
-        <p style={{ color: 'var(--muted)' }}>Nothing scheduled today.</p>
+        <p style={{ color: 'var(--muted)' }}>{t('nothingScheduled')}</p>
       )}
       <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1.5rem' }}>
         {items.map((item) => {
@@ -87,7 +89,7 @@ export default async function TimelinePage() {
                   >
                     <button
                       type="submit"
-                      aria-label="Start workout"
+                      aria-label={t('startWorkout')}
                       style={{
                         padding: '0.4rem 0.75rem',
                         background: 'var(--accent)',
@@ -97,7 +99,7 @@ export default async function TimelinePage() {
                         cursor: 'pointer',
                       }}
                     >
-                      Start
+                      {t('startWorkout')}
                     </button>
                   </form>
                 )}
@@ -110,7 +112,7 @@ export default async function TimelinePage() {
                 >
                   <button
                     type="submit"
-                    aria-label={done ? 'Mark pending' : 'Mark completed'}
+                    aria-label={done ? t('markPending') : t('markCompleted')}
                     style={{
                       padding: '0.4rem 0.75rem',
                       background: done ? 'var(--accent)' : 'transparent',
@@ -120,14 +122,14 @@ export default async function TimelinePage() {
                       cursor: 'pointer',
                     }}
                   >
-                    {done ? 'Done' : 'Complete'}
+                    {done ? t('done') : t('complete')}
                   </button>
                 </form>
                 {!done && (
                   <form action={setTimelineStatus.bind(null, item.id, 'skipped')}>
                     <button
                       type="submit"
-                      aria-label="Skip"
+                      aria-label={t('skip')}
                       style={{
                         padding: '0.4rem 0.75rem',
                         background: 'transparent',
@@ -137,7 +139,7 @@ export default async function TimelinePage() {
                         cursor: 'pointer',
                       }}
                     >
-                      Skip
+                      {t('skip')}
                     </button>
                   </form>
                 )}

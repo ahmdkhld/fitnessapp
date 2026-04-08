@@ -1,4 +1,5 @@
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { saveDailyNote } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -23,11 +24,13 @@ const input: React.CSSProperties = {
 
 export default async function DailyNotesPage() {
   const { note, error } = await load();
+  const t = await getTranslations('tracking');
+  const tc = await getTranslations('common');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Daily notes</h1>
+      <h1 style={{ marginTop: 0 }}>{t('dailyNotesTitle')}</h1>
       <p style={{ color: 'var(--muted)' }}>
-        Log how you felt, symptoms you noticed and your mood today.
+        {t('dailyNotesDesc')}
       </p>
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
       {note?.notes && (
@@ -41,7 +44,7 @@ export default async function DailyNotesPage() {
             marginBottom: '1.5rem',
           }}
         >
-          <div style={{ color: 'var(--muted)', fontSize: 12 }}>Latest</div>
+          <div style={{ color: 'var(--muted)', fontSize: 12 }}>{t('latest')}</div>
           <div>{note.notes}</div>
         </div>
       )}
@@ -58,7 +61,7 @@ export default async function DailyNotesPage() {
         }}
       >
         <label>
-          Mood (1-5)
+          {t('mood')}
           <input
             name="mood"
             type="number"
@@ -68,7 +71,7 @@ export default async function DailyNotesPage() {
           />
         </label>
         <label>
-          Symptoms (free text or JSON)
+          {t('symptoms')}
           <input
             name="symptoms"
             placeholder='e.g. {"bloating": true}'
@@ -76,7 +79,7 @@ export default async function DailyNotesPage() {
           />
         </label>
         <label>
-          Notes
+          {t('notesLabel')}
           <textarea
             name="notes"
             rows={5}
@@ -95,7 +98,7 @@ export default async function DailyNotesPage() {
             justifySelf: 'start',
           }}
         >
-          Save
+          {tc('save')}
         </button>
       </form>
     </div>

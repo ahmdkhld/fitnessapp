@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { api, DietPlan } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { getTranslations } from 'next-intl/server';
 import { activateDietPlan, createDietPlan, deleteDietPlan } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -17,9 +18,11 @@ async function load(): Promise<{ plans: DietPlan[]; error: string | null }> {
 
 export default async function DietPlansPage() {
   const { plans, error } = await load();
+  const t = await getTranslations('dietPlans');
+  const tc = await getTranslations('common');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Diet plans</h1>
+      <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
       {error && <p style={{ color: 'var(--muted)' }}>{error}</p>}
 
       <div
@@ -32,14 +35,14 @@ export default async function DietPlansPage() {
           marginBottom: '2rem',
         }}
       >
-        <h3 style={{ marginTop: 0, fontSize: '1rem' }}>Create new plan</h3>
+        <h3 style={{ marginTop: 0, fontSize: '1rem' }}>{t('createNewPlan')}</h3>
         <form
           action={createDietPlan}
           style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}
         >
           <input
             name="name"
-            placeholder="Plan name"
+            placeholder={t('planName')}
             required
             style={{
               flex: '1 1 200px',
@@ -52,7 +55,7 @@ export default async function DietPlansPage() {
           />
           <input
             name="goal"
-            placeholder="Goal (optional)"
+            placeholder={t('goalOptional')}
             style={{
               flex: '1 1 200px',
               padding: '0.6rem 0.75rem',
@@ -73,13 +76,13 @@ export default async function DietPlansPage() {
               cursor: 'pointer',
             }}
           >
-            Create
+            {tc('create')}
           </button>
         </form>
       </div>
 
       {plans.length === 0 && !error && (
-        <p style={{ color: 'var(--muted)' }}>No plans yet.</p>
+        <p style={{ color: 'var(--muted)' }}>{t('noPlans')}</p>
       )}
       <div style={{ display: 'grid', gap: '0.75rem' }}>
         {plans.map((p) => (
@@ -118,7 +121,7 @@ export default async function DietPlansPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    Activate
+                    {tc('activate')}
                   </button>
                 </form>
               )}
@@ -132,7 +135,7 @@ export default async function DietPlansPage() {
                     fontSize: 12,
                   }}
                 >
-                  Active
+                  {tc('active')}
                 </span>
               )}
               <form action={deleteDietPlan.bind(null, p.id)}>
@@ -147,7 +150,7 @@ export default async function DietPlansPage() {
                     cursor: 'pointer',
                   }}
                 >
-                  Delete
+                  {tc('delete')}
                 </button>
               </form>
             </div>

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { buildPaginatedResponse } from '../../common/dto/pagination-query.dto';
 import { CreateSetDto } from './dto/create-set.dto';
 import { UpdateSetDto } from './dto/update-set.dto';
 import { StartSessionDto } from './dto/start-session.dto';
@@ -60,42 +61,56 @@ export class WorkoutSessionsService {
     });
   }
 
-  list(userId: string, from?: Date, to?: Date) {
+  async list(
+    userId: string,
+    opts: { from?: Date; to?: Date; page?: number; limit?: number } = {},
+  ) {
     // List endpoints stay shallow on purpose: pulling the full plan +
     // exercise tree per row killed the history page on real data. The
     // detail endpoint (findOne) keeps the deep include.
-    return this.prisma.workoutSession.findMany({
-      where: {
-        userId,
-        ...(from || to
-          ? {
-              date: {
-                ...(from ? { gte: from } : {}),
-                ...(to ? { lte: to } : {}),
-              },
-            }
-          : {}),
-      },
-      orderBy: { date: 'desc' },
-      take: 100,
-      select: {
-        id: true,
-        date: true,
-        status: true,
-        startedAt: true,
-        completedAt: true,
-        durationMin: true,
-        bodyweightKg: true,
-        energyLevel: true,
-        notes: true,
-        workoutDayId: true,
-        day: { select: { id: true, name: true } },
-        // Aggregate set count + total volume in a single roundtrip via
-        // the relation aggregation API; falls back to the count alone
-        // when the Prisma version doesn't expose `_sum` on relations.
-        _count: { select: { sets: true } },
-      },
-    });
+    const page = opts.page ?? 1;
+    const limit = opts.limit ?? 20;
+
+    const where = {
+      userId,
+      ...(opts.from || opts.to
+        ? {
+            date: {
+              ...(opts.from ? { gte: opts.from } : {}),
+              ...(opts.to ? { lte: opts.to } : {}),
+            },
+          }
+        : {}),
+    };
+
+    const [data, total] = await Promise.all([
+      this.prisma.workoutSession.findMany({
+        where,
+        orderBy: { date: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+        select: {
+          id: true,
+          date: true,
+          status: true,
+          startedAt: true,
+          completedAt: true,
+          durationMin: true,
+          bodyweightKg: true,
+          energyLevel: true,
+          notes: true,
+          workoutDayId: true,
+          day: { select: { id: true, name: true } },
+          // Aggregate set count + total volume in a single roundtrip via
+          // the relation aggregation API; falls back to the count alone
+          // when the Prisma version doesn't expose `_sum` on relations.
+          _count: { select: { sets: true } },
+        },
+      }),
+      this.prisma.workoutSession.count({ where }),
+    ]);
+
+    return buildPaginatedResponse(data, total, page, limit);
   }
 
   async findOne(userId: string, id: string) {
@@ -306,8 +321,9 @@ export class WorkoutSessionsService {
 
   /**
    * Auto-progression: if the user hit every target set for an exercise
-   * at or above the prescribed weight, bump the target weight by
-   * `progressionKg`. Runs when a session is marked complete.
+   * at or above the prescribed weight AND met or exceeded the minimum
+   * target reps, bump the target weight by `progressionKg`.
+   * Runs when a session is marked complete.
    */
   private async applyAutoProgression(workoutDayId: string, sessionId: string) {
     // Wrap the read-evaluate-write loop in a transaction so two
@@ -341,6 +357,15 @@ export class WorkoutSessionsService {
         );
         if (!allHitTarget) continue;
 
+        // Check reps: parse minimum from targetReps (e.g. "8", "8-12", "10+")
+        const minReps = this.parseMinReps(row.targetReps);
+        if (minReps > 0) {
+          const allHitReps = sets.every(
+            (s) => s.reps != null && s.reps >= minReps,
+          );
+          if (!allHitReps) continue;
+        }
+
         await tx.workoutDayExercise.update({
           where: { id: row.id },
           data: {
@@ -349,6 +374,25 @@ export class WorkoutSessionsService {
         });
       }
     });
+  }
+
+  /**
+   * Extract the minimum rep count from a target-reps string.
+   * Handles formats like "8", "8-12", "10+", "6 - 8".
+   * Returns 0 when the string is null/unparseable (skip rep check).
+   */
+  private parseMinReps(targetReps: string | null): number {
+    if (!targetReps) return 0;
+    const trimmed = targetReps.trim();
+    // "8-12" or "6 - 8" → take the first number
+    const rangeMatch = trimmed.match(/^(\d+)\s*[-–]\s*\d+$/);
+    if (rangeMatch) return parseInt(rangeMatch[1], 10);
+    // "10+" → 10
+    const plusMatch = trimmed.match(/^(\d+)\+$/);
+    if (plusMatch) return parseInt(plusMatch[1], 10);
+    // Plain number "8"
+    const plain = parseInt(trimmed, 10);
+    return Number.isNaN(plain) ? 0 : plain;
   }
 
   private async markScheduleItemCompleted(

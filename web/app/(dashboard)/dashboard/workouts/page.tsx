@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { PersonalRecord, WorkoutPlan, WorkoutSession } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
@@ -31,6 +32,7 @@ const card: React.CSSProperties = {
 
 export default async function WorkoutsHomePage() {
   const { plans, prs, history, error } = await load();
+  const t = await getTranslations('workouts');
   const active = plans.find((p) => p.isActive);
   return (
     <div>
@@ -41,7 +43,7 @@ export default async function WorkoutsHomePage() {
           alignItems: 'baseline',
         }}
       >
-        <h1 style={{ marginTop: 0 }}>Workouts</h1>
+        <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <Link
             href="/dashboard/workouts/templates"
@@ -51,7 +53,7 @@ export default async function WorkoutsHomePage() {
               borderRadius: 6,
             }}
           >
-            Templates
+            {t('templates')}
           </Link>
           <Link
             href="/dashboard/workouts/plans"
@@ -61,7 +63,7 @@ export default async function WorkoutsHomePage() {
               borderRadius: 6,
             }}
           >
-            My plans
+            {t('myPlans')}
           </Link>
           <Link
             href="/dashboard/workouts/sessions"
@@ -71,7 +73,7 @@ export default async function WorkoutsHomePage() {
               borderRadius: 6,
             }}
           >
-            History
+            {t('history')}
           </Link>
           <Link
             href="/dashboard/workouts/library"
@@ -81,7 +83,7 @@ export default async function WorkoutsHomePage() {
               borderRadius: 6,
             }}
           >
-            Library
+            {t('library')}
           </Link>
           <Link
             href="/dashboard/workouts/analytics"
@@ -91,7 +93,7 @@ export default async function WorkoutsHomePage() {
               borderRadius: 6,
             }}
           >
-            Analytics
+            {t('analytics')}
           </Link>
         </div>
       </div>
@@ -100,10 +102,10 @@ export default async function WorkoutsHomePage() {
       <div style={{ ...card, marginTop: '1.5rem' }}>
         {active ? (
           <>
-            <div style={{ fontSize: 12, color: 'var(--muted)' }}>ACTIVE PLAN</div>
+            <div style={{ fontSize: 12, color: 'var(--muted)' }}>{t('activePlan')}</div>
             <div style={{ fontSize: 22, fontWeight: 600 }}>{active.name}</div>
             <div style={{ color: 'var(--muted)', fontSize: 13 }}>
-              {[active.splitType, `${active.daysPerWeek} days/week`, active.goal]
+              {[active.splitType, `${active.daysPerWeek} ${t('daysPerWeek')}`, active.goal]
                 .filter(Boolean)
                 .join(' · ')}
             </div>
@@ -111,7 +113,7 @@ export default async function WorkoutsHomePage() {
         ) : (
           <>
             <div style={{ fontSize: 18, marginBottom: 8 }}>
-              You don't have an active plan yet
+              {t('noActivePlan')}
             </div>
             <Link
               href="/dashboard/workouts/templates"
@@ -123,15 +125,15 @@ export default async function WorkoutsHomePage() {
                 borderRadius: 6,
               }}
             >
-              Browse templates
+              {t('browseTemplates')}
             </Link>
           </>
         )}
       </div>
 
-      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>Recent PRs</h2>
+      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>{t('recentPRs')}</h2>
       {prs.length === 0 ? (
-        <p style={{ color: 'var(--muted)' }}>Log a session to earn your first PR.</p>
+        <p style={{ color: 'var(--muted)' }}>{t('logSessionForPR')}</p>
       ) : (
         <div style={{ display: 'grid', gap: '0.5rem' }}>
           {prs.slice(0, 5).map((pr) => (
@@ -145,9 +147,9 @@ export default async function WorkoutsHomePage() {
         </div>
       )}
 
-      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>Recent sessions</h2>
+      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>{t('recentSessions')}</h2>
       {history.length === 0 ? (
-        <p style={{ color: 'var(--muted)' }}>No sessions logged yet.</p>
+        <p style={{ color: 'var(--muted)' }}>{t('noSessionsYet')}</p>
       ) : (
         <div style={{ display: 'grid', gap: '0.5rem' }}>
           {history.slice(0, 5).map((s) => (
@@ -156,9 +158,9 @@ export default async function WorkoutsHomePage() {
               href={`/dashboard/workouts/sessions/${s.id}`}
               style={{ ...card, padding: '0.75rem 1rem', color: 'inherit' }}
             >
-              <div style={{ fontWeight: 600 }}>{s.day?.name ?? 'Freeform'}</div>
+              <div style={{ fontWeight: 600 }}>{s.day?.name ?? t('freeform')}</div>
               <div style={{ color: 'var(--muted)', fontSize: 13 }}>
-                {s.date.slice(0, 10)} · {s.sets.length} sets · {s.durationMin ?? 0} min
+                {s.date.slice(0, 10)} · {s.sets.length} {t('sets')} · {s.durationMin ?? 0} {t('min')}
               </div>
             </Link>
           ))}

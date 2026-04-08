@@ -45,6 +45,11 @@ class SettingsScreen extends StatelessWidget {
             onTap: () => context.push('/settings/profile'),
           ),
           ListTile(
+            leading: const Icon(Icons.lock),
+            title: Text(l.changePasswordTitle),
+            onTap: () => context.push('/settings/change-password'),
+          ),
+          ListTile(
             leading: const Icon(Icons.notifications),
             title: Text(l.notifications),
             onTap: () => context.push('/settings/notifications'),

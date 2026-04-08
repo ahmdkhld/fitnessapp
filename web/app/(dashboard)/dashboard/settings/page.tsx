@@ -1,19 +1,24 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { logoutAction } from './actions';
+import { Card, Button } from '@/components/ui';
 
-const settingsLinks: { label: string; href: string | null }[] = [
-  { label: 'Profile', href: '/dashboard/profile' },
-  { label: 'Notifications', href: '/dashboard/notifications' },
-  { label: 'Devices', href: null },
-  { label: 'Export data', href: '/dashboard/export' },
-];
+export default async function SettingsPage() {
+  const t = await getTranslations('settings');
 
-export default function SettingsPage() {
+  const settingsLinks: { label: string; href: string | null }[] = [
+    { label: t('profile'), href: '/dashboard/profile' },
+    { label: t('changePassword'), href: '/dashboard/settings/change-password' },
+    { label: t('notifications'), href: '/dashboard/notifications' },
+    { label: t('devices'), href: null },
+    { label: t('exportData'), href: '/dashboard/export' },
+  ];
+
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Settings</h1>
+      <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
       <p style={{ color: 'var(--muted)' }}>
-        Profile, notifications and device management.
+        {t('description')}
       </p>
       <div
         style={{
@@ -29,47 +34,24 @@ export default function SettingsPage() {
               key={label}
               href={href}
               style={{
-                background: 'var(--card)',
-                border: '1px solid var(--border)',
-                padding: '1rem 1.25rem',
-                borderRadius: 8,
                 color: 'inherit',
                 textDecoration: 'none',
               }}
             >
-              {label}
+              <Card padding="1rem 1.25rem" style={{ borderRadius: 8 }}>
+                {label}
+              </Card>
             </Link>
           ) : (
-            <div
-              key={label}
-              style={{
-                background: 'var(--card)',
-                border: '1px solid var(--border)',
-                padding: '1rem 1.25rem',
-                borderRadius: 8,
-              }}
-            >
+            <Card key={label} padding="1rem 1.25rem" style={{ borderRadius: 8 }}>
               {label}
-            </div>
+            </Card>
           ),
         )}
         <form action={logoutAction}>
-          <button
-            type="submit"
-            style={{
-              width: '100%',
-              padding: '1rem 1.25rem',
-              background: 'transparent',
-              color: '#e07b5f',
-              border: '1px solid #6a2a2a',
-              borderRadius: 8,
-              cursor: 'pointer',
-              textAlign: 'left',
-              fontSize: 14,
-            }}
-          >
-            Sign out
-          </button>
+          <Button type="submit" variant="danger" fullWidth style={{ textAlign: 'left' }}>
+            {t('signOut')}
+          </Button>
         </form>
       </div>
     </div>

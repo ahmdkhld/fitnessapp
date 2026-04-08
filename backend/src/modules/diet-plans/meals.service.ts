@@ -45,6 +45,7 @@ export class MealsService {
           ? { ingredients: { deleteMany: {}, create: ingredients } }
           : {}),
       },
+      include: { ingredients: true },
     });
   }
 

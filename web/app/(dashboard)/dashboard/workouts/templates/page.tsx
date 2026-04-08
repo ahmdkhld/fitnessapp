@@ -1,4 +1,5 @@
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { WorkoutPlan } from '@/lib/api';
 import { cloneTemplateAction } from '../plans/actions';
 
@@ -34,36 +35,37 @@ const button: React.CSSProperties = {
 
 export default async function TemplatesPage() {
   const { templates, error } = await load();
+  const t = await getTranslations('workouts');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Plan templates</h1>
+      <h1 style={{ marginTop: 0 }}>{t('planTemplates')}</h1>
       <p style={{ color: 'var(--muted)' }}>
-        Cloned templates are copied into your personal plans and can be edited freely.
+        {t('clonedTemplatesDesc')}
       </p>
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
       <div style={{ display: 'grid', gap: '1rem', marginTop: '1.5rem' }}>
-        {templates.map((t) => (
-          <div key={t.id} style={card}>
+        {templates.map((tmpl) => (
+          <div key={tmpl.id} style={card}>
             <div
               style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
             >
               <div>
-                <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{t.name}</div>
+                <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{tmpl.name}</div>
                 <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 4 }}>
-                  {[t.splitType, `${t.daysPerWeek}×/week`, t.goal]
+                  {[tmpl.splitType, `${tmpl.daysPerWeek}x/${t('daysPerWeek')}`, tmpl.goal]
                     .filter(Boolean)
                     .join(' · ')}
                 </div>
               </div>
-              <form action={cloneTemplateAction.bind(null, t.id)}>
+              <form action={cloneTemplateAction.bind(null, tmpl.id)}>
                 <button type="submit" style={button}>
-                  Use this plan
+                  {t('useThisPlan')}
                 </button>
               </form>
             </div>
-            {t.description && (
+            {tmpl.description && (
               <p style={{ color: 'var(--muted)', marginTop: '0.75rem' }}>
-                {t.description}
+                {tmpl.description}
               </p>
             )}
             <div
@@ -74,7 +76,7 @@ export default async function TemplatesPage() {
                 marginTop: '0.75rem',
               }}
             >
-              {t.days.map((d) => (
+              {tmpl.days.map((d) => (
                 <span
                   key={d.id}
                   style={{
@@ -84,7 +86,7 @@ export default async function TemplatesPage() {
                     fontSize: 12,
                   }}
                 >
-                  {d.name} · {d.exercises.length} ex
+                  {d.name} · {d.exercises.length} {t('exercises')}
                 </span>
               ))}
             </div>

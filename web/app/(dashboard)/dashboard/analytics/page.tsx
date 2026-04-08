@@ -1,5 +1,6 @@
 import { api, Insight } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { getTranslations } from 'next-intl/server';
 import { WeeklyAdherenceChart } from '@/components/WeeklyAdherenceChart';
 
 export const dynamic = 'force-dynamic';
@@ -39,19 +40,20 @@ const severityColor: Record<string, string> = {
 
 export default async function AnalyticsPage() {
   const { insights, chart, error } = await load();
+  const t = await getTranslations('analytics');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Analytics & insights</h1>
+      <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
       {error && <p style={{ color: 'var(--muted)' }}>{error}</p>}
       {chart.length > 0 && (
         <div style={{ marginTop: '1.5rem' }}>
           <WeeklyAdherenceChart data={chart} />
         </div>
       )}
-      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>Insights</h2>
+      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>{t('insights')}</h2>
       {insights.length === 0 && !error && (
         <p style={{ color: 'var(--muted)' }}>
-          No insights yet — keep logging for at least a week.
+          {t('noInsights')}
         </p>
       )}
       <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1rem' }}>

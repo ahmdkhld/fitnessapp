@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { acceptInvite, inviteClient } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -48,22 +49,22 @@ const button: React.CSSProperties = {
 
 export default async function CoachPortalPage() {
   const { clients, coaches, error } = await load();
+  const t = await getTranslations('coach');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Coach portal</h1>
+      <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
       <p style={{ color: 'var(--muted)' }}>
-        Coaches can view read-only summaries of their clients' adherence,
-        recent workout sessions and personal records.
+        {t('description')}
       </p>
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
 
-      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>My clients</h2>
+      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>{t('myClients')}</h2>
       <div style={{ ...card, marginBottom: '1rem' }}>
         <form action={inviteClient} style={{ display: 'flex', gap: '0.5rem' }}>
           <input
             name="email"
             type="email"
-            placeholder="Client email"
+            placeholder={t('clientEmail')}
             required
             style={{
               flex: 1,
@@ -75,18 +76,17 @@ export default async function CoachPortalPage() {
             }}
           />
           <button type="submit" style={button}>
-            Invite
+            {t('invite')}
           </button>
         </form>
         <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 8 }}>
-          Invites can only be sent by users with the <code>coach</code> role.
-          If you receive a 403 here, ask an admin to promote your account.
+          {t('inviteNote')}
         </p>
       </div>
 
       <div style={{ display: 'grid', gap: '0.5rem' }}>
         {clients.length === 0 && (
-          <p style={{ color: 'var(--muted)' }}>No accepted clients yet.</p>
+          <p style={{ color: 'var(--muted)' }}>{t('noClients')}</p>
         )}
         {clients.map((link) => (
           <Link
@@ -109,19 +109,19 @@ export default async function CoachPortalPage() {
               </div>
             </div>
             <span style={{ color: 'var(--muted)', fontSize: 12 }}>
-              {link.acceptedAt?.slice(0, 10) ?? 'pending'}
+              {link.acceptedAt?.slice(0, 10) ?? t('pendingInvite')}
             </span>
           </Link>
         ))}
       </div>
 
       <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>
-        Coaching me
+        {t('coachingMe')}
       </h2>
       <div style={{ display: 'grid', gap: '0.5rem' }}>
         {coaches.length === 0 && (
           <p style={{ color: 'var(--muted)' }}>
-            No coach invites — ask your coach to send you an invite.
+            {t('noCoachInvites')}
           </p>
         )}
         {coaches.map((link) => (
@@ -138,13 +138,13 @@ export default async function CoachPortalPage() {
                   {link.coach.fullName ?? link.coach.email}
                 </div>
                 <div style={{ color: 'var(--muted)', fontSize: 13 }}>
-                  {link.acceptedAt ? 'Active' : 'Pending invite'}
+                  {link.acceptedAt ? t('activeStatus') : t('pendingInvite')}
                 </div>
               </div>
               {!link.acceptedAt && (
                 <form action={acceptInvite.bind(null, link.id)}>
                   <button type="submit" style={button}>
-                    Accept
+                    {t('accept')}
                   </button>
                 </form>
               )}

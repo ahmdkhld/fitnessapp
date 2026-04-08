@@ -1,4 +1,5 @@
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,8 +62,11 @@ export default async function ClientSummaryPage({
   params: { clientId: string };
 }) {
   const { data, error } = await load(params.clientId);
+  const t = await getTranslations('coach');
+  const tc = await getTranslations('common');
+  const tw = await getTranslations('workouts');
   if (error) return <p style={{ color: '#e07b5f' }}>{error}</p>;
-  if (!data?.client) return <p>Not found</p>;
+  if (!data?.client) return <p>{tc('notFound')}</p>;
 
   return (
     <div>
@@ -70,7 +74,7 @@ export default async function ClientSummaryPage({
         {data.client.fullName ?? data.client.email}
       </h1>
       <p style={{ color: 'var(--muted)' }}>
-        {data.client.goal ?? '—'} · read-only coach view
+        {data.client.goal ?? '—'} · {t('readOnlyView')}
       </p>
 
       <div
@@ -82,31 +86,31 @@ export default async function ClientSummaryPage({
         }}
       >
         <div style={card}>
-          <div style={{ color: 'var(--muted)', fontSize: 13 }}>Adherence (14d)</div>
+          <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('adherence14d')}</div>
           <div style={{ fontSize: 28, fontWeight: 600 }}>
             {data.summary.adherencePct}%
           </div>
           <div style={{ color: 'var(--muted)', fontSize: 12 }}>
-            {data.summary.completedItems}/{data.summary.totalItems} items
+            {data.summary.completedItems}/{data.summary.totalItems} {t('items')}
           </div>
         </div>
         <div style={card}>
-          <div style={{ color: 'var(--muted)', fontSize: 13 }}>Workouts (14d)</div>
+          <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('workouts14d')}</div>
           <div style={{ fontSize: 28, fontWeight: 600 }}>
             {data.summary.workoutSessions}
           </div>
         </div>
         <div style={card}>
-          <div style={{ color: 'var(--muted)', fontSize: 13 }}>PRs (14d)</div>
+          <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('prs14d')}</div>
           <div style={{ fontSize: 28, fontWeight: 600 }}>
             {data.summary.personalRecords}
           </div>
         </div>
       </div>
 
-      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>Recent sessions</h2>
+      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>{t('recentSessions')}</h2>
       {data.recentSessions.length === 0 ? (
-        <p style={{ color: 'var(--muted)' }}>No sessions logged recently.</p>
+        <p style={{ color: 'var(--muted)' }}>{t('noRecentSessions')}</p>
       ) : (
         <div style={{ display: 'grid', gap: '0.5rem' }}>
           {data.recentSessions.map((s) => (
@@ -116,16 +120,16 @@ export default async function ClientSummaryPage({
             >
               <div style={{ fontWeight: 600 }}>{s.name}</div>
               <div style={{ color: 'var(--muted)', fontSize: 13 }}>
-                {s.date.slice(0, 10)} · {s.durationMin ?? 0} min
+                {s.date.slice(0, 10)} · {s.durationMin ?? 0} {tw('min')}
               </div>
             </div>
           ))}
         </div>
       )}
 
-      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>Recent PRs</h2>
+      <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>{t('recentPRs')}</h2>
       {data.recentPRs.length === 0 ? (
-        <p style={{ color: 'var(--muted)' }}>No PRs logged recently.</p>
+        <p style={{ color: 'var(--muted)' }}>{t('noRecentPRs')}</p>
       ) : (
         <div style={{ display: 'grid', gap: '0.5rem' }}>
           {data.recentPRs.map((pr, i) => (

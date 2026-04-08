@@ -251,6 +251,34 @@ export class AuthService {
     return { success: true };
   }
 
+  /**
+   * Changes the password for an authenticated user. Verifies the current
+   * password, hashes the new one, updates the user record, and revokes
+   * all existing refresh tokens to force re-login on other devices.
+   */
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException('User not found');
+
+    const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!ok) throw new BadRequestException('Current password is incorrect');
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash },
+      }),
+      // Revoke all refresh tokens — forces re-login on every device
+      this.prisma.refreshToken.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
+
+    return { success: true };
+  }
+
   async resetPassword(token: string, newPassword: string) {
     const tokenHash = this.hash(token);
     const record = await this.prisma.refreshToken.findFirst({

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { WorkoutSession } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
@@ -15,11 +16,12 @@ async function load() {
 
 export default async function SessionsPage() {
   const { sessions, error } = await load();
+  const t = await getTranslations('workouts');
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Workout history</h1>
+      <h1 style={{ marginTop: 0 }}>{t('workoutHistory')}</h1>
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
-      {sessions.length === 0 && <p style={{ color: 'var(--muted)' }}>Nothing yet.</p>}
+      {sessions.length === 0 && <p style={{ color: 'var(--muted)' }}>{t('nothingYet')}</p>}
       <div style={{ display: 'grid', gap: '0.5rem', marginTop: '1rem' }}>
         {sessions.map((s) => {
           const volume = s.sets.reduce(
@@ -50,11 +52,11 @@ export default async function SessionsPage() {
               >
                 <div>
                   <div style={{ fontWeight: 600 }}>
-                    {s.day?.name ?? 'Freeform'}
+                    {s.day?.name ?? t('freeform')}
                   </div>
                   <div style={{ color: 'var(--muted)', fontSize: 13 }}>
-                    {s.date.slice(0, 10)} · {s.sets.length} sets ·{' '}
-                    {s.durationMin ?? 0} min
+                    {s.date.slice(0, 10)} · {s.sets.length} {t('sets')} ·{' '}
+                    {s.durationMin ?? 0} {t('min')}
                   </div>
                 </div>
                 <div style={{ color: 'var(--muted)', fontSize: 13 }}>

@@ -1,5 +1,7 @@
 import { api, AdherenceSummary } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { getTranslations } from 'next-intl/server';
+import { Card } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,28 +27,29 @@ async function loadSummary(): Promise<{
 
 export default async function DashboardOverviewPage() {
   const { summary, streak, error } = await loadSummary();
+  const t = await getTranslations('dashboard');
 
   const cards = [
     {
-      label: 'Adherence (7d)',
+      label: t('adherence7d'),
       value: summary ? `${summary.overallPercentage}%` : '—',
     },
-    { label: 'Current streak', value: streak ? `${streak} days` : '0 days' },
+    { label: t('currentStreak'), value: streak ? `${streak} ${t('days')}` : `0 ${t('days')}` },
     {
-      label: 'Completed (7d)',
+      label: t('completed7d'),
       value: summary ? `${summary.completed} / ${summary.total}` : '—',
     },
     {
-      label: 'Skipped (7d)',
+      label: t('skipped7d'),
       value: summary ? `${summary.skipped}` : '—',
     },
   ];
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Overview</h1>
+      <h1 style={{ marginTop: 0 }}>{t('overview')}</h1>
       <p style={{ color: 'var(--muted)' }}>
-        Snapshot of your weekly adherence and progress.
+        {t('snapshot')}
       </p>
       {error && (
         <div
@@ -70,35 +73,23 @@ export default async function DashboardOverviewPage() {
         }}
       >
         {cards.map((c) => (
-          <div
-            key={c.label}
-            style={{
-              background: 'var(--card)',
-              border: '1px solid var(--border)',
-              padding: '1.25rem',
-              borderRadius: 12,
-            }}
-          >
+          <Card key={c.label} padding="1.25rem" style={{ borderRadius: 12 }}>
             <div style={{ color: 'var(--muted)', fontSize: 13 }}>{c.label}</div>
             <div style={{ fontSize: 28, fontWeight: 600, marginTop: 4 }}>
               {c.value}
             </div>
-          </div>
+          </Card>
         ))}
       </div>
       {summary && (
         <div style={{ marginTop: '2rem' }}>
-          <h2 style={{ fontSize: '1.25rem' }}>By category</h2>
+          <h2 style={{ fontSize: '1.25rem' }}>{t('byCategory')}</h2>
           <div style={{ display: 'grid', gap: '0.5rem', marginTop: '1rem' }}>
-            {summary.perType.map((t) => (
-              <div
-                key={t.type}
-                style={{
-                  background: 'var(--card)',
-                  border: '1px solid var(--border)',
-                  padding: '0.75rem 1rem',
-                  borderRadius: 8,
-                }}
+            {summary.perType.map((pt) => (
+              <Card
+                key={pt.type}
+                padding="0.75rem 1rem"
+                style={{ borderRadius: 8 }}
               >
                 <div
                   style={{
@@ -107,9 +98,9 @@ export default async function DashboardOverviewPage() {
                     marginBottom: 6,
                   }}
                 >
-                  <span style={{ textTransform: 'capitalize' }}>{t.type}</span>
+                  <span style={{ textTransform: 'capitalize' }}>{pt.type}</span>
                   <span>
-                    {t.completed}/{t.total} · {t.percentage}%
+                    {pt.completed}/{pt.total} · {pt.percentage}%
                   </span>
                 </div>
                 <div
@@ -121,14 +112,14 @@ export default async function DashboardOverviewPage() {
                 >
                   <div
                     style={{
-                      width: `${t.percentage}%`,
+                      width: `${pt.percentage}%`,
                       height: '100%',
                       background: 'var(--accent)',
                       borderRadius: 3,
                     }}
                   />
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         </div>

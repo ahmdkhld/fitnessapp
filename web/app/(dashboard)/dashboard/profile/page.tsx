@@ -1,5 +1,7 @@
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { updateUser, upsertProfile } from './actions';
+import { Card, Button, Input, Select } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,48 +49,15 @@ async function loadData(): Promise<{
   }
 }
 
-const input: React.CSSProperties = {
-  padding: '0.6rem 0.75rem',
-  background: 'var(--bg)',
-  border: '1px solid var(--border)',
-  borderRadius: 6,
-  color: 'var(--fg)',
-  width: '100%',
-};
-
-const label: React.CSSProperties = {
-  display: 'block',
-  fontSize: 13,
-  color: 'var(--muted)',
-  marginBottom: 4,
-};
-
-const btn: React.CSSProperties = {
-  padding: '0.6rem 1.5rem',
-  background: 'var(--accent)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: 6,
-  cursor: 'pointer',
-  fontSize: 14,
-};
-
-const card: React.CSSProperties = {
-  background: 'var(--card)',
-  border: '1px solid var(--border)',
-  borderRadius: 10,
-  padding: '1.25rem',
-  marginBottom: '1.5rem',
-};
-
 export default async function ProfilePage() {
   const { user, profile, error } = await loadData();
+  const t = await getTranslations('profile');
 
   return (
     <div style={{ maxWidth: 600 }}>
-      <h1 style={{ marginTop: 0 }}>Profile</h1>
+      <h1 style={{ marginTop: 0 }}>{t('title')}</h1>
       <p style={{ color: 'var(--muted)' }}>
-        View and update your account information.
+        {t('description')}
       </p>
       {error && (
         <div
@@ -107,163 +76,121 @@ export default async function ProfilePage() {
       {user && (
         <>
           {/* Account info section */}
-          <div style={card}>
-            <h2 style={{ fontSize: '1.1rem', marginTop: 0 }}>Account</h2>
-            <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: '1rem' }}>
-              {user.email} &middot; Member since{' '}
+          <Card title={t('account')} style={{ marginBottom: '1.5rem' }}>
+            <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: '1rem', marginTop: '-0.5rem' }}>
+              {user.email} &middot; {t('memberSince')}{' '}
               {new Date(user.createdAt).toLocaleDateString()}
             </div>
             <form
               action={updateUser}
               style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}
             >
-              <div>
-                <span style={label}>Full name</span>
-                <input
-                  name="fullName"
-                  defaultValue={user.fullName ?? ''}
-                  placeholder="Full name"
-                  style={input}
-                />
-              </div>
-              <div>
-                <span style={label}>Goal</span>
-                <select name="goal" defaultValue={user.goal ?? ''} style={input}>
-                  <option value="">-- select --</option>
-                  <option value="fat_loss">Fat loss</option>
-                  <option value="muscle_gain">Muscle gain</option>
-                  <option value="general_health">General health</option>
-                  <option value="performance">Athletic performance</option>
-                </select>
-              </div>
-              <div>
-                <span style={label}>Timezone</span>
-                <input
-                  name="timezone"
-                  defaultValue={user.timezone}
-                  placeholder="UTC"
-                  style={input}
-                />
-              </div>
-              <div>
-                <span style={label}>Unit system</span>
-                <select name="unitSystem" defaultValue={user.unitSystem} style={input}>
-                  <option value="metric">Metric</option>
-                  <option value="imperial">Imperial</option>
-                </select>
-              </div>
+              <Input
+                label={t('fullName')}
+                name="fullName"
+                defaultValue={user.fullName ?? ''}
+                placeholder={t('fullName')}
+              />
+              <Select label={t('goal')} name="goal" defaultValue={user.goal ?? ''}>
+                <option value="">{t('selectGoal')}</option>
+                <option value="fat_loss">{t('fatLoss')}</option>
+                <option value="muscle_gain">{t('muscleGain')}</option>
+                <option value="general_health">{t('generalHealth')}</option>
+                <option value="performance">{t('performance')}</option>
+              </Select>
+              <Input
+                label={t('timezone')}
+                name="timezone"
+                defaultValue={user.timezone}
+                placeholder="UTC"
+              />
+              <Select label={t('unitSystem')} name="unitSystem" defaultValue={user.unitSystem}>
+                <option value="metric">{t('metric')}</option>
+                <option value="imperial">{t('imperial')}</option>
+              </Select>
               <div style={{ gridColumn: '1 / -1', marginTop: 4 }}>
-                <button type="submit" style={btn}>
-                  Save account
-                </button>
+                <Button type="submit">{t('saveAccount')}</Button>
               </div>
             </form>
-          </div>
+          </Card>
 
           {/* Body profile section */}
-          <div style={card}>
-            <h2 style={{ fontSize: '1.1rem', marginTop: 0 }}>Body profile</h2>
-            <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 0 }}>
-              Each save creates a new snapshot so you can track changes over time.
-            </p>
+          <Card
+            title={t('bodyProfile')}
+            subtitle={t('bodyProfileDesc')}
+          >
             <form
               action={upsertProfile}
               style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}
             >
-              <div>
-                <span style={label}>Height (cm)</span>
-                <input
-                  name="heightCm"
-                  type="number"
-                  step="0.1"
-                  defaultValue={profile?.heightCm ?? ''}
-                  placeholder="170"
-                  style={input}
-                />
-              </div>
-              <div>
-                <span style={label}>Weight (kg)</span>
-                <input
-                  name="weightKg"
-                  type="number"
-                  step="0.1"
-                  defaultValue={profile?.weightKg ?? ''}
-                  placeholder="75"
-                  style={input}
-                />
-              </div>
-              <div>
-                <span style={label}>Body fat %</span>
-                <input
-                  name="bodyFatPct"
-                  type="number"
-                  step="0.1"
-                  defaultValue={profile?.bodyFatPct ?? ''}
-                  placeholder="15"
-                  style={input}
-                />
-              </div>
-              <div>
-                <span style={label}>Waist (cm)</span>
-                <input
-                  name="waistCm"
-                  type="number"
-                  step="0.1"
-                  defaultValue={profile?.waistCm ?? ''}
-                  placeholder="80"
-                  style={input}
-                />
-              </div>
-              <div>
-                <span style={label}>Date of birth</span>
-                <input
-                  name="dateOfBirth"
-                  type="date"
-                  defaultValue={profile?.dateOfBirth?.slice(0, 10) ?? ''}
-                  style={input}
-                />
-              </div>
-              <div>
-                <span style={label}>Gender</span>
-                <select name="gender" defaultValue={profile?.gender ?? ''} style={input}>
-                  <option value="">-- select --</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-              <div>
-                <span style={label}>Activity level</span>
-                <select
-                  name="activityLevel"
-                  defaultValue={profile?.activityLevel ?? ''}
-                  style={input}
-                >
-                  <option value="">-- select --</option>
-                  <option value="sedentary">Sedentary</option>
-                  <option value="lightly_active">Lightly active</option>
-                  <option value="moderately_active">Moderately active</option>
-                  <option value="very_active">Very active</option>
-                  <option value="extremely_active">Extremely active</option>
-                </select>
-              </div>
-              <div>
-                <span style={label}>Daily water goal (ml)</span>
-                <input
-                  name="dailyWaterGoalMl"
-                  type="number"
-                  defaultValue={profile?.dailyWaterGoalMl ?? 2500}
-                  placeholder="2500"
-                  style={input}
-                />
-              </div>
+              <Input
+                label={t('heightCm')}
+                name="heightCm"
+                type="number"
+                step="0.1"
+                defaultValue={profile?.heightCm ?? ''}
+                placeholder="170"
+              />
+              <Input
+                label={t('weightKg')}
+                name="weightKg"
+                type="number"
+                step="0.1"
+                defaultValue={profile?.weightKg ?? ''}
+                placeholder="75"
+              />
+              <Input
+                label={t('bodyFatPct')}
+                name="bodyFatPct"
+                type="number"
+                step="0.1"
+                defaultValue={profile?.bodyFatPct ?? ''}
+                placeholder="15"
+              />
+              <Input
+                label={t('waistCm')}
+                name="waistCm"
+                type="number"
+                step="0.1"
+                defaultValue={profile?.waistCm ?? ''}
+                placeholder="80"
+              />
+              <Input
+                label={t('dateOfBirth')}
+                name="dateOfBirth"
+                type="date"
+                defaultValue={profile?.dateOfBirth?.slice(0, 10) ?? ''}
+              />
+              <Select label={t('gender')} name="gender" defaultValue={profile?.gender ?? ''}>
+                <option value="">{t('selectGoal')}</option>
+                <option value="male">{t('male')}</option>
+                <option value="female">{t('female')}</option>
+                <option value="other">{t('other')}</option>
+              </Select>
+              <Select
+                label={t('activityLevel')}
+                name="activityLevel"
+                defaultValue={profile?.activityLevel ?? ''}
+              >
+                <option value="">{t('selectGoal')}</option>
+                <option value="sedentary">{t('sedentary')}</option>
+                <option value="lightly_active">{t('lightlyActive')}</option>
+                <option value="moderately_active">{t('moderatelyActive')}</option>
+                <option value="very_active">{t('veryActive')}</option>
+                <option value="extremely_active">{t('extremelyActive')}</option>
+              </Select>
+              <Input
+                label={t('dailyWaterGoal')}
+                name="dailyWaterGoalMl"
+                type="number"
+                defaultValue={profile?.dailyWaterGoalMl ?? 2500}
+                placeholder="2500"
+              />
               <div style={{ gridColumn: '1 / -1', marginTop: 4 }}>
-                <button type="submit" style={btn}>
-                  Save profile
-                </button>
+                <Button type="submit">{t('saveProfile')}</Button>
               </div>
             </form>
-          </div>
+          </Card>
         </>
       )}
     </div>

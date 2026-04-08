@@ -1,4 +1,5 @@
 import { authedFetch } from '@/lib/server-fetch';
+import { getTranslations } from 'next-intl/server';
 import { PersonalRecord } from '@/lib/api';
 import {
   VolumePoint,
@@ -27,21 +28,21 @@ async function load() {
 
 export default async function WorkoutAnalyticsPage() {
   const { volume, prs, error } = await load();
+  const t = await getTranslations('workouts');
 
-  // Group PRs by exercise, keep the most recent per recordType
   const topPrs = prs.slice(0, 15);
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Workout analytics</h1>
+      <h1 style={{ marginTop: 0 }}>{t('workoutAnalytics')}</h1>
       {error && <p style={{ color: '#e07b5f' }}>{error}</p>}
       <WorkoutVolumeChart data={volume} />
 
       <h2 style={{ fontSize: '1.1rem', marginTop: '2rem' }}>
-        Recent personal records
+        {t('recentPersonalRecords')}
       </h2>
       {topPrs.length === 0 ? (
-        <p style={{ color: 'var(--muted)' }}>No PRs yet.</p>
+        <p style={{ color: 'var(--muted)' }}>{t('noPRsYet')}</p>
       ) : (
         <div style={{ display: 'grid', gap: '0.5rem' }}>
           {topPrs.map((pr) => (

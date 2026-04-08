@@ -55,6 +55,7 @@ export class NotificationCron {
         'Missed items',
         `You have ${count} overdue item${count > 1 ? 's' : ''} today.`,
         `${userId}:overdue::${dateStr}`,
+        'overdue',
       );
     }
     this.logger.log(`Overdue check: notified ${overdueByUser.size} users`);
@@ -83,6 +84,7 @@ export class NotificationCron {
         'Daily recap',
         `${done}/${items.length} completed (${pct}%). Great work!`,
         `${id}:recap::${dateStr}`,
+        'recap',
       );
     }
   }
@@ -106,6 +108,7 @@ export class NotificationCron {
           `${s.name} running low`,
           `${s.stockQuantity} servings remaining. Consider refilling.`,
           `${s.plan.userId}:stock:${s.id}:${dateStr}`,
+          'stock',
         );
       }
     }
