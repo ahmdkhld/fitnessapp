@@ -25,10 +25,10 @@ function formatTime(iso: string) {
 }
 
 const typeIcons: Record<string, { icon: string; bg: string }> = {
-  meal: { icon: '🍽', bg: 'rgba(34,197,94,0.15)' },
-  workout: { icon: '💪', bg: 'rgba(0,0,255,0.15)' },
-  supplement: { icon: '💊', bg: 'rgba(160,32,240,0.15)' },
-  default: { icon: '📋', bg: 'rgba(169,169,169,0.15)' },
+  meal: { icon: '🍽', bg: 'var(--success-bg)' },
+  workout: { icon: '💪', bg: 'var(--info-bg)' },
+  supplement: { icon: '💊', bg: 'rgba(92, 84, 121, 0.12)' },
+  default: { icon: '📋', bg: 'var(--hover-overlay)' },
 };
 
 export default async function TimelinePage() {
@@ -46,59 +46,65 @@ export default async function TimelinePage() {
   return (
     <div>
       {/* Page header */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ marginTop: 0, marginBottom: 4, fontSize: '1.75rem', fontWeight: 700 }}>
-          {t('title')}
-        </h1>
-        <p style={{ color: 'var(--muted)', margin: 0, fontSize: 14 }}>{dateStr}</p>
+      <div className="page-header">
+        <h1>{t('title')}</h1>
+        <p>{dateStr}</p>
       </div>
 
       {error && <div className="error-banner">{t('errorLoading', { error })}</div>}
       {!error && items.length === 0 && (
-        <div className="glass-card" style={{ textAlign: 'center', padding: '3rem 1.5rem' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📅</div>
-          <p style={{ color: 'var(--muted)', margin: 0 }}>{t('nothingScheduled')}</p>
+        <div className="empty-state">
+          <p className="empty-state__title">{t('nothingScheduled')}</p>
+          <p className="empty-state__body">
+            Schedule meals, supplements, or workouts and they&apos;ll appear here.
+          </p>
         </div>
       )}
 
-      <div style={{ display: 'grid', gap: '0.75rem' }}>
-        {items.map((item) => {
+      <div style={{ display: 'grid', gap: '0.85rem' }}>
+        {items.map((item, idx) => {
           const done = item.status === 'completed';
           const skipped = item.status === 'skipped';
-          const pending = !done && !skipped;
           const typeInfo = typeIcons[item.itemType] || typeIcons.default;
+          const muted = done || skipped;
 
           return (
             <div
               key={item.id}
+              className="timeline-card reveal"
               style={{
-                background: 'var(--card)',
-                border: '1px solid var(--border)',
-                borderRadius: 12,
-                padding: '1rem 1.25rem',
+                animationDelay: `${idx * 0.04}s`,
                 display: 'flex',
                 alignItems: 'center',
-                gap: '1rem',
-                opacity: done || skipped ? 0.55 : 1,
-                borderLeft: pending ? '3px solid var(--accent)' : '1px solid var(--border)',
-                boxShadow: pending ? '0 0 12px rgba(0,0,255,0.08)' : 'none',
-                transition: 'transform 0.2s ease',
+                gap: '1.25rem',
+                paddingLeft: '1.5rem',
               }}
             >
               {/* Time column */}
-              <div style={{
-                minWidth: 50,
-                fontSize: 13,
-                fontWeight: 600,
-                color: 'var(--muted)',
-                textAlign: 'center',
-                flexShrink: 0,
-              }}>
+              <div
+                style={{
+                  minWidth: 56,
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 18,
+                  fontFeatureSettings: "'tnum'",
+                  color: muted ? 'var(--muted)' : 'var(--fg)',
+                  flexShrink: 0,
+                }}
+              >
                 {formatTime(item.scheduledTime)}
               </div>
 
               {/* Icon circle */}
-              <div className="icon-circle" style={{ background: typeInfo.bg }}>
+              <div
+                className="icon-circle"
+                style={{
+                  background: done ? 'var(--hover-overlay)' : typeInfo.bg,
+                  color: done ? 'var(--success)' : 'var(--fg)',
+                  width: 42,
+                  height: 42,
+                }}
+                aria-hidden="true"
+              >
                 {done ? '✓' : typeInfo.icon}
               </div>
 
@@ -106,9 +112,10 @@ export default async function TimelinePage() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
                   style={{
-                    fontWeight: 600,
+                    fontWeight: 500,
                     textDecoration: done ? 'line-through' : 'none',
-                    color: done ? 'var(--muted)' : 'var(--fg)',
+                    textDecorationColor: 'var(--muted)',
+                    color: muted ? 'var(--muted)' : 'var(--fg)',
                     fontSize: 15,
                   }}
                 >
@@ -119,28 +126,32 @@ export default async function TimelinePage() {
                     {item.subtitle}
                   </div>
                 )}
-                <div style={{
-                  fontSize: 11,
-                  color: 'var(--muted)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  marginTop: 2,
-                }}>
+                <div
+                  style={{
+                    fontSize: 10,
+                    color: 'var(--muted)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.12em',
+                    marginTop: 4,
+                    fontWeight: 500,
+                  }}
+                >
                   {item.itemType}
+                  {skipped && ' · skipped'}
                 </div>
               </div>
 
               {/* Action buttons */}
-              <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+              <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
                 {item.itemType === 'workout' && item.referenceId && !done && (
                   <form
-                    action={startWorkoutFromTimeline.bind(
-                      null,
-                      item.referenceId,
-                    )}
+                    action={startWorkoutFromTimeline.bind(null, item.referenceId)}
                   >
-                    <button type="submit" className="btn-primary" aria-label={t('startWorkout')}
-                      style={{ padding: '0.4rem 0.75rem', fontSize: 13 }}>
+                    <button
+                      type="submit"
+                      className="btn-primary btn--sm"
+                      aria-label={t('startWorkout')}
+                    >
                       {t('startWorkout')}
                     </button>
                   </form>
@@ -154,7 +165,7 @@ export default async function TimelinePage() {
                 >
                   <button
                     type="submit"
-                    className={done ? 'btn-outline' : 'btn-success'}
+                    className="btn-outline btn--sm"
                     aria-label={done ? t('markPending') : t('markCompleted')}
                   >
                     {done ? t('done') : t('complete')}
@@ -162,8 +173,12 @@ export default async function TimelinePage() {
                 </form>
                 {!done && !skipped && (
                   <form action={setTimelineStatus.bind(null, item.id, 'skipped')}>
-                    <button type="submit" className="btn-outline" aria-label={t('skip')}
-                      style={{ color: 'var(--muted)' }}>
+                    <button
+                      type="submit"
+                      className="btn-outline btn--sm"
+                      style={{ color: 'var(--muted)' }}
+                      aria-label={t('skip')}
+                    >
                       {t('skip')}
                     </button>
                   </form>

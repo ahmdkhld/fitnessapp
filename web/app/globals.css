@@ -589,6 +589,22 @@ body::after {
   font-size: 0.85rem;
 }
 
+/* ── Diet plan create form grid ───────────────────────── */
+.diet-plan-create-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+@media (max-width: 640px) {
+  .diet-plan-create-grid {
+    grid-template-columns: 1fr;
+  }
+  .diet-plan-create-grid > button {
+    width: 100%;
+  }
+}
+
 /* ── Magazine dashboard hero ──────────────────────────── */
 .hero-grid {
   display: grid;

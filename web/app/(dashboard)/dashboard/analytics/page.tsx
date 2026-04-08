@@ -42,32 +42,53 @@ export default async function AnalyticsPage() {
   const { insights, chart, error } = await load();
   const t = await getTranslations('analytics');
   return (
-    <div>
+    <div className="reveal">
       <div className="page-header">
-        <h1><i className="fa-solid fa-chart-pie" style={{ marginRight: 10, color: 'var(--green)' }} />{t('title')}</h1>
+        <h1>{t('title')}</h1>
+        <p>Weekly adherence and computed insights from your last 7 days.</p>
       </div>
+
       {error && <div className="error-banner">{error}</div>}
+
       {chart.length > 0 && (
-        <div className="glass-card" style={{ marginTop: '1rem' }}>
+        <div className="glass-card">
           <WeeklyAdherenceChart data={chart} />
         </div>
       )}
-      <h2 className="section-title">
-        <i className="fa-solid fa-lightbulb" style={{ marginRight: 8, color: 'var(--purple)' }} />
-        {t('insights')}
-      </h2>
+
+      <h2 className="section-title">{t('insights')}</h2>
+
       {insights.length === 0 && !error && (
-        <p style={{ color: 'var(--muted)' }}>{t('noInsights')}</p>
+        <div className="empty-state">
+          <p className="empty-state__title">{t('noInsights')}</p>
+          <p className="empty-state__body">
+            Insights appear once you have at least a few days of logged meals,
+            workouts, or supplements.
+          </p>
+        </div>
       )}
-      <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1rem' }}>
+
+      <div style={{ display: 'grid', gap: '0.75rem' }}>
         {insights.map((i, idx) => (
           <div
             key={idx}
-            className="insight-card"
-            style={{ borderLeftColor: severityColor[i.severity] ?? 'var(--border)' }}
+            className="insight-card reveal"
+            style={{
+              animationDelay: `${idx * 0.05}s`,
+              borderLeftColor: severityColor[i.severity] ?? 'var(--border)',
+            }}
           >
-            <div style={{ fontWeight: 600 }}>{i.title}</div>
-            <div style={{ color: 'var(--muted)', fontSize: 14, marginTop: 4 }}>
+            <div
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '1.1rem',
+                fontWeight: 500,
+                letterSpacing: '-0.005em',
+              }}
+            >
+              {i.title}
+            </div>
+            <div style={{ color: 'var(--muted)', fontSize: 14, marginTop: 6, lineHeight: 1.55 }}>
               {i.detail}
             </div>
           </div>

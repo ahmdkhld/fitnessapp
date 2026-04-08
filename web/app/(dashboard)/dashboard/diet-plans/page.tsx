@@ -22,27 +22,31 @@ export default async function DietPlansPage() {
   const tc = await getTranslations('common');
 
   return (
-    <div>
-      {/* Page header */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ marginTop: 0, marginBottom: 4, fontSize: '1.75rem', fontWeight: 700 }}>
-          {t('title')}
-        </h1>
-        <p style={{ color: 'var(--muted)', margin: 0, fontSize: 14 }}>
-          {t('createNewPlan')}
-        </p>
+    <div className="reveal">
+      <div className="page-header">
+        <h1>{t('title')}</h1>
+        <p>Build daily nutrition plans, then activate the one you&apos;re currently following.</p>
       </div>
 
       {error && <div className="error-banner">{error}</div>}
 
       {/* Create form */}
       <div className="form-card" style={{ marginBottom: '2rem' }}>
-        <h3 style={{ marginTop: 0, marginBottom: '1rem', fontSize: '1rem', fontWeight: 600 }}>
+        <h3
+          style={{
+            fontFamily: 'var(--font-display)',
+            marginTop: 0,
+            marginBottom: '1.25rem',
+            fontSize: '1.25rem',
+            fontWeight: 500,
+            letterSpacing: '-0.01em',
+          }}
+        >
           {t('createNewPlan')}
         </h3>
         <form
           action={createDietPlan}
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '0.75rem', alignItems: 'end' }}
+          className="diet-plan-create-grid"
         >
           <div>
             <label style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 4 }}>
@@ -73,42 +77,51 @@ export default async function DietPlansPage() {
 
       {/* Plans list */}
       {plans.length === 0 && !error && (
-        <div className="glass-card" style={{ textAlign: 'center', padding: '3rem 1.5rem' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🍽</div>
-          <p style={{ color: 'var(--muted)', margin: 0 }}>{t('noPlans')}</p>
+        <div className="empty-state">
+          <p className="empty-state__title">{t('noPlans')}</p>
+          <p className="empty-state__body">
+            Create your first plan above to start logging meals against a daily target.
+          </p>
         </div>
       )}
 
       <div style={{ display: 'grid', gap: '0.75rem' }}>
-        {plans.map((p) => (
+        {plans.map((p, idx) => (
           <div
             key={p.id}
-            className="plan-card"
+            className="plan-card reveal"
             style={{
+              animationDelay: `${idx * 0.05}s`,
               borderLeft: p.isActive ? '3px solid var(--accent)' : undefined,
-              boxShadow: p.isActive ? '0 0 12px rgba(0,0,255,0.08)' : undefined,
+              paddingLeft: p.isActive ? 'calc(1.25rem - 2px)' : undefined,
             }}
           >
             <Link
               href={`/dashboard/diet-plans/${p.id}`}
               style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}
             >
-              {/* Icon circle */}
-              <div className="icon-circle" style={{ background: 'rgba(34,197,94,0.15)' }}>
-                🥗
-              </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 600, fontSize: 15 }}>{p.name}</div>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '1.15rem',
+                    fontWeight: 500,
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  {p.name}
+                </div>
                 {p.goal && (
-                  <span style={{
-                    display: 'inline-block',
-                    marginTop: 4,
-                    padding: '2px 8px',
-                    background: 'rgba(160,32,240,0.12)',
-                    color: 'var(--purple)',
-                    borderRadius: 9999,
-                    fontSize: 11,
-                  }}>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      marginTop: 6,
+                      fontSize: 11,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      color: 'var(--muted)',
+                    }}
+                  >
                     {p.goal}
                   </span>
                 )}

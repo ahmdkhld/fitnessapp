@@ -27,64 +27,114 @@ export default async function WorkoutsHomePage() {
   const { plans, prs, history, error } = await load();
   const t = await getTranslations('workouts');
   const active = plans.find((p) => p.isActive);
+
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '0.75rem' }}>
-        <div className="page-header">
-          <h1><i className="fa-solid fa-dumbbell" style={{ marginRight: 10, color: 'var(--accent)' }} />{t('title')}</h1>
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <Link href="/dashboard/workouts/templates" className="btn-outline">{t('templates')}</Link>
-          <Link href="/dashboard/workouts/plans" className="btn-outline">{t('myPlans')}</Link>
-          <Link href="/dashboard/workouts/sessions" className="btn-outline">{t('history')}</Link>
-          <Link href="/dashboard/workouts/library" className="btn-outline">{t('library')}</Link>
-          <Link href="/dashboard/workouts/analytics" className="btn-outline">{t('analytics')}</Link>
-        </div>
+    <div className="reveal">
+      <div className="page-header">
+        <h1>{t('title')}</h1>
+        <p>Your active plan, recent records, and session history.</p>
       </div>
+
+      {/* Sub-nav pills */}
+      <div
+        style={{
+          display: 'flex',
+          gap: '0.5rem',
+          flexWrap: 'wrap',
+          marginBottom: '2rem',
+          marginTop: '-1rem',
+        }}
+      >
+        <Link href="/dashboard/workouts/templates" className="btn-outline">{t('templates')}</Link>
+        <Link href="/dashboard/workouts/plans" className="btn-outline">{t('myPlans')}</Link>
+        <Link href="/dashboard/workouts/sessions" className="btn-outline">{t('history')}</Link>
+        <Link href="/dashboard/workouts/library" className="btn-outline">{t('library')}</Link>
+        <Link href="/dashboard/workouts/analytics" className="btn-outline">{t('analytics')}</Link>
+      </div>
+
       {error && <div className="error-banner">{error}</div>}
 
-      <div className="glass-card" style={{ marginTop: '1.5rem' }}>
-        {active ? (
-          <>
-            <div className="form-label">{t('activePlan')}</div>
-            <div style={{ fontSize: 22, fontWeight: 700, marginTop: 4 }}>{active.name}</div>
-            <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 4 }}>
-              {[active.splitType, `${active.daysPerWeek} ${t('daysPerWeek')}`, active.goal]
-                .filter(Boolean)
-                .join(' · ')}
-            </div>
-          </>
-        ) : (
-          <>
-            <div style={{ fontSize: 18, marginBottom: 8 }}>
-              {t('noActivePlan')}
-            </div>
-            <Link href="/dashboard/workouts/templates" className="btn-primary" style={{ display: 'inline-block' }}>
-              {t('browseTemplates')}
-            </Link>
-          </>
-        )}
-      </div>
-
-      <h2 className="section-title"><i className="fa-solid fa-trophy" style={{ marginRight: 8, color: 'var(--green)' }} />{t('recentPRs')}</h2>
-      {prs.length === 0 ? (
-        <p style={{ color: 'var(--muted)' }}>{t('logSessionForPR')}</p>
+      {/* Active plan callout */}
+      {active ? (
+        <div className="glass-card">
+          <div className="form-label">{t('activePlan')}</div>
+          <div
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '2rem',
+              fontWeight: 400,
+              letterSpacing: '-0.02em',
+              marginTop: 6,
+              color: 'var(--fg)',
+            }}
+          >
+            {active.name}
+          </div>
+          <div style={{ color: 'var(--muted)', fontSize: 14, marginTop: 6 }}>
+            {[active.splitType, `${active.daysPerWeek} ${t('daysPerWeek')}`, active.goal]
+              .filter(Boolean)
+              .join(' · ')}
+          </div>
+        </div>
       ) : (
-        <div style={{ display: 'grid', gap: '0.5rem' }}>
-          {prs.slice(0, 5).map((pr) => (
-            <div key={pr.id} className="list-card" style={{ padding: '0.75rem 1rem' }}>
-              <div style={{ fontWeight: 600 }}>{pr.exercise.name}</div>
-              <div style={{ color: 'var(--muted)', fontSize: 13 }}>
-                {pr.recordType.replace(/_/g, ' ')} · {pr.value} {pr.unit}
-              </div>
-            </div>
-          ))}
+        <div className="empty-state">
+          <p className="empty-state__title">{t('noActivePlan')}</p>
+          <p className="empty-state__body">
+            Pick a starter template, then customize the days and exercises to match your week.
+          </p>
+          <Link
+            href="/dashboard/workouts/templates"
+            className="btn-primary empty-state__cta"
+          >
+            {t('browseTemplates')}
+          </Link>
         </div>
       )}
 
-      <h2 className="section-title"><i className="fa-solid fa-clock-rotate-left" style={{ marginRight: 8, color: 'var(--purple)' }} />{t('recentSessions')}</h2>
+      {/* Recent PRs */}
+      <h2 className="section-title">{t('recentPRs')}</h2>
+      {prs.length === 0 ? (
+        <p style={{ color: 'var(--muted)', margin: 0 }}>{t('logSessionForPR')}</p>
+      ) : (
+        <div style={{ display: 'grid', gap: '0.5rem' }}>
+          {prs.slice(0, 5).map((pr) => (
+            <div key={pr.id} className="list-card">
+              <div style={{ fontWeight: 500 }}>{pr.exercise.name}</div>
+              <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 2 }}>
+                {pr.recordType.replace(/_/g, ' ')} ·{' '}
+                <span
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 15,
+                    color: 'var(--fg)',
+                    fontFeatureSettings: "'tnum'",
+                  }}
+                >
+                  {pr.value} {pr.unit}
+                </span>
+              </div>
+            </div>
+          ))}
+          {prs.length > 5 && (
+            <Link
+              href="/dashboard/workouts/analytics"
+              style={{
+                fontSize: 13,
+                color: 'var(--muted)',
+                marginTop: 4,
+                textAlign: 'right',
+              }}
+            >
+              View all PRs →
+            </Link>
+          )}
+        </div>
+      )}
+
+      {/* Recent sessions */}
+      <h2 className="section-title">{t('recentSessions')}</h2>
       {history.length === 0 ? (
-        <p style={{ color: 'var(--muted)' }}>{t('noSessionsYet')}</p>
+        <p style={{ color: 'var(--muted)', margin: 0 }}>{t('noSessionsYet')}</p>
       ) : (
         <div style={{ display: 'grid', gap: '0.5rem' }}>
           {history.slice(0, 5).map((s) => (
@@ -92,14 +142,34 @@ export default async function WorkoutsHomePage() {
               key={s.id}
               href={`/dashboard/workouts/sessions/${s.id}`}
               className="list-card"
-              style={{ color: 'inherit', display: 'block', padding: '0.75rem 1rem' }}
+              style={{ color: 'inherit', display: 'block', textDecoration: 'none' }}
             >
-              <div style={{ fontWeight: 600 }}>{s.day?.name ?? t('freeform')}</div>
-              <div style={{ color: 'var(--muted)', fontSize: 13 }}>
+              <div style={{ fontWeight: 500 }}>{s.day?.name ?? t('freeform')}</div>
+              <div
+                style={{
+                  color: 'var(--muted)',
+                  fontSize: 13,
+                  marginTop: 2,
+                  fontFeatureSettings: "'tnum'",
+                }}
+              >
                 {s.date.slice(0, 10)} · {s.sets.length} {t('sets')} · {s.durationMin ?? 0} {t('min')}
               </div>
             </Link>
           ))}
+          {history.length > 5 && (
+            <Link
+              href="/dashboard/workouts/sessions"
+              style={{
+                fontSize: 13,
+                color: 'var(--muted)',
+                marginTop: 4,
+                textAlign: 'right',
+              }}
+            >
+              View all sessions →
+            </Link>
+          )}
         </div>
       )}
     </div>
