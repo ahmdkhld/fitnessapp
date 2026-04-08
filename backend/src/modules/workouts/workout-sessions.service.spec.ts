@@ -4,6 +4,10 @@ import { WorkoutSessionsService } from './workout-sessions.service';
  * Integration-ish tests exercising the private PR detection and
  * auto-progression logic via a fake Prisma. We only mock what the
  * service actually touches — the rest is plain JavaScript.
+ *
+ * Both detectPRs and applyAutoProgression run inside a transaction
+ * now, so the fake Prisma exposes a `$transaction` that just hands the
+ * caller the same client (sufficient for our single-process tests).
  */
 describe('WorkoutSessionsService — PR detection + auto-progression', () => {
   const dayExerciseId = 'dx1';
@@ -28,13 +32,15 @@ describe('WorkoutSessionsService — PR detection + auto-progression', () => {
         targetWeightKg: { toString: () => '100' },
         progressionKg: { toString: () => '2.5' },
         exercise: { isCardio: false },
+        // Personal plan — auto-progression should fire on this row.
+        day: { plan: { userId: overrides.planUserId ?? 'u1' } },
       } as any,
       updatedWeight: null as number | null,
     };
-    return {
+    const client: any = {
       state,
       personalRecord: {
-        findFirst: jest.fn(async ({ where, orderBy }: any) => {
+        findFirst: jest.fn(async ({ where }: any) => {
           const candidates = state.prs.filter(
             (p) =>
               p.userId === where.userId &&
@@ -52,13 +58,15 @@ describe('WorkoutSessionsService — PR detection + auto-progression', () => {
         }),
       },
       workoutSet: {
-        findMany: jest.fn(async ({ where }: any) =>
+        findMany: jest.fn(async () =>
           overrides.loggedSets ?? [
             { weightKg: 100, reps: 5 },
             { weightKg: 100, reps: 5 },
             { weightKg: 100, reps: 5 },
           ],
         ),
+        create: jest.fn(),
+        delete: jest.fn(),
       },
       workoutDayExercise: {
         findMany: jest.fn(async () => [state.dayExercise]),
@@ -75,14 +83,20 @@ describe('WorkoutSessionsService — PR detection + auto-progression', () => {
       dailyScheduleItem: {
         updateMany: jest.fn(),
       },
-    } as any;
+      workoutDay: {
+        findUnique: jest.fn(),
+      },
+    };
+    // The service uses $transaction(callback) — pass the same client back
+    // so the fake reads + writes share state.
+    client.$transaction = jest.fn(async (cb: any) => cb(client));
+    return client;
   }
 
   it('inserts 1RM/3RM/5RM/estimated/max_volume PRs for a fresh user', async () => {
     const prisma = makePrisma();
     const svc = new WorkoutSessionsService(prisma);
-    // Private method access via bracket notation
-    await (svc as any).detectPRs('u1', {
+    await (svc as any).detectPRs(prisma, 'u1', {
       id: 's1',
       exerciseId,
       reps: 5,
@@ -90,7 +104,7 @@ describe('WorkoutSessionsService — PR detection + auto-progression', () => {
       durationSec: null,
       distanceKm: null,
     });
-    const types = prisma.state.prs.map((p) => p.recordType).sort();
+    const types = prisma.state.prs.map((p: any) => p.recordType).sort();
     expect(types).toEqual(
       ['1rm', '3rm', '5rm', 'estimated_1rm', 'max_volume'].sort(),
     );
@@ -107,7 +121,7 @@ describe('WorkoutSessionsService — PR detection + auto-progression', () => {
       unit: 'kg',
     });
     const svc = new WorkoutSessionsService(prisma);
-    await (svc as any).detectPRs('u1', {
+    await (svc as any).detectPRs(prisma, 'u1', {
       id: 's1',
       exerciseId,
       reps: 5,
@@ -115,7 +129,7 @@ describe('WorkoutSessionsService — PR detection + auto-progression', () => {
       durationSec: null,
       distanceKm: null,
     });
-    const fiveRmPRs = prisma.state.prs.filter((p) => p.recordType === '5rm');
+    const fiveRmPRs = prisma.state.prs.filter((p: any) => p.recordType === '5rm');
     expect(fiveRmPRs).toHaveLength(1);
     expect(fiveRmPRs[0].value).toBe(120);
   });
@@ -123,7 +137,7 @@ describe('WorkoutSessionsService — PR detection + auto-progression', () => {
   it('records max_distance for a cardio set', async () => {
     const prisma = makePrisma();
     const svc = new WorkoutSessionsService(prisma);
-    await (svc as any).detectPRs('u1', {
+    await (svc as any).detectPRs(prisma, 'u1', {
       id: 's1',
       exerciseId,
       reps: null,
@@ -131,7 +145,7 @@ describe('WorkoutSessionsService — PR detection + auto-progression', () => {
       durationSec: 1800,
       distanceKm: { toString: () => '5.2' },
     });
-    const dist = prisma.state.prs.find((p) => p.recordType === 'max_distance');
+    const dist = prisma.state.prs.find((p: any) => p.recordType === 'max_distance');
     expect(dist).toBeDefined();
     expect(dist?.value).toBe(5.2);
   });
@@ -147,10 +161,17 @@ describe('WorkoutSessionsService — PR detection + auto-progression', () => {
     const prisma = makePrisma({
       loggedSets: [
         { weightKg: 100, reps: 5 },
-        { weightKg: 95, reps: 5 }, // dropped 5kg
+        { weightKg: 95, reps: 5 },
         { weightKg: 100, reps: 5 },
       ],
     });
+    const svc = new WorkoutSessionsService(prisma);
+    await (svc as any).applyAutoProgression('d1', 's1');
+    expect(prisma.state.updatedWeight).toBeNull();
+  });
+
+  it('auto-progression refuses to mutate template (planUserId=null) prescriptions', async () => {
+    const prisma = makePrisma({ planUserId: null });
     const svc = new WorkoutSessionsService(prisma);
     await (svc as any).applyAutoProgression('d1', 's1');
     expect(prisma.state.updatedWeight).toBeNull();

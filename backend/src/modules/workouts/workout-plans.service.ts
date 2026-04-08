@@ -85,7 +85,16 @@ export class WorkoutPlansService {
   }
 
   async activate(userId: string, id: string) {
-    await this.findOne(userId, id);
+    const plan = await this.findOne(userId, id);
+    if (plan.userId === null) {
+      // Templates are global rows. Activating them would mark a row
+      // shared by every user, and any subsequent edit/auto-progression
+      // would corrupt the template for everyone. Force the user to
+      // clone first.
+      throw new ForbiddenException(
+        'Clone the template into a personal plan before activating it',
+      );
+    }
     return this.prisma.$transaction([
       this.prisma.workoutPlan.updateMany({
         where: { userId, isActive: true },
@@ -163,7 +172,8 @@ export class WorkoutPlansService {
   // ========== DAYS ==========
 
   async addDay(userId: string, planId: string, dto: CreateDayDto) {
-    await this.findOne(userId, planId);
+    const plan = await this.findOne(userId, planId);
+    this.assertUserOwnsPlan(plan);
     return this.prisma.workoutDay.create({
       data: { workoutPlanId: planId, ...dto },
     });
@@ -175,7 +185,7 @@ export class WorkoutPlansService {
       include: { plan: true },
     });
     if (!day) throw new NotFoundException();
-    if (day.plan.userId !== userId) throw new ForbiddenException();
+    this.assertUserOwnsPlan(day.plan, userId);
     return this.prisma.workoutDay.update({ where: { id: dayId }, data: dto });
   }
 
@@ -185,7 +195,7 @@ export class WorkoutPlansService {
       include: { plan: true },
     });
     if (!day) throw new NotFoundException();
-    if (day.plan.userId !== userId) throw new ForbiddenException();
+    this.assertUserOwnsPlan(day.plan, userId);
     await this.prisma.workoutDay.delete({ where: { id: dayId } });
     return { success: true };
   }
@@ -233,5 +243,23 @@ export class WorkoutPlansService {
     }
     await this.prisma.workoutDayExercise.delete({ where: { id: exerciseRowId } });
     return { success: true };
+  }
+
+  /**
+   * Throws if the plan is a global template or belongs to a different
+   * user. Used to gate every mutating endpoint that takes a plan id.
+   */
+  private assertUserOwnsPlan(
+    plan: { userId: string | null },
+    expectedUserId?: string,
+  ) {
+    if (plan.userId === null) {
+      throw new ForbiddenException(
+        'Clone the template into a personal plan first',
+      );
+    }
+    if (expectedUserId && plan.userId !== expectedUserId) {
+      throw new ForbiddenException();
+    }
   }
 }

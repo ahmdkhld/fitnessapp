@@ -67,11 +67,20 @@ export class AuthService {
         tokenHash,
         revokedAt: null,
         expiresAt: { gt: new Date() },
+        // Defence-in-depth: never let a row written by the password
+        // reset flow be exchanged for a new access token, even though
+        // those rows store random hex (not signed JWTs) and would fail
+        // the JWT verify above. Belt + suspenders.
+        NOT: { userAgent: 'password-reset' },
       },
     });
     if (!record) {
       await this.prisma.refreshToken.updateMany({
-        where: { userId: payload.sub, revokedAt: null },
+        where: {
+          userId: payload.sub,
+          revokedAt: null,
+          NOT: { userAgent: 'password-reset' },
+        },
         data: { revokedAt: new Date() },
       });
       throw new UnauthorizedException('Refresh token reused or expired');
@@ -88,7 +97,11 @@ export class AuthService {
   async logout(refreshToken: string) {
     const tokenHash = this.hash(refreshToken);
     await this.prisma.refreshToken.updateMany({
-      where: { tokenHash, revokedAt: null },
+      where: {
+        tokenHash,
+        revokedAt: null,
+        NOT: { userAgent: 'password-reset' },
+      },
       data: { revokedAt: new Date() },
     });
     return { success: true };

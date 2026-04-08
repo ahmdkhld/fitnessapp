@@ -20,7 +20,9 @@ export interface AdherenceSummary {
 
 export interface ScheduleItem {
   id: string;
-  itemType: 'meal' | 'supplement' | 'water';
+  itemType: 'meal' | 'supplement' | 'workout';
+  /** FK back to the underlying meal / supplement / workout day. */
+  referenceId: string | null;
   title: string;
   subtitle: string | null;
   scheduledTime: string;

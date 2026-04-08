@@ -58,7 +58,8 @@ class AppRouter {
         ),
         GoRoute(
           path: '/onboarding/stats',
-          builder: (_, __) => const BodyStatsScreen(),
+          builder: (_, state) =>
+              BodyStatsScreen(goal: state.uri.queryParameters['goal']),
         ),
         GoRoute(
           path: '/onboarding/plan',

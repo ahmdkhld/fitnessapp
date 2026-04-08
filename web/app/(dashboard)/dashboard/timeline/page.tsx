@@ -1,6 +1,6 @@
 import { api, ScheduleItem } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-import { setTimelineStatus } from './actions';
+import { setTimelineStatus, startWorkoutFromTimeline } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,6 +78,29 @@ export default async function TimelinePage() {
                 )}
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {item.itemType === 'workout' && item.referenceId && !done && (
+                  <form
+                    action={startWorkoutFromTimeline.bind(
+                      null,
+                      item.referenceId,
+                    )}
+                  >
+                    <button
+                      type="submit"
+                      aria-label="Start workout"
+                      style={{
+                        padding: '0.4rem 0.75rem',
+                        background: 'var(--accent)',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Start
+                    </button>
+                  </form>
+                )}
                 <form
                   action={setTimelineStatus.bind(
                     null,

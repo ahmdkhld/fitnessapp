@@ -5,10 +5,17 @@ import '../../../core/api/api_client.dart';
 import '../../../core/di/injection.dart';
 
 /// Optional onboarding step where the user fills in height, weight,
-/// gender, DOB, activity level and unit system. Writes to
-/// /users/me/profile and /users/me.
+/// gender, DOB, activity level and unit system. Writes the goal +
+/// unit system to `/users/me` and the body stats to
+/// `/users/me/profile` so the rest of the app (calorie targets,
+/// adherence calc, kg↔lbs display) has them.
 class BodyStatsScreen extends StatefulWidget {
-  const BodyStatsScreen({super.key});
+  const BodyStatsScreen({super.key, this.goal});
+
+  /// Goal selected on the previous onboarding step. We persist it via
+  /// `PATCH /users/me/goal` so it ends up on the user record — until
+  /// this screen wired the call, the entire goal step was a no-op.
+  final String? goal;
 
   @override
   State<BodyStatsScreen> createState() => _BodyStatsScreenState();
@@ -44,6 +51,14 @@ class _BodyStatsScreenState extends State<BodyStatsScreen> {
         '/users/me',
         data: {'unitSystem': _unitSystem},
       );
+      // Persist the goal selected on the previous step. Until this
+      // call existed the goal was being thrown on the floor.
+      if (widget.goal != null && widget.goal!.isNotEmpty) {
+        await api.dio.patch<void>(
+          '/users/me/goal',
+          data: {'goal': widget.goal},
+        );
+      }
       // Then the profile row
       await api.dio.post<void>(
         '/users/me/profile',
@@ -57,7 +72,11 @@ class _BodyStatsScreenState extends State<BodyStatsScreen> {
           if (_dob != null) 'dateOfBirth': _dob!.toIso8601String(),
         },
       );
-      if (mounted) context.go('/onboarding/plan');
+      if (mounted) {
+        // Forward the goal so the next screen can highlight it.
+        final qs = widget.goal != null ? '?goal=${widget.goal}' : '';
+        context.go('/onboarding/plan$qs');
+      }
     } on DioException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

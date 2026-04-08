@@ -18,6 +18,24 @@ export class WorkoutSessionsService {
   // ========== SESSIONS ==========
 
   async start(userId: string, dto: StartSessionDto) {
+    // Reject sessions that point at a template day — those exercises
+    // are shared and would get corrupted by auto-progression.
+    if (dto.workoutDayId) {
+      const day = await this.prisma.workoutDay.findUnique({
+        where: { id: dto.workoutDayId },
+        include: { plan: { select: { userId: true } } },
+      });
+      if (!day) throw new NotFoundException('Workout day not found');
+      if (day.plan.userId === null) {
+        throw new ForbiddenException(
+          'Clone the template into a personal plan before starting a session',
+        );
+      }
+      if (day.plan.userId !== userId) {
+        throw new ForbiddenException();
+      }
+    }
+
     // Auto-close any in-progress session older than 12h to avoid zombies
     await this.prisma.workoutSession.updateMany({
       where: {
@@ -114,27 +132,32 @@ export class WorkoutSessionsService {
   async logSet(userId: string, sessionId: string, dto: CreateSetDto) {
     const session = await this.findOne(userId, sessionId);
 
-    const created = await this.prisma.workoutSet.create({
-      data: {
-        sessionId,
-        exerciseId: dto.exerciseId,
-        setNumber: dto.setNumber,
-        reps: dto.reps,
-        weightKg: dto.weightKg,
-        rpe: dto.rpe,
-        durationSec: dto.durationSec,
-        distanceKm: dto.distanceKm,
-        isWarmup: dto.isWarmup ?? false,
-        isFailure: dto.isFailure ?? false,
-        restSeconds: dto.restSeconds,
-        notes: dto.notes,
-      },
-    });
+    // Insert the set and run PR detection inside a single interactive
+    // transaction so two simultaneous logSet calls can't observe the
+    // same "previous max" and produce duplicate records.
+    return this.prisma.$transaction(async (tx) => {
+      const created = await tx.workoutSet.create({
+        data: {
+          sessionId,
+          exerciseId: dto.exerciseId,
+          setNumber: dto.setNumber,
+          reps: dto.reps,
+          weightKg: dto.weightKg,
+          rpe: dto.rpe,
+          durationSec: dto.durationSec,
+          distanceKm: dto.distanceKm,
+          isWarmup: dto.isWarmup ?? false,
+          isFailure: dto.isFailure ?? false,
+          restSeconds: dto.restSeconds,
+          notes: dto.notes,
+        },
+      });
 
-    if (!created.isWarmup) {
-      await this.detectPRs(session.userId, created);
-    }
-    return created;
+      if (!created.isWarmup) {
+        await this.detectPRs(tx, session.userId, created);
+      }
+      return created;
+    });
   }
 
   async updateSet(userId: string, setId: string, dto: UpdateSetDto) {
@@ -168,14 +191,18 @@ export class WorkoutSessionsService {
    *   - Max volume in a single set
    *   - Fastest distance for cardio
    */
-  private async detectPRs(userId: string, set: {
-    id: string;
-    exerciseId: string;
-    reps: number | null;
-    weightKg: Prisma.Decimal | null;
-    durationSec: number | null;
-    distanceKm: Prisma.Decimal | null;
-  }) {
+  private async detectPRs(
+    tx: Prisma.TransactionClient,
+    userId: string,
+    set: {
+      id: string;
+      exerciseId: string;
+      reps: number | null;
+      weightKg: Prisma.Decimal | null;
+      durationSec: number | null;
+      distanceKm: Prisma.Decimal | null;
+    },
+  ) {
     const records: Array<{
       recordType: string;
       value: number;
@@ -190,7 +217,7 @@ export class WorkoutSessionsService {
       for (const target of [1, 3, 5, 10]) {
         if (reps >= target) {
           const rmType = `${target}rm`;
-          const prev = await this.prisma.personalRecord.findFirst({
+          const prev = await tx.personalRecord.findFirst({
             where: { userId, exerciseId: set.exerciseId, recordType: rmType },
             orderBy: { value: 'desc' },
           });
@@ -201,7 +228,7 @@ export class WorkoutSessionsService {
       }
       // Estimated 1RM
       const est = estimate1rm(weight, reps);
-      const prevEst = await this.prisma.personalRecord.findFirst({
+      const prevEst = await tx.personalRecord.findFirst({
         where: {
           userId,
           exerciseId: set.exerciseId,
@@ -215,7 +242,7 @@ export class WorkoutSessionsService {
 
       // Max single-set volume
       const vol = setVolume(weight, reps);
-      const prevVol = await this.prisma.personalRecord.findFirst({
+      const prevVol = await tx.personalRecord.findFirst({
         where: {
           userId,
           exerciseId: set.exerciseId,
@@ -231,7 +258,7 @@ export class WorkoutSessionsService {
     // Cardio PRs — furthest distance
     if (set.distanceKm) {
       const distance = Number(set.distanceKm);
-      const prevDist = await this.prisma.personalRecord.findFirst({
+      const prevDist = await tx.personalRecord.findFirst({
         where: {
           userId,
           exerciseId: set.exerciseId,
@@ -245,7 +272,7 @@ export class WorkoutSessionsService {
     }
 
     if (records.length === 0) return;
-    await this.prisma.personalRecord.createMany({
+    await tx.personalRecord.createMany({
       data: records.map((r) => ({
         userId,
         exerciseId: set.exerciseId,
@@ -263,39 +290,45 @@ export class WorkoutSessionsService {
    * `progressionKg`. Runs when a session is marked complete.
    */
   private async applyAutoProgression(workoutDayId: string, sessionId: string) {
-    const dayExercises = await this.prisma.workoutDayExercise.findMany({
-      where: { workoutDayId },
-      include: { exercise: true },
+    // Wrap the read-evaluate-write loop in a transaction so two
+    // sessions completing concurrently can't double-bump the same row.
+    await this.prisma.$transaction(async (tx) => {
+      const dayExercises = await tx.workoutDayExercise.findMany({
+        where: { workoutDayId },
+        include: { exercise: true, day: { select: { plan: { select: { userId: true } } } } },
+      });
+
+      for (const row of dayExercises) {
+        // Defence-in-depth: never write to a template's prescription rows.
+        if (row.day.plan.userId === null) continue;
+        if (Number(row.progressionKg) <= 0) continue;
+        if (row.exercise.isCardio) continue;
+        if (!row.targetWeightKg) continue;
+
+        const sets = await tx.workoutSet.findMany({
+          where: {
+            sessionId,
+            exerciseId: row.exerciseId,
+            isWarmup: false,
+          },
+        });
+
+        if (sets.length < row.targetSets) continue;
+
+        const target = Number(row.targetWeightKg);
+        const allHitTarget = sets.every(
+          (s) => s.weightKg != null && Number(s.weightKg) >= target,
+        );
+        if (!allHitTarget) continue;
+
+        await tx.workoutDayExercise.update({
+          where: { id: row.id },
+          data: {
+            targetWeightKg: target + Number(row.progressionKg),
+          },
+        });
+      }
     });
-
-    for (const row of dayExercises) {
-      if (Number(row.progressionKg) <= 0) continue;
-      if (row.exercise.isCardio) continue;
-      if (!row.targetWeightKg) continue;
-
-      const sets = await this.prisma.workoutSet.findMany({
-        where: {
-          sessionId,
-          exerciseId: row.exerciseId,
-          isWarmup: false,
-        },
-      });
-
-      if (sets.length < row.targetSets) continue;
-
-      const target = Number(row.targetWeightKg);
-      const allHitTarget = sets.every(
-        (s) => s.weightKg != null && Number(s.weightKg) >= target,
-      );
-      if (!allHitTarget) continue;
-
-      await this.prisma.workoutDayExercise.update({
-        where: { id: row.id },
-        data: {
-          targetWeightKg: target + Number(row.progressionKg),
-        },
-      });
-    }
   }
 
   private async markScheduleItemCompleted(
