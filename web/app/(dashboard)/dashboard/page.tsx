@@ -28,116 +28,95 @@ export default async function DashboardOverviewPage() {
   const { summary, streak, error } = await loadSummary();
   const t = await getTranslations('dashboard');
 
-  const cards = [
-    {
-      label: t('adherence7d'),
-      value: summary ? `${summary.overallPercentage}%` : '—',
-      icon: '📊',
-      accentColor: 'var(--success)',
-    },
-    {
-      label: t('currentStreak'),
-      value: streak ? `${streak} ${t('days')}` : `0 ${t('days')}`,
-      icon: '🔥',
-      accentColor: 'var(--accent-purple)',
-    },
-    {
-      label: t('completed7d'),
-      value: summary ? `${summary.completed} / ${summary.total}` : '—',
-      icon: '✅',
-      accentColor: 'var(--accent)',
-    },
-    {
-      label: t('skipped7d'),
-      value: summary ? `${summary.skipped}` : '—',
-      icon: '⏭',
-      accentColor: 'var(--muted)',
-    },
-  ];
+  const adherence = summary?.overallPercentage ?? 0;
+  const completedRatio = summary
+    ? `${summary.completed} / ${summary.total}`
+    : '— / —';
+  const skipped = summary?.skipped ?? 0;
+
+  const today = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
 
   return (
     <div>
-      {/* Page header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
-        <div>
-          <h1 style={{ marginTop: 0, marginBottom: 4, fontSize: '1.75rem', fontWeight: 700 }}>
-            {t('overview')}
-          </h1>
-          <p style={{ color: 'var(--muted)', margin: 0, fontSize: 14 }}>
-            {t('snapshot')}
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <span style={{
-            padding: '0.4rem 0.75rem',
-            background: 'var(--card)',
-            border: '1px solid var(--border)',
-            borderRadius: 8,
-            color: 'var(--muted)',
-            fontSize: 13,
-          }}>
-            {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-          </span>
-        </div>
-      </div>
-
       {error && <div className="error-banner">{error}</div>}
 
-      {/* Stat cards grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1rem',
-        }}
-      >
-        {cards.map((c) => (
-          <div key={c.label} className="stat-card">
-            {/* Accent circle in top-right */}
-            <div style={{
-              position: 'absolute',
-              top: 12,
-              right: 12,
-              width: 36,
-              height: 36,
-              borderRadius: '50%',
-              background: `${c.accentColor}20`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 16,
-            }}>
-              {c.icon}
-            </div>
-            <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 4 }}>{c.label}</div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: '#FFF' }}>
-              {c.value}
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* ── Hero: magazine layout ─────────────────────── */}
+      <section className="hero-grid reveal">
+        <div className="hero-main">
+          <div className="hero-eyebrow">{today}</div>
+          <h1 className="hero-number">
+            {adherence}
+            <sup>%</sup>
+          </h1>
+          <p className="hero-caption">
+            <strong>{t('adherence7d')}.</strong> Of the {summary?.total ?? 0}{' '}
+            scheduled items in the last seven days, you completed{' '}
+            {summary?.completed ?? 0}.{' '}
+            {streak > 0 && (
+              <>
+                You&apos;re on a <strong>{streak}-day streak</strong>.
+              </>
+            )}
+          </p>
+        </div>
 
-      {/* Category breakdown */}
-      {summary && (
-        <div style={{ marginTop: '2rem' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem' }}>
-            {t('byCategory')}
-          </h2>
+        <aside className="hero-side">
+          <div className="hero-side__row">
+            <span className="hero-side__label">{t('currentStreak')}</span>
+            <span className="hero-side__value">{streak}</span>
+          </div>
+          <div className="hero-side__rule" />
+          <div className="hero-side__row">
+            <span className="hero-side__label">{t('completed7d')}</span>
+            <span className="hero-side__value">{completedRatio}</span>
+          </div>
+          <div className="hero-side__rule" />
+          <div className="hero-side__row">
+            <span className="hero-side__label">{t('skipped7d')}</span>
+            <span className="hero-side__value">{skipped}</span>
+          </div>
+        </aside>
+      </section>
+
+      {/* ── Category breakdown ─────────────────────────── */}
+      {summary && summary.perType.length > 0 && (
+        <section className="reveal" style={{ animationDelay: '0.15s' }}>
+          <h2 className="section-title">{t('byCategory')}</h2>
           <div className="glass-card">
-            <div style={{ display: 'grid', gap: '1rem' }}>
+            <div style={{ display: 'grid', gap: '1.4rem' }}>
               {summary.perType.map((pt) => (
                 <div key={pt.type}>
                   <div
                     style={{
                       display: 'flex',
                       justifyContent: 'space-between',
+                      alignItems: 'baseline',
                       marginBottom: 8,
                       fontSize: 14,
                     }}
                   >
-                    <span style={{ textTransform: 'capitalize', fontWeight: 500 }}>{pt.type}</span>
-                    <span style={{ color: 'var(--muted)' }}>
-                      {pt.completed}/{pt.total} &middot; {pt.percentage}%
+                    <span
+                      style={{
+                        textTransform: 'capitalize',
+                        fontWeight: 500,
+                        letterSpacing: '0.01em',
+                      }}
+                    >
+                      {pt.type}
+                    </span>
+                    <span
+                      style={{
+                        color: 'var(--muted)',
+                        fontFamily: 'var(--font-display)',
+                        fontSize: 15,
+                        fontFeatureSettings: "'tnum'",
+                      }}
+                    >
+                      {pt.completed}/{pt.total} · {pt.percentage}%
                     </span>
                   </div>
                   <div className="progress-track">
@@ -150,7 +129,20 @@ export default async function DashboardOverviewPage() {
               ))}
             </div>
           </div>
-        </div>
+        </section>
+      )}
+
+      {/* ── Empty state ─────────────────────────────────── */}
+      {summary && summary.perType.length === 0 && (
+        <section className="reveal" style={{ animationDelay: '0.15s' }}>
+          <div className="empty-state">
+            <p className="empty-state__title">No data for the past week</p>
+            <p className="empty-state__body">
+              Once you log meals, supplements, or workout sessions, your
+              adherence breakdown will appear here.
+            </p>
+          </div>
+        </section>
       )}
     </div>
   );
