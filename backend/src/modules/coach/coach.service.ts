@@ -1,21 +1,29 @@
 import {
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { MailerService } from '../mailer/mailer.service';
 
 @Injectable()
 export class CoachService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(CoachService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailer: MailerService,
+  ) {}
 
   /**
    * A coach invites a client by email. If the client doesn't exist yet,
    * the invite is rejected with 404 to avoid enumeration side-effects.
    * The link is created un-accepted and must be confirmed by the client.
+   * The client also receives an email pointing them at /coach/accept/:id.
    */
   async inviteClient(coachId: string, clientEmail: string) {
-    await this.ensureCoach(coachId);
+    const coach = await this.ensureCoach(coachId);
 
     const client = await this.prisma.user.findUnique({
       where: { email: clientEmail },
@@ -25,11 +33,27 @@ export class CoachService {
       throw new ForbiddenException('Cannot coach yourself');
     }
 
-    return this.prisma.coachLink.upsert({
+    const link = await this.prisma.coachLink.upsert({
       where: { coachId_clientId: { coachId, clientId: client.id } },
       create: { coachId, clientId: client.id },
       update: {},
     });
+
+    // Best-effort email — never fail the invite if delivery hiccups.
+    try {
+      const acceptUrl =
+        `${process.env.APP_URL ?? 'https://app.nutritrack.app'}` +
+        `/dashboard/coach?accept=${link.id}`;
+      await this.mailer.sendCoachInvite(
+        client.email,
+        coach.fullName ?? coach.email,
+        acceptUrl,
+      );
+    } catch (err) {
+      this.logger.warn(`Coach invite email failed: ${(err as Error).message}`);
+    }
+
+    return link;
   }
 
   /** A client accepts a pending coaching relationship. */
@@ -152,10 +176,11 @@ export class CoachService {
   private async ensureCoach(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { role: true },
+      select: { id: true, email: true, fullName: true, role: true },
     });
     if (user?.role !== 'coach' && user?.role !== 'admin') {
       throw new ForbiddenException('Coach role required');
     }
+    return user;
   }
 }

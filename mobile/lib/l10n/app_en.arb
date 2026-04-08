@@ -64,5 +64,19 @@
   "weeklyVolume": "Weekly volume",
   "estimated1rm": "Estimated 1RM",
   "customExercise": "Custom",
-  "createCustom": "Create custom exercise"
+  "createCustom": "Create custom exercise",
+  "newBodyLog": "New body log",
+  "weightKg": "Weight (kg)",
+  "waistCm": "Waist (cm)",
+  "bodyFatPct": "Body fat %",
+  "energyLevel": "Energy",
+  "notesField": "Notes",
+  "camera": "Camera",
+  "gallery": "Gallery",
+  "todayWaterTitle": "Water",
+  "addAmount": "Add",
+  "diet": "Diet plans",
+  "supplementPlans": "Supplement plans",
+  "logoutConfirmTitle": "Sign out?",
+  "logoutConfirmBody": "You'll need to sign in again next time."
 }

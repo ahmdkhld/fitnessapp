@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../core/di/injection.dart';
@@ -35,6 +36,7 @@ class _BodyLogScreenState extends State<BodyLogScreen> {
   }
 
   Future<void> _create() async {
+    final l = AppLocalizations.of(context)!;
     final weight = TextEditingController();
     final waist = TextEditingController();
     final bodyFat = TextEditingController();
@@ -58,25 +60,25 @@ class _BodyLogScreenState extends State<BodyLogScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('New body log', style: TextStyle(fontSize: 18)),
+                Text(l.newBodyLog, style: const TextStyle(fontSize: 18)),
                 const SizedBox(height: 12),
                 TextField(
                   controller: weight,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Weight (kg)'),
+                  decoration: InputDecoration(labelText: l.weightKg),
                 ),
                 TextField(
                   controller: waist,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Waist (cm)'),
+                  decoration: InputDecoration(labelText: l.waistCm),
                 ),
                 TextField(
                   controller: bodyFat,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Body fat %'),
+                  decoration: InputDecoration(labelText: l.bodyFatPct),
                 ),
                 const SizedBox(height: 12),
-                Text('Energy: $energy / 5'),
+                Text('${l.energyLevel}: $energy / 5'),
                 Slider(
                   value: energy.toDouble(),
                   min: 1,
@@ -86,14 +88,14 @@ class _BodyLogScreenState extends State<BodyLogScreen> {
                 ),
                 TextField(
                   controller: notes,
-                  decoration: const InputDecoration(labelText: 'Notes'),
+                  decoration: InputDecoration(labelText: l.notesField),
                 ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     OutlinedButton.icon(
                       icon: const Icon(Icons.camera_alt),
-                      label: const Text('Camera'),
+                      label: Text(l.camera),
                       onPressed: () async {
                         final picked = await _picker.pickImage(
                           source: ImageSource.camera,
@@ -107,7 +109,7 @@ class _BodyLogScreenState extends State<BodyLogScreen> {
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
                       icon: const Icon(Icons.photo_library),
-                      label: const Text('Gallery'),
+                      label: Text(l.gallery),
                       onPressed: () async {
                         final picked = await _picker.pickImage(
                           source: ImageSource.gallery,
@@ -130,7 +132,7 @@ class _BodyLogScreenState extends State<BodyLogScreen> {
                 const SizedBox(height: 12),
                 FilledButton(
                   onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text('Save'),
+                  child: Text(l.save),
                 ),
               ],
             ),
@@ -167,7 +169,7 @@ class _BodyLogScreenState extends State<BodyLogScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Body log')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.bodyLog)),
       floatingActionButton: FloatingActionButton(
         onPressed: _create,
         child: const Icon(Icons.add),

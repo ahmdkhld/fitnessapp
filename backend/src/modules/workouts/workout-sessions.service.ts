@@ -61,6 +61,9 @@ export class WorkoutSessionsService {
   }
 
   list(userId: string, from?: Date, to?: Date) {
+    // List endpoints stay shallow on purpose: pulling the full plan +
+    // exercise tree per row killed the history page on real data. The
+    // detail endpoint (findOne) keeps the deep include.
     return this.prisma.workoutSession.findMany({
       where: {
         userId,
@@ -74,7 +77,24 @@ export class WorkoutSessionsService {
           : {}),
       },
       orderBy: { date: 'desc' },
-      include: this.sessionInclude(),
+      take: 100,
+      select: {
+        id: true,
+        date: true,
+        status: true,
+        startedAt: true,
+        completedAt: true,
+        durationMin: true,
+        bodyweightKg: true,
+        energyLevel: true,
+        notes: true,
+        workoutDayId: true,
+        day: { select: { id: true, name: true } },
+        // Aggregate set count + total volume in a single roundtrip via
+        // the relation aggregation API; falls back to the count alone
+        // when the Prisma version doesn't expose `_sum` on relations.
+        _count: { select: { sets: true } },
+      },
     });
   }
 

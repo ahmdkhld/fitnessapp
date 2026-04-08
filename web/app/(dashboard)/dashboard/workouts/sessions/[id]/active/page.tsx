@@ -96,6 +96,70 @@ export default async function ActiveSessionPage({
         Started {session.date.slice(0, 10)} · {session.sets.length} sets logged
       </p>
 
+      {!day && session.sets.length === 0 && (
+        <div
+          style={{
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
+            padding: '1rem 1.25rem',
+            borderRadius: 10,
+            marginTop: '1.5rem',
+            color: 'var(--muted)',
+          }}
+        >
+          Freeform session — log sets from the mobile app, or pick a plan day
+          to start with prescribed targets.
+        </div>
+      )}
+
+      {/* Freeform mode: render whatever has already been logged so the
+          user can at least see and finish the session from the web. */}
+      {!day && session.sets.length > 0 && (
+        <div style={{ display: 'grid', gap: '0.75rem', marginTop: '1.5rem' }}>
+          {[...setsByExercise.entries()].map(([exId, sets]) => (
+            <div
+              key={exId}
+              style={{
+                background: 'var(--card)',
+                border: '1px solid var(--border)',
+                padding: '1rem 1.25rem',
+                borderRadius: 10,
+              }}
+            >
+              <div style={{ fontWeight: 600 }}>
+                {sets[0].exercise?.name ?? exId}
+              </div>
+              {sets.map((s) => (
+                <div
+                  key={s.id}
+                  style={{
+                    display: 'flex',
+                    gap: 12,
+                    fontSize: 13,
+                    padding: '0.3rem 0',
+                    borderBottom: '1px solid var(--border)',
+                  }}
+                >
+                  <span style={{ width: 30, fontWeight: 600 }}>
+                    #{s.setNumber}
+                  </span>
+                  <span>
+                    {[
+                      s.weightKg != null ? `${s.weightKg} kg` : null,
+                      s.reps != null ? `${s.reps} reps` : null,
+                      s.durationSec != null ? `${s.durationSec}s` : null,
+                      s.distanceKm != null ? `${s.distanceKm} km` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+
       <div style={{ display: 'grid', gap: '1rem', marginTop: '1.5rem' }}>
         {(day?.exercises ?? []).map((px) => {
           const logged = setsByExercise.get(px.exerciseId) ?? [];

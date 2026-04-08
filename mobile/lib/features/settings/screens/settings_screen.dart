@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
@@ -7,50 +8,71 @@ import '../../auth/bloc/auth_event.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
-  void _signOut(BuildContext context) {
-    context.read<AuthBloc>().add(const AuthLogoutRequested());
+  Future<void> _signOut(BuildContext context) async {
+    final l = AppLocalizations.of(context)!;
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.logoutConfirmTitle),
+        content: Text(l.logoutConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l.signOut),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true && context.mounted) {
+      context.read<AuthBloc>().add(const AuthLogoutRequested());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l.settingsTitle)),
       body: ListView(
         children: [
           ListTile(
             leading: const Icon(Icons.notifications),
-            title: const Text('Notifications'),
+            title: Text(l.notifications),
             onTap: () => context.push('/settings/notifications'),
           ),
           ListTile(
             leading: const Icon(Icons.restaurant_menu),
-            title: const Text('Diet plans'),
+            title: Text(l.diet),
             onTap: () => context.push('/diet-plans'),
           ),
           ListTile(
             leading: const Icon(Icons.medication),
-            title: const Text('Supplement plans'),
+            title: Text(l.supplementPlans),
             onTap: () => context.push('/supplements'),
           ),
           ListTile(
             leading: const Icon(Icons.water_drop),
-            title: const Text('Water tracker'),
+            title: Text(l.waterTracker),
             onTap: () => context.push('/water'),
           ),
           ListTile(
             leading: const Icon(Icons.monitor_weight),
-            title: const Text('Body log'),
+            title: Text(l.bodyLog),
             onTap: () => context.push('/body-log'),
           ),
           ListTile(
             leading: const Icon(Icons.upload_file),
-            title: const Text('Import plan'),
+            title: Text(l.importPlan),
             onTap: () => context.push('/plan-import'),
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),
-            title: const Text('Sign out'),
+            title: Text(l.signOut),
             onTap: () => _signOut(context),
           ),
         ],

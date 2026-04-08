@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../core/di/injection.dart';
 import '../repositories/water_repository.dart';
 
@@ -46,7 +47,9 @@ class _WaterTrackerScreenState extends State<WaterTrackerScreen> {
     final progress = (total / _goalMl).clamp(0.0, 1.0);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Water')),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.todayWaterTitle),
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Padding(

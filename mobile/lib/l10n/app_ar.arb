@@ -64,5 +64,19 @@
   "weeklyVolume": "الحجم الأسبوعي",
   "estimated1rm": "أقصى وزن تقديري لمرة واحدة",
   "customExercise": "مخصص",
-  "createCustom": "إنشاء تمرين مخصص"
+  "createCustom": "إنشاء تمرين مخصص",
+  "newBodyLog": "سجل جسم جديد",
+  "weightKg": "الوزن (كجم)",
+  "waistCm": "محيط الخصر (سم)",
+  "bodyFatPct": "نسبة الدهون %",
+  "energyLevel": "الطاقة",
+  "notesField": "ملاحظات",
+  "camera": "الكاميرا",
+  "gallery": "الاستوديو",
+  "todayWaterTitle": "الماء",
+  "addAmount": "إضافة",
+  "diet": "الخطط الغذائية",
+  "supplementPlans": "خطط المكملات",
+  "logoutConfirmTitle": "تسجيل الخروج؟",
+  "logoutConfirmBody": "ستحتاج إلى تسجيل الدخول مرة أخرى."
 }

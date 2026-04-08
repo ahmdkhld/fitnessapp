@@ -30,10 +30,16 @@ async function load(search: string) {
     return {
       users: (await usersRes.json()) as AdminUser[],
       stats: (await statsRes.json()) as AdminStats,
+      forbidden: false,
       error: null as string | null,
     };
   } catch (e) {
-    return { users: [], stats: null, error: (e as Error).message };
+    const message = (e as Error).message;
+    // server-fetch throws "API <status>: <body>" — sniff a 403 so we
+    // can render a friendly "you don't have access" view instead of a
+    // raw exception string.
+    const forbidden = /^API 403/.test(message);
+    return { users: [], stats: null, forbidden, error: message };
   }
 }
 
@@ -66,7 +72,23 @@ export default async function AdminPage({
 }: {
   searchParams: { search?: string };
 }) {
-  const { users, stats, error } = await load(searchParams.search ?? '');
+  const { users, stats, forbidden, error } = await load(searchParams.search ?? '');
+  if (forbidden) {
+    return (
+      <div>
+        <h1 style={{ marginTop: 0 }}>Admin</h1>
+        <div style={{ ...card, marginTop: '1rem' }}>
+          <div style={{ fontWeight: 600, fontSize: '1.05rem' }}>
+            Admin role required
+          </div>
+          <p style={{ color: 'var(--muted)', marginTop: 6 }}>
+            Your account doesn't have access to this page. Ask an existing
+            admin to promote you (or use the API if you're the first user).
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div>
       <h1 style={{ marginTop: 0 }}>Admin</h1>
