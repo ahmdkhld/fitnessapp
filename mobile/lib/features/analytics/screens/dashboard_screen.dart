@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_colors.dart';
 import '../repositories/analytics_repository.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -54,17 +55,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   _AdherenceCard(summary: _summary),
                   const SizedBox(height: 12),
                   _StreakCard(streak: _streak),
-                  const SizedBox(height: 16),
-                  Text('Insights', style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'INSIGHTS',
+                    style: TextStyle(
+                      color: AppColors.muted,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   if (_insights.isEmpty)
-                    const Text('No insights yet — keep logging!'),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppColors.card,
+                        borderRadius:
+                            BorderRadius.circular(AppColors.radiusMd),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'No insights yet \u2014 keep logging!',
+                          style:
+                              TextStyle(color: AppColors.muted, fontSize: 14),
+                        ),
+                      ),
+                    ),
                   ..._insights.map(
-                    (i) => Card(
-                      child: ListTile(
-                        leading: const Icon(Icons.lightbulb_outline),
-                        title: Text(i['title']?.toString() ?? ''),
-                        subtitle: Text(i['detail']?.toString() ?? ''),
+                    (i) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _InsightCard(
+                        title: i['title']?.toString() ?? '',
+                        detail: i['detail']?.toString() ?? '',
                       ),
                     ),
                   ),
@@ -75,6 +99,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
+/// Adherence stat card matching web .stat-card with accent circle
 class _AdherenceCard extends StatelessWidget {
   const _AdherenceCard({required this.summary});
   final AdherenceSummary? summary;
@@ -82,60 +107,196 @@ class _AdherenceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pct = summary?.overallPercentage ?? 0;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            SizedBox(
-              height: 80,
-              width: 80,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  SizedBox.expand(
-                    child: CircularProgressIndicator(
-                      value: pct / 100,
-                      strokeWidth: 8,
-                    ),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(AppColors.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          // Circular progress with glow
+          SizedBox(
+            height: 80,
+            width: 80,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox.expand(
+                  child: CircularProgressIndicator(
+                    value: pct / 100,
+                    strokeWidth: 6,
+                    backgroundColor: AppColors.border,
+                    color: AppColors.accentGreen,
                   ),
-                  Text('$pct%'),
-                ],
-              ),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Weekly adherence',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${summary?.completed ?? 0} of ${summary?.total ?? 0} items completed',
+                ),
+                Text(
+                  '$pct%',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.fg,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'WEEKLY ADHERENCE',
+                  style: TextStyle(
+                    color: AppColors.muted,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${summary?.completed ?? 0} of ${summary?.total ?? 0}',
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.fg,
+                  ),
+                ),
+                const Text(
+                  'items completed',
+                  style: TextStyle(color: AppColors.muted, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
+/// Streak card with fire icon and green accent
 class _StreakCard extends StatelessWidget {
   const _StreakCard({required this.streak});
   final int streak;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: const Icon(Icons.local_fire_department, size: 36),
-        title: Text('$streak day streak',
-            style: Theme.of(context).textTheme.titleMedium),
-        subtitle: const Text('Consecutive days at 80%+ adherence'),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(AppColors.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: const BoxDecoration(
+              color: AppColors.badgeGreenBg,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.local_fire_department,
+                size: 28, color: AppColors.accentGreen),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$streak day streak',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.fg,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  'Consecutive days at 80%+ adherence',
+                  style: TextStyle(color: AppColors.muted, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Insight card matching web .insight-card with left border accent
+class _InsightCard extends StatelessWidget {
+  const _InsightCard({required this.title, required this.detail});
+  final String title;
+  final String detail;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(AppColors.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Container(width: 4, color: AppColors.accentPurple),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: const BoxDecoration(
+                        color: AppColors.badgePurpleBg,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.lightbulb_outline,
+                          size: 18, color: AppColors.accentPurple),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                              color: AppColors.fg,
+                            ),
+                          ),
+                          if (detail.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              detail,
+                              style: const TextStyle(
+                                color: AppColors.muted,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

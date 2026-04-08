@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_colors.dart';
 import '../repositories/export_repository.dart';
 
 class CoachReportScreen extends StatefulWidget {
@@ -101,7 +102,6 @@ class _CoachReportScreenState extends State<CoachReportScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(l.coachReportTitle)),
@@ -109,65 +109,81 @@ class _CoachReportScreenState extends State<CoachReportScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           // Date range selector
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l.coachReportDateRange,
-                      style: theme.textTheme.titleSmall),
-                  const SizedBox(height: 8),
-                  InkWell(
-                    onTap: _pickDateRange,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: theme.colorScheme.outline),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.date_range, size: 20),
-                          const SizedBox(width: 8),
-                          Text('${_formatDate(_from)}  —  ${_formatDate(_to)}'),
-                          const Spacer(),
-                          const Icon(Icons.edit, size: 16),
-                        ],
-                      ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              borderRadius: BorderRadius.circular(AppColors.radiusMd),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l.coachReportDateRange.toUpperCase(),
+                    style: const TextStyle(
+                      color: AppColors.muted,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
+                    )),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: _pickDateRange,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.bg,
+                      border: Border.all(color: AppColors.border),
+                      borderRadius:
+                          BorderRadius.circular(AppColors.radiusSm),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.date_range,
+                            size: 20, color: AppColors.muted),
+                        const SizedBox(width: 8),
+                        Text('${_formatDate(_from)}  \u2014  ${_formatDate(_to)}'),
+                        const Spacer(),
+                        const Icon(Icons.edit,
+                            size: 16, color: AppColors.muted),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: _loading ? null : _generateReport,
-                      icon: _loading
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.assessment),
-                      label: Text(l.coachReportGenerate),
-                    ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _loading ? null : _generateReport,
+                    icon: _loading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: AppColors.fg),
+                          )
+                        : const Icon(Icons.assessment),
+                    label: Text(l.coachReportGenerate),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
 
           if (_error != null) ...[
             const SizedBox(height: 12),
-            Card(
-              color: theme.colorScheme.errorContainer,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(_error!,
-                    style:
-                        TextStyle(color: theme.colorScheme.onErrorContainer)),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.badgeRedBg,
+                borderRadius:
+                    BorderRadius.circular(AppColors.radiusSm),
+                border:
+                    Border.all(color: AppColors.danger.withAlpha(80)),
               ),
+              child: Text(_error!,
+                  style: const TextStyle(color: AppColors.dangerMuted)),
             ),
           ],
 
@@ -206,62 +222,80 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l.coachReportSummary, style: theme.textTheme.titleMedium),
-            if (report.userName.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(report.userName,
-                  style: theme.textTheme.bodySmall),
-            ],
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                SizedBox(
-                  height: 80,
-                  width: 80,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox.expand(
-                        child: CircularProgressIndicator(
-                          value: report.adherencePct / 100,
-                          strokeWidth: 8,
-                        ),
-                      ),
-                      Text('${report.adherencePct}%',
-                          style: theme.textTheme.titleMedium),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l.coachReportAdherence),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${report.completed} / ${report.totalItems} ${l.coachReportItemsCompleted}',
-                        style: theme.textTheme.bodySmall,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${report.from} — ${report.to}',
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(AppColors.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l.coachReportSummary.toUpperCase(),
+              style: const TextStyle(
+                color: AppColors.muted,
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.5,
+              )),
+          if (report.userName.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(report.userName,
+                style: const TextStyle(color: AppColors.muted, fontSize: 13)),
           ],
-        ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              SizedBox(
+                height: 80,
+                width: 80,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox.expand(
+                      child: CircularProgressIndicator(
+                        value: report.adherencePct / 100,
+                        strokeWidth: 6,
+                        backgroundColor: AppColors.border,
+                        color: AppColors.accentGreen,
+                      ),
+                    ),
+                    Text('${report.adherencePct}%',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.fg,
+                        )),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l.coachReportAdherence,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w500, fontSize: 15)),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${report.completed} / ${report.totalItems} ${l.coachReportItemsCompleted}',
+                      style:
+                          const TextStyle(color: AppColors.muted, fontSize: 13),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${report.from} \u2014 ${report.to}',
+                      style:
+                          const TextStyle(color: AppColors.muted, fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -274,36 +308,45 @@ class _WorkoutsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l.coachReportWorkouts, style: theme.textTheme.titleMedium),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                const Icon(Icons.fitness_center, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  '${report.workoutSessionCount} ${l.coachReportSessions}',
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.timer, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  '${report.workoutTotalDurationMin} ${l.coachReportMinutes}',
-                ),
-              ],
-            ),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(AppColors.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l.coachReportWorkouts.toUpperCase(),
+              style: const TextStyle(
+                color: AppColors.muted,
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.5,
+              )),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Icon(Icons.fitness_center,
+                  size: 20, color: AppColors.accentGreen),
+              const SizedBox(width: 8),
+              Text(
+                '${report.workoutSessionCount} ${l.coachReportSessions}',
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.timer, size: 20, color: AppColors.accent),
+              const SizedBox(width: 8),
+              Text(
+                '${report.workoutTotalDurationMin} ${l.coachReportMinutes}',
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

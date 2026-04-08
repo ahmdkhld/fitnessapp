@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_colors.dart';
 import '../repositories/profile_repository.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -170,7 +171,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(_error!, style: const TextStyle(color: Colors.red)),
+                      Text(_error!, style: const TextStyle(color: AppColors.dangerMuted)),
                       const SizedBox(height: 16),
                       FilledButton(onPressed: _load, child: Text(l.retry)),
                     ],
@@ -190,8 +191,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
 
                     // Account section
-                    Text(l.profileAccountSection,
-                        style: Theme.of(context).textTheme.titleMedium),
+                    Text(l.profileAccountSection.toUpperCase(),
+                        style: const TextStyle(
+                          color: AppColors.muted,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.5,
+                        )),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _fullNameCtrl,
@@ -239,8 +245,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 16),
 
                     // Body profile section
-                    Text(l.profileBodySection,
-                        style: Theme.of(context).textTheme.titleMedium),
+                    Text(l.profileBodySection.toUpperCase(),
+                        style: const TextStyle(
+                          color: AppColors.muted,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.5,
+                        )),
                     const SizedBox(height: 12),
                     Row(
                       children: [

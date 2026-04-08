@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_colors.dart';
 import '../models/workout_session.dart';
 import '../repositories/workout_sessions_repository.dart';
 
@@ -40,46 +41,92 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
           : RefreshIndicator(
               onRefresh: _load,
               child: _sessions.isEmpty
-                  ? const Center(child: Text('No sessions logged yet.'))
+                  ? const Center(
+                      child: Text('No sessions logged yet.',
+                          style: TextStyle(color: AppColors.muted)))
                   : ListView.separated(
                       padding: const EdgeInsets.all(16),
                       itemCount: _sessions.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 8),
                       itemBuilder: (_, i) {
                         final s = _sessions[i];
-                        final totalVolume = s.sets.fold<double>(0, (sum, set) {
+                        final completed = s.status == 'completed';
+                        final totalVolume =
+                            s.sets.fold<double>(0, (sum, set) {
                           if (set.weightKg == null || set.reps == null) {
                             return sum;
                           }
                           return sum + set.weightKg! * set.reps!;
                         });
-                        return Card(
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: s.status == 'completed'
-                                  ? Colors.green
-                                  : Colors.grey,
-                              child: Icon(
-                                s.status == 'completed'
-                                    ? Icons.check
-                                    : Icons.pending,
-                                color: Colors.white,
+                        return Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.card,
+                            borderRadius:
+                                BorderRadius.circular(AppColors.radiusMd),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: completed
+                                      ? AppColors.badgeGreenBg
+                                      : AppColors.border,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  completed
+                                      ? Icons.check
+                                      : Icons.pending,
+                                  color: completed
+                                      ? AppColors.accentGreen
+                                      : AppColors.muted,
+                                  size: 20,
+                                ),
                               ),
-                            ),
-                            title: Text(s.day?.name ?? 'Freeform workout'),
-                            subtitle: Text([
-                              DateFormat.yMMMd().format(s.date),
-                              if (s.durationMin != null)
-                                '${s.durationMin} min',
-                              '${s.sets.length} sets',
-                              if (totalVolume > 0)
-                                '${totalVolume.round()} kg volume',
-                            ].join(' · ')),
-                            onTap: s.status == 'in_progress'
-                                ? () => context.push(
-                                      '/workouts/sessions/${s.id}/active',
-                                    )
-                                : null,
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      s.day?.name ?? 'Freeform workout',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 15,
+                                        color: AppColors.fg,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      [
+                                        DateFormat.yMMMd().format(s.date),
+                                        if (s.durationMin != null)
+                                          '${s.durationMin} min',
+                                        '${s.sets.length} sets',
+                                        if (totalVolume > 0)
+                                          '${totalVolume.round()} kg vol',
+                                      ].join(' \u00b7 '),
+                                      style: const TextStyle(
+                                        color: AppColors.muted,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (!completed)
+                                TextButton(
+                                  onPressed: () => context.push(
+                                    '/workouts/sessions/${s.id}/active',
+                                  ),
+                                  child: const Text('Resume'),
+                                ),
+                            ],
                           ),
                         );
                       },

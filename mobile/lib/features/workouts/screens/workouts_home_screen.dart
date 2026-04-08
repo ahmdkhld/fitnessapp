@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_colors.dart';
 import '../models/workout_plan.dart';
 import '../repositories/workout_analytics_repository.dart';
 import '../repositories/workout_plans_repository.dart';
@@ -85,73 +86,203 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   if (_activePlan == null)
-                    Card(
-                      child: ListTile(
-                        leading: const Icon(Icons.auto_awesome, size: 36),
-                        title: Text(l.pickPlanPrompt),
-                        subtitle: Text(l.browseTemplates),
-                        onTap: () => context.push('/workouts/templates'),
+                    // No active plan — prompt to pick one
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppColors.card,
+                        borderRadius:
+                            BorderRadius.circular(AppColors.radiusMd),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: const BoxDecoration(
+                              color: AppColors.badgePurpleBg,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.auto_awesome,
+                                color: AppColors.accentPurple),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(l.pickPlanPrompt,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15)),
+                                const SizedBox(height: 2),
+                                Text(l.browseTemplates,
+                                    style: const TextStyle(
+                                        color: AppColors.muted, fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.chevron_right,
+                                color: AppColors.muted),
+                            onPressed: () =>
+                                context.push('/workouts/templates'),
+                          ),
+                        ],
                       ),
                     )
                   else if (_todayDay != null)
-                    Card(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(l.workoutsToday,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge),
-                            const SizedBox(height: 4),
-                            Text(
-                              _todayDay!.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineSmall,
+                    // Today's workout — accent card with glow
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppColors.card,
+                        borderRadius:
+                            BorderRadius.circular(AppColors.radiusMd),
+                        border: Border.all(
+                            color: AppColors.accent.withAlpha(100)),
+                        boxShadow: AppColors.glowBlueShadow,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l.workoutsToday.toUpperCase(),
+                            style: const TextStyle(
+                              color: AppColors.muted,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.5,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${_todayDay!.exercises.length} ${l.exercises} · '
-                              '${_todayDay!.estimatedDurationMin ?? 60} min',
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            _todayDay!.name,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.fg,
                             ),
-                            const SizedBox(height: 16),
-                            FilledButton.icon(
-                              onPressed: () => context.push(
-                                '/workouts/plans/${_activePlan!.id}',
-                              ),
-                              icon: const Icon(Icons.play_arrow),
-                              label: Text(l.startWorkout),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${_todayDay!.exercises.length} ${l.exercises} \u00b7 '
+                            '${_todayDay!.estimatedDurationMin ?? 60} min',
+                            style: const TextStyle(
+                                color: AppColors.muted, fontSize: 14),
+                          ),
+                          const SizedBox(height: 16),
+                          FilledButton.icon(
+                            onPressed: () => context.push(
+                              '/workouts/plans/${_activePlan!.id}',
                             ),
-                          ],
-                        ),
+                            icon: const Icon(Icons.play_arrow),
+                            label: Text(l.startWorkout),
+                          ),
+                        ],
                       ),
                     )
                   else
-                    Card(
-                      child: ListTile(
-                        leading: const Icon(Icons.self_improvement, size: 36),
-                        title: Text(l.restDay),
-                        subtitle: Text(
-                          '"${_activePlan!.name}"',
-                        ),
+                    // Rest day
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppColors.card,
+                        borderRadius:
+                            BorderRadius.circular(AppColors.radiusMd),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: const BoxDecoration(
+                              color: AppColors.badgeGreenBg,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.self_improvement,
+                                size: 28, color: AppColors.accentGreen),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(l.restDay,
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600)),
+                                Text('"${_activePlan!.name}"',
+                                    style: const TextStyle(
+                                        color: AppColors.muted, fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   const SizedBox(height: 24),
-                  Text(l.personalRecords,
-                      style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  if (_prs.isEmpty) Text(l.noPrsYet),
-                  ..._prs.take(5).map((pr) => Card(
-                        child: ListTile(
-                          leading: const Icon(Icons.emoji_events,
-                              color: Colors.amber),
-                          title: Text(pr.exerciseName),
-                          subtitle: Text(
-                              '${pr.recordType.replaceAll("_", " ")} · '
-                              '${pr.value} ${pr.unit}'),
+                  const Text(
+                    'PERSONAL RECORDS',
+                    style: TextStyle(
+                      color: AppColors.muted,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  if (_prs.isEmpty)
+                    Text(l.noPrsYet,
+                        style: const TextStyle(
+                            color: AppColors.muted, fontSize: 14)),
+                  ..._prs.take(5).map((pr) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: AppColors.card,
+                            borderRadius:
+                                BorderRadius.circular(AppColors.radiusMd),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.badgeAmberBg,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.emoji_events,
+                                    size: 18, color: AppColors.badgeAmber),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(pr.exerciseName,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14)),
+                                    Text(
+                                      '${pr.recordType.replaceAll("_", " ")} \u00b7 '
+                                      '${pr.value} ${pr.unit}',
+                                      style: const TextStyle(
+                                          color: AppColors.muted,
+                                          fontSize: 13),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       )),
                 ],

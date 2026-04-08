@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
 
@@ -38,61 +39,180 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l.settingsTitle)),
       body: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: Text(l.profileTitle),
-            onTap: () => context.push('/settings/profile'),
+          // Account section
+          const _SectionLabel('ACCOUNT'),
+          const SizedBox(height: 8),
+          _SettingsGroup(
+            children: [
+              _SettingsTile(
+                icon: Icons.person,
+                label: l.profileTitle,
+                onTap: () => context.push('/settings/profile'),
+              ),
+              _SettingsTile(
+                icon: Icons.lock,
+                label: l.changePasswordTitle,
+                onTap: () => context.push('/settings/change-password'),
+              ),
+              _SettingsTile(
+                icon: Icons.notifications,
+                label: l.notifications,
+                onTap: () => context.push('/settings/notifications'),
+              ),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.lock),
-            title: Text(l.changePasswordTitle),
-            onTap: () => context.push('/settings/change-password'),
+          const SizedBox(height: 24),
+
+          // Plans & tracking section
+          const _SectionLabel('PLANS & TRACKING'),
+          const SizedBox(height: 8),
+          _SettingsGroup(
+            children: [
+              _SettingsTile(
+                icon: Icons.restaurant_menu,
+                label: l.diet,
+                onTap: () => context.push('/diet-plans'),
+              ),
+              _SettingsTile(
+                icon: Icons.medication,
+                label: l.supplementPlans,
+                onTap: () => context.push('/supplements'),
+              ),
+              _SettingsTile(
+                icon: Icons.water_drop,
+                label: l.waterTracker,
+                onTap: () => context.push('/water'),
+              ),
+              _SettingsTile(
+                icon: Icons.monitor_weight,
+                label: l.bodyLog,
+                onTap: () => context.push('/body-log'),
+              ),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.notifications),
-            title: Text(l.notifications),
-            onTap: () => context.push('/settings/notifications'),
+          const SizedBox(height: 24),
+
+          // Tools section
+          const _SectionLabel('TOOLS'),
+          const SizedBox(height: 8),
+          _SettingsGroup(
+            children: [
+              _SettingsTile(
+                icon: Icons.upload_file,
+                label: l.importPlan,
+                onTap: () => context.push('/plan-import'),
+              ),
+              _SettingsTile(
+                icon: Icons.summarize,
+                label: l.coachReportTitle,
+                subtitle: l.coachReportSubtitle,
+                onTap: () => context.push('/coach-report'),
+              ),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.restaurant_menu),
-            title: Text(l.diet),
-            onTap: () => context.push('/diet-plans'),
+          const SizedBox(height: 24),
+
+          // Sign out
+          _SettingsGroup(
+            children: [
+              _SettingsTile(
+                icon: Icons.logout,
+                label: l.signOut,
+                iconColor: AppColors.dangerMuted,
+                labelColor: AppColors.dangerMuted,
+                onTap: () => _signOut(context),
+              ),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.medication),
-            title: Text(l.supplementPlans),
-            onTap: () => context.push('/supplements'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.water_drop),
-            title: Text(l.waterTracker),
-            onTap: () => context.push('/water'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.monitor_weight),
-            title: Text(l.bodyLog),
-            onTap: () => context.push('/body-log'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.upload_file),
-            title: Text(l.importPlan),
-            onTap: () => context.push('/plan-import'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.summarize),
-            title: Text(l.coachReportTitle),
-            subtitle: Text(l.coachReportSubtitle),
-            onTap: () => context.push('/coach-report'),
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: Text(l.signOut),
-            onTap: () => _signOut(context),
-          ),
+          const SizedBox(height: 32),
         ],
       ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.label);
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: const TextStyle(
+        color: AppColors.muted,
+        fontSize: 11,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+}
+
+/// Groups tiles in a single dark card (matches web .list-card grouped look)
+class _SettingsGroup extends StatelessWidget {
+  const _SettingsGroup({required this.children});
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(AppColors.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          for (int i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i < children.length - 1)
+              const Divider(height: 1, indent: 52, endIndent: 16),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsTile extends StatelessWidget {
+  const _SettingsTile({
+    required this.icon,
+    required this.label,
+    this.subtitle,
+    this.iconColor,
+    this.labelColor,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final String? subtitle;
+  final Color? iconColor;
+  final Color? labelColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: iconColor ?? AppColors.muted, size: 22),
+      title: Text(
+        label,
+        style: TextStyle(
+          color: labelColor ?? AppColors.fg,
+          fontSize: 15,
+          fontWeight: FontWeight.w400,
+        ),
+      ),
+      subtitle: subtitle != null
+          ? Text(subtitle!,
+              style: const TextStyle(color: AppColors.muted, fontSize: 13))
+          : null,
+      trailing: const Icon(Icons.chevron_right, color: AppColors.border, size: 20),
+      onTap: onTap,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_colors.dart';
 import '../repositories/workout_analytics_repository.dart';
 
 class WorkoutAnalyticsScreen extends StatefulWidget {
@@ -57,13 +58,29 @@ class _WorkoutAnalyticsScreenState extends State<WorkoutAnalyticsScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  Text('Weekly volume',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  SizedBox(
+                  const Text(
+                    'WEEKLY VOLUME',
+                    style: TextStyle(
+                      color: AppColors.muted,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
                     height: 220,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.card,
+                      borderRadius:
+                          BorderRadius.circular(AppColors.radiusMd),
+                      border: Border.all(color: AppColors.border),
+                    ),
                     child: weeks.isEmpty
-                        ? const Center(child: Text('Log a session to see data.'))
+                        ? const Center(
+                            child: Text('Log a session to see data.',
+                                style: TextStyle(color: AppColors.muted)))
                         : BarChart(
                             BarChartData(
                               maxY: maxVol * 1.1,
@@ -75,18 +92,30 @@ class _WorkoutAnalyticsScreenState extends State<WorkoutAnalyticsScreen> {
                                       BarChartRodData(
                                         toY: totals[weeks[i]]!.toDouble(),
                                         width: 12,
-                                        borderRadius: BorderRadius.circular(4),
+                                        borderRadius:
+                                            BorderRadius.circular(4),
+                                        gradient: AppColors.accentGradient,
                                       ),
                                     ],
                                   ),
                               ],
                               borderData: FlBorderData(show: false),
-                              gridData: const FlGridData(show: false),
+                              gridData: FlGridData(
+                                show: true,
+                                drawVerticalLine: false,
+                                getDrawingHorizontalLine: (_) => FlLine(
+                                  color: AppColors.border,
+                                  strokeWidth: 0.5,
+                                ),
+                              ),
                               titlesData: FlTitlesData(
                                 rightTitles: const AxisTitles(
                                   sideTitles: SideTitles(showTitles: false),
                                 ),
                                 topTitles: const AxisTitles(
+                                  sideTitles: SideTitles(showTitles: false),
+                                ),
+                                leftTitles: const AxisTitles(
                                   sideTitles: SideTitles(showTitles: false),
                                 ),
                                 bottomTitles: AxisTitles(
@@ -100,7 +129,10 @@ class _WorkoutAnalyticsScreenState extends State<WorkoutAnalyticsScreen> {
                                       }
                                       return Text(
                                         weeks[i].substring(5),
-                                        style: const TextStyle(fontSize: 10),
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          color: AppColors.muted,
+                                        ),
                                       );
                                     },
                                   ),
@@ -110,25 +142,72 @@ class _WorkoutAnalyticsScreenState extends State<WorkoutAnalyticsScreen> {
                           ),
                   ),
                   const SizedBox(height: 24),
-                  Text('Personal records',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
+                  const Text(
+                    'PERSONAL RECORDS',
+                    style: TextStyle(
+                      color: AppColors.muted,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   if (_prs.isEmpty)
-                    const Text('No PRs yet.')
+                    const Text('No PRs yet.',
+                        style: TextStyle(color: AppColors.muted))
                   else
-                    ..._prs.map((pr) => Card(
-                          child: ListTile(
-                            leading: const Icon(
-                              Icons.emoji_events,
-                              color: Colors.amber,
+                    ..._prs.map((pr) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: AppColors.card,
+                              borderRadius:
+                                  BorderRadius.circular(AppColors.radiusMd),
+                              border: Border.all(color: AppColors.border),
                             ),
-                            title: Text(pr.exerciseName),
-                            subtitle: Text(
-                              '${pr.recordType.replaceAll("_", " ")}: '
-                              '${pr.value} ${pr.unit}',
-                            ),
-                            trailing: Text(
-                              '${pr.achievedAt.toLocal().toString().substring(0, 10)}',
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.badgeAmberBg,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.emoji_events,
+                                      size: 18, color: AppColors.badgeAmber),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(pr.exerciseName,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 14)),
+                                      Text(
+                                        '${pr.recordType.replaceAll("_", " ")}: '
+                                        '${pr.value} ${pr.unit}',
+                                        style: const TextStyle(
+                                            color: AppColors.muted,
+                                            fontSize: 13),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  pr.achievedAt
+                                      .toLocal()
+                                      .toString()
+                                      .substring(0, 10),
+                                  style: const TextStyle(
+                                      color: AppColors.muted, fontSize: 12),
+                                ),
+                              ],
                             ),
                           ),
                         )),

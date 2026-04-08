@@ -46,6 +46,7 @@ dependencies:
   # UI
   fl_chart: ^0.68.0
   cached_network_image: ^3.3.1
+  google_fonts: ^6.1.0
 
   # Observability
   sentry_flutter: ^8.0.0

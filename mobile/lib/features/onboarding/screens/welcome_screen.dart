@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/app_colors.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -16,29 +17,53 @@ class WelcomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.eco, size: 72, color: Color(0xFF2E7D5C)),
-              const SizedBox(height: 24),
+              // App icon with gradient matching web avatar
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  gradient: AppColors.avatarGradient,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: AppColors.glowBlueShadow,
+                ),
+                child: const Icon(Icons.bolt, size: 40, color: AppColors.fg),
+              ),
+              const SizedBox(height: 32),
               Text(
                 l.welcomeHeadline,
-                style: Theme.of(context).textTheme.displaySmall,
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.fg,
+                  height: 1.2,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
                 l.welcomeBody,
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: const TextStyle(
+                  color: AppColors.muted,
+                  fontSize: 16,
+                  height: 1.5,
+                ),
               ),
               const Spacer(),
-              FilledButton(
-                onPressed: () => context.go('/onboarding/goal'),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => context.go('/onboarding/goal'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                  child: Text(l.getStarted),
                 ),
-                child: Text(l.getStarted),
               ),
               const SizedBox(height: 12),
-              TextButton(
-                onPressed: () => context.go('/login'),
-                child: Text(l.alreadyHaveAccount),
+              Center(
+                child: TextButton(
+                  onPressed: () => context.go('/login'),
+                  child: Text(l.alreadyHaveAccount),
+                ),
               ),
             ],
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_colors.dart';
 import '../repositories/supplement_repository.dart';
 import 'supplement_editor_screen.dart';
 
@@ -88,7 +89,7 @@ class _SupplementPlansScreenState extends State<SupplementPlansScreen> {
                           title: Text(plan.name),
                           subtitle: plan.isActive ? const Text('Active') : null,
                           trailing: plan.isActive
-                              ? const Icon(Icons.star, color: Colors.amber)
+                              ? const Icon(Icons.star, color: AppColors.badgeAmber)
                               : IconButton(
                                   icon: const Icon(Icons.check),
                                   onPressed: () async {

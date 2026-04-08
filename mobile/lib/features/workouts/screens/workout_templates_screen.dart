@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_colors.dart';
 import '../models/workout_plan.dart';
 import '../repositories/workout_plans_repository.dart';
 
@@ -58,47 +59,77 @@ class _WorkoutTemplatesScreenState extends State<WorkoutTemplatesScreen> {
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (_, i) {
                 final t = _templates[i];
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(t.name,
-                            style: Theme.of(context).textTheme.titleMedium),
-                        const SizedBox(height: 4),
-                        Text(
-                          [
-                            if (t.splitType != null) t.splitType!,
-                            if (t.daysPerWeek != null) '${t.daysPerWeek}×/week',
-                            if (t.goal != null) t.goal!,
-                          ].join(' · '),
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                        if (t.description != null) ...[
-                          const SizedBox(height: 8),
-                          Text(t.description!),
-                        ],
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8,
-                          children: t.days
-                              .map((d) => Chip(label: Text(d.name)))
-                              .toList(),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            FilledButton.icon(
-                              onPressed: () => _clone(t),
-                              icon: const Icon(Icons.add),
-                              label: const Text('Use this plan'),
-                            ),
-                          ],
-                        ),
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.card,
+                    borderRadius:
+                        BorderRadius.circular(AppColors.radiusMd),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t.name,
+                          style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 4),
+                      Text(
+                        [
+                          if (t.splitType != null) t.splitType!,
+                          if (t.daysPerWeek != null)
+                            '${t.daysPerWeek}\u00d7/week',
+                          if (t.goal != null) t.goal!,
+                        ].join(' \u00b7 '),
+                        style: const TextStyle(
+                            color: AppColors.muted, fontSize: 13),
+                      ),
+                      if (t.description != null) ...[
+                        const SizedBox(height: 8),
+                        Text(t.description!,
+                            style: const TextStyle(
+                                color: AppColors.muted, fontSize: 14)),
                       ],
-                    ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: t.days
+                            .map((d) => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.badgePurpleBg,
+                                    borderRadius:
+                                        BorderRadius.circular(9999),
+                                    border: Border.all(
+                                        color: AppColors.accentPurple
+                                            .withAlpha(77)),
+                                  ),
+                                  child: Text(
+                                    d.name,
+                                    style: const TextStyle(
+                                      color: AppColors.accentPurple,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FilledButton.icon(
+                            onPressed: () => _clone(t),
+                            icon: const Icon(Icons.add),
+                            label: const Text('Use this plan'),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 );
               },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_colors.dart';
 import '../repositories/water_repository.dart';
 
 class WaterTrackerScreen extends StatefulWidget {
@@ -56,6 +57,8 @@ class _WaterTrackerScreenState extends State<WaterTrackerScreen> {
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
+                  const SizedBox(height: 24),
+                  // Circular progress with accent styling
                   SizedBox(
                     height: 180,
                     width: 180,
@@ -66,35 +69,79 @@ class _WaterTrackerScreenState extends State<WaterTrackerScreen> {
                           child: CircularProgressIndicator(
                             value: progress,
                             strokeWidth: 12,
+                            backgroundColor: AppColors.border,
+                            color: AppColors.badgeCyan,
                           ),
                         ),
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              '$total ml',
-                              style: Theme.of(context).textTheme.headlineSmall,
+                              '$total',
+                              style: const TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.fg,
+                              ),
                             ),
-                            Text('/ $_goalMl ml'),
+                            Text(
+                              '/ $_goalMl ml',
+                              style: const TextStyle(
+                                color: AppColors.muted,
+                                fontSize: 14,
+                              ),
+                            ),
                           ],
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 40),
+                  // Quick-add buttons
                   Wrap(
                     spacing: 12,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.center,
                     children: [
                       for (final amt in [100, 250, 500, 750])
-                        FilledButton(
-                          onPressed: () => _add(amt),
-                          child: Text('+$amt ml'),
+                        _QuickAddButton(
+                          amount: amt,
+                          onTap: () => _add(amt),
                         ),
                     ],
                   ),
                 ],
               ),
             ),
+    );
+  }
+}
+
+class _QuickAddButton extends StatelessWidget {
+  const _QuickAddButton({required this.amount, required this.onTap});
+  final int amount;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(AppColors.radiusSm),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Text(
+          '+$amount ml',
+          style: const TextStyle(
+            color: AppColors.badgeCyan,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+      ),
     );
   }
 }
