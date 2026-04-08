@@ -70,13 +70,25 @@ migrations via a **Shell** in the Render dashboard:
 
 ### Promote yourself to admin
 
-The first admin user is set by hand via Neon's SQL editor:
+The first admin user is set by hand via Neon's SQL editor. The backend
+also requires verified emails — until you wire up Resend (step 6),
+the verification link only lives in the Render logs, so mark your own
+row verified in the same query:
 
 1. Register a user through the web app (after step 3 below).
 2. In the Neon dashboard → **SQL Editor**, run:
    ```sql
-   UPDATE users SET role = 'admin' WHERE email = 'you@yourco.com';
+   UPDATE users
+   SET role = 'admin',
+       email_verified = true,
+       email_verify_token = NULL,
+       email_verify_expires = NULL
+   WHERE email = 'you@yourco.com';
    ```
+
+Once Resend is wired, new signups receive a real verification email
+and can click through themselves — only the first admin needs the SQL
+shortcut.
 
 ## 3. Deploy the web dashboard (Vercel) — 10 min
 
