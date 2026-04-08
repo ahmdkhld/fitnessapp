@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     final l = AppLocalizations.of(context)!;
     return Scaffold(
       body: SafeArea(
@@ -24,25 +26,25 @@ class WelcomeScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: AppColors.avatarGradient,
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: AppColors.glowBlueShadow,
+                  boxShadow: c.glowBlue,
                 ),
-                child: const Icon(Icons.bolt, size: 40, color: AppColors.fg),
+                child: Icon(Icons.bolt, size: 40, color: c.fg),
               ),
               const SizedBox(height: 32),
               Text(
                 l.welcomeHeadline,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.fg,
+                  color: c.fg,
                   height: 1.2,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 l.welcomeBody,
-                style: const TextStyle(
-                  color: AppColors.muted,
+                style: TextStyle(
+                  color: c.muted,
                   fontSize: 16,
                   height: 1.5,
                 ),

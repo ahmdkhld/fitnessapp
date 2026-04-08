@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 import '../repositories/analytics_repository.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -43,6 +44,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Progress')),
       body: _loading
@@ -56,10 +58,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(height: 12),
                   _StreakCard(streak: _streak),
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     'INSIGHTS',
                     style: TextStyle(
-                      color: AppColors.muted,
+                      color: c.muted,
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.5,
@@ -70,16 +72,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: AppColors.card,
+                        color: c.card,
                         borderRadius:
                             BorderRadius.circular(AppColors.radiusMd),
-                        border: Border.all(color: AppColors.border),
+                        border: Border.all(color: c.border),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
                           'No insights yet \u2014 keep logging!',
                           style:
-                              TextStyle(color: AppColors.muted, fontSize: 14),
+                              TextStyle(color: c.muted, fontSize: 14),
                         ),
                       ),
                     ),
@@ -106,13 +108,14 @@ class _AdherenceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     final pct = summary?.overallPercentage ?? 0;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: c.card,
         borderRadius: BorderRadius.circular(AppColors.radiusMd),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: c.border),
       ),
       child: Row(
         children: [
@@ -127,16 +130,16 @@ class _AdherenceCard extends StatelessWidget {
                   child: CircularProgressIndicator(
                     value: pct / 100,
                     strokeWidth: 6,
-                    backgroundColor: AppColors.border,
+                    backgroundColor: c.border,
                     color: AppColors.accentGreen,
                   ),
                 ),
                 Text(
                   '$pct%',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.fg,
+                    color: c.fg,
                   ),
                 ),
               ],
@@ -147,10 +150,10 @@ class _AdherenceCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'WEEKLY ADHERENCE',
                   style: TextStyle(
-                    color: AppColors.muted,
+                    color: c.muted,
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                     letterSpacing: 0.4,
@@ -159,15 +162,15 @@ class _AdherenceCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${summary?.completed ?? 0} of ${summary?.total ?? 0}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.fg,
+                    color: c.fg,
                   ),
                 ),
-                const Text(
+                Text(
                   'items completed',
-                  style: TextStyle(color: AppColors.muted, fontSize: 13),
+                  style: TextStyle(color: c.muted, fontSize: 13),
                 ),
               ],
             ),
@@ -185,12 +188,13 @@ class _StreakCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: c.card,
         borderRadius: BorderRadius.circular(AppColors.radiusMd),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: c.border),
       ),
       child: Row(
         children: [
@@ -211,16 +215,16 @@ class _StreakCard extends StatelessWidget {
               children: [
                 Text(
                   '$streak day streak',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.fg,
+                    color: c.fg,
                   ),
                 ),
                 const SizedBox(height: 2),
-                const Text(
+                Text(
                   'Consecutive days at 80%+ adherence',
-                  style: TextStyle(color: AppColors.muted, fontSize: 13),
+                  style: TextStyle(color: c.muted, fontSize: 13),
                 ),
               ],
             ),
@@ -239,11 +243,12 @@ class _InsightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: c.card,
         borderRadius: BorderRadius.circular(AppColors.radiusMd),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: c.border),
       ),
       clipBehavior: Clip.antiAlias,
       child: IntrinsicHeight(
@@ -272,18 +277,18 @@ class _InsightCard extends StatelessWidget {
                         children: [
                           Text(
                             title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w500,
                               fontSize: 14,
-                              color: AppColors.fg,
+                              color: c.fg,
                             ),
                           ),
                           if (detail.isNotEmpty) ...[
                             const SizedBox(height: 2),
                             Text(
                               detail,
-                              style: const TextStyle(
-                                color: AppColors.muted,
+                              style: TextStyle(
+                                color: c.muted,
                                 fontSize: 13,
                               ),
                             ),

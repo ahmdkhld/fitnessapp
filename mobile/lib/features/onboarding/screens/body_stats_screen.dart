@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 
 /// Optional onboarding step where the user fills in height, weight,
 /// gender, DOB, activity level and unit system. Writes the goal +
@@ -85,6 +86,7 @@ class _BodyStatsScreenState extends State<BodyStatsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your stats'),
@@ -100,9 +102,9 @@ class _BodyStatsScreenState extends State<BodyStatsScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const Text(
+            Text(
               'Takes 30 seconds \u2014 helps calorie targets, volume charts and insights.',
-              style: TextStyle(color: AppColors.muted, fontSize: 14),
+              style: TextStyle(color: c.muted, fontSize: 14),
             ),
             const SizedBox(height: 24),
 
@@ -116,9 +118,9 @@ class _BodyStatsScreenState extends State<BodyStatsScreen> {
               onSelectionChanged: (set) =>
                   setState(() => _unitSystem = set.first),
               style: SegmentedButton.styleFrom(
-                backgroundColor: AppColors.card,
-                foregroundColor: AppColors.muted,
-                selectedForegroundColor: AppColors.fg,
+                backgroundColor: c.card,
+                foregroundColor: c.muted,
+                selectedForegroundColor: c.fg,
                 selectedBackgroundColor: AppColors.accent,
               ),
             ),
@@ -128,9 +130,9 @@ class _BodyStatsScreenState extends State<BodyStatsScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.card,
+                color: c.card,
                 borderRadius: BorderRadius.circular(AppColors.radiusMd),
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: c.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,7 +162,7 @@ class _BodyStatsScreenState extends State<BodyStatsScreen> {
                   DropdownButtonFormField<String>(
                     value: _gender,
                     decoration: const InputDecoration(labelText: 'Gender'),
-                    dropdownColor: AppColors.card,
+                    dropdownColor: c.card,
                     items: const [
                       DropdownMenuItem(
                           value: 'unspecified',
@@ -178,7 +180,7 @@ class _BodyStatsScreenState extends State<BodyStatsScreen> {
                     value: _activity,
                     decoration:
                         const InputDecoration(labelText: 'Activity level'),
-                    dropdownColor: AppColors.card,
+                    dropdownColor: c.card,
                     items: const [
                       DropdownMenuItem(
                           value: 'sedentary', child: Text('Sedentary')),
@@ -203,11 +205,11 @@ class _BodyStatsScreenState extends State<BodyStatsScreen> {
                           ? 'Tap to select'
                           : '${_dob!.year}-${_dob!.month.toString().padLeft(2, '0')}-${_dob!.day.toString().padLeft(2, '0')}',
                       style: TextStyle(
-                        color: _dob == null ? AppColors.muted : AppColors.fg,
+                        color: _dob == null ? c.muted : c.fg,
                       ),
                     ),
                     trailing:
-                        const Icon(Icons.calendar_today, color: AppColors.muted),
+                        Icon(Icons.calendar_today, color: c.muted),
                     onTap: _pickDob,
                   ),
                 ],

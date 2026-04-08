@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 import '../repositories/water_repository.dart';
 
 class WaterTrackerScreen extends StatefulWidget {
@@ -44,6 +45,7 @@ class _WaterTrackerScreenState extends State<WaterTrackerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     final total = _day?.totalMl ?? 0;
     final progress = (total / _goalMl).clamp(0.0, 1.0);
 
@@ -69,7 +71,7 @@ class _WaterTrackerScreenState extends State<WaterTrackerScreen> {
                           child: CircularProgressIndicator(
                             value: progress,
                             strokeWidth: 12,
-                            backgroundColor: AppColors.border,
+                            backgroundColor: c.border,
                             color: AppColors.badgeCyan,
                           ),
                         ),
@@ -78,16 +80,16 @@ class _WaterTrackerScreenState extends State<WaterTrackerScreen> {
                           children: [
                             Text(
                               '$total',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 36,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.fg,
+                                color: c.fg,
                               ),
                             ),
                             Text(
                               '/ $_goalMl ml',
-                              style: const TextStyle(
-                                color: AppColors.muted,
+                              style: TextStyle(
+                                color: c.muted,
                                 fontSize: 14,
                               ),
                             ),
@@ -124,14 +126,15 @@ class _QuickAddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: c.card,
           borderRadius: BorderRadius.circular(AppColors.radiusSm),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: c.border),
         ),
         child: Text(
           '+$amount ml',

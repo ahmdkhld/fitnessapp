@@ -32,7 +32,7 @@ export default async function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body style={{ background: '#121212' }}>
+      <body>
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>

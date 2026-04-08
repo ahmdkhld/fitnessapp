@@ -13,18 +13,18 @@ interface CardProps {
 
 const variantStyles: Record<CardVariant, React.CSSProperties> = {
   default: {
-    background: '#1E1E1E',
-    border: '1px solid #333333',
+    background: 'var(--card)',
+    border: '1px solid var(--border)',
     borderRadius: 16,
-    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+    boxShadow: 'var(--shadow-card)',
   },
   glass: {
-    background: 'rgba(30,30,30,0.6)',
-    border: '1px solid #333333',
+    background: 'var(--glass-bg)',
+    border: '1px solid var(--border)',
     borderRadius: 16,
     backdropFilter: 'blur(12px)',
     WebkitBackdropFilter: 'blur(12px)',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+    boxShadow: 'var(--shadow-card)',
   },
 };
 
@@ -45,12 +45,12 @@ export function Card({
       }}
     >
       {title && (
-        <h2 style={{ fontSize: '1.1rem', marginTop: 0, marginBottom: subtitle ? 4 : '1rem', color: '#FFFFFF', fontFamily: "'Inter', sans-serif" }}>
+        <h2 style={{ fontSize: '1.1rem', marginTop: 0, marginBottom: subtitle ? 4 : '1rem', color: 'var(--fg)', fontFamily: "'Inter', sans-serif" }}>
           {title}
         </h2>
       )}
       {subtitle && (
-        <p style={{ color: '#A9A9A9', fontSize: 13, marginTop: 0, marginBottom: '1rem', fontFamily: "'Inter', sans-serif" }}>
+        <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 0, marginBottom: '1rem', fontFamily: "'Inter', sans-serif" }}>
           {subtitle}
         </p>
       )}

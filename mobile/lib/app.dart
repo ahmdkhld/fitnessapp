@@ -67,9 +67,9 @@ class _NutriTrackAppState extends State<NutriTrackApp> {
       value: _authBloc,
       child: MaterialApp.router(
         title: 'NutriTrack',
-        theme: AppTheme.dark,
+        theme: AppTheme.light,
         darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.dark,
+        themeMode: ThemeMode.system,
         routerConfig: _router,
         debugShowCheckedModeBanner: false,
         supportedLocales: AppLocalizations.supportedLocales,

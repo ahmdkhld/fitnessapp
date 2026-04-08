@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 import '../repositories/export_repository.dart';
 
 class CoachReportScreen extends StatefulWidget {
@@ -101,6 +102,7 @@ class _CoachReportScreenState extends State<CoachReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     final l = AppLocalizations.of(context)!;
 
     return Scaffold(

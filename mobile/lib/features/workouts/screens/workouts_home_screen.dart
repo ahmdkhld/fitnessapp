@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 import '../models/workout_plan.dart';
 import '../repositories/workout_analytics_repository.dart';
 import '../repositories/workout_plans_repository.dart';
@@ -51,6 +52,7 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     final l = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
@@ -90,10 +92,10 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: AppColors.card,
+                        color: c.card,
                         borderRadius:
                             BorderRadius.circular(AppColors.radiusMd),
-                        border: Border.all(color: AppColors.border),
+                        border: Border.all(color: c.border),
                       ),
                       child: Row(
                         children: [
@@ -118,14 +120,14 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                                         fontSize: 15)),
                                 const SizedBox(height: 2),
                                 Text(l.browseTemplates,
-                                    style: const TextStyle(
-                                        color: AppColors.muted, fontSize: 13)),
+                                    style: TextStyle(
+                                        color: c.muted, fontSize: 13)),
                               ],
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.chevron_right,
-                                color: AppColors.muted),
+                            icon: Icon(Icons.chevron_right,
+                                color: c.muted),
                             onPressed: () =>
                                 context.push('/workouts/templates'),
                           ),
@@ -137,20 +139,20 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: AppColors.card,
+                        color: c.card,
                         borderRadius:
                             BorderRadius.circular(AppColors.radiusMd),
                         border: Border.all(
                             color: AppColors.accent.withAlpha(100)),
-                        boxShadow: AppColors.glowBlueShadow,
+                        boxShadow: c.glowBlue,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             l.workoutsToday.toUpperCase(),
-                            style: const TextStyle(
-                              color: AppColors.muted,
+                            style: TextStyle(
+                              color: c.muted,
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
                               letterSpacing: 0.5,
@@ -159,18 +161,18 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                           const SizedBox(height: 6),
                           Text(
                             _todayDay!.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.fg,
+                              color: c.fg,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             '${_todayDay!.exercises.length} ${l.exercises} \u00b7 '
                             '${_todayDay!.estimatedDurationMin ?? 60} min',
-                            style: const TextStyle(
-                                color: AppColors.muted, fontSize: 14),
+                            style: TextStyle(
+                                color: c.muted, fontSize: 14),
                           ),
                           const SizedBox(height: 16),
                           FilledButton.icon(
@@ -188,10 +190,10 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: AppColors.card,
+                        color: c.card,
                         borderRadius:
                             BorderRadius.circular(AppColors.radiusMd),
-                        border: Border.all(color: AppColors.border),
+                        border: Border.all(color: c.border),
                       ),
                       child: Row(
                         children: [
@@ -215,8 +217,8 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600)),
                                 Text('"${_activePlan!.name}"',
-                                    style: const TextStyle(
-                                        color: AppColors.muted, fontSize: 13)),
+                                    style: TextStyle(
+                                        color: c.muted, fontSize: 13)),
                               ],
                             ),
                           ),
@@ -224,10 +226,10 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                       ),
                     ),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     'PERSONAL RECORDS',
                     style: TextStyle(
-                      color: AppColors.muted,
+                      color: c.muted,
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.5,
@@ -236,18 +238,18 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                   const SizedBox(height: 10),
                   if (_prs.isEmpty)
                     Text(l.noPrsYet,
-                        style: const TextStyle(
-                            color: AppColors.muted, fontSize: 14)),
+                        style: TextStyle(
+                            color: c.muted, fontSize: 14)),
                   ..._prs.take(5).map((pr) => Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            color: AppColors.card,
+                            color: c.card,
                             borderRadius:
                                 BorderRadius.circular(AppColors.radiusMd),
-                            border: Border.all(color: AppColors.border),
+                            border: Border.all(color: c.border),
                           ),
                           child: Row(
                             children: [
@@ -274,8 +276,8 @@ class _WorkoutsHomeScreenState extends State<WorkoutsHomeScreen> {
                                     Text(
                                       '${pr.recordType.replaceAll("_", " ")} \u00b7 '
                                       '${pr.value} ${pr.unit}',
-                                      style: const TextStyle(
-                                          color: AppColors.muted,
+                                      style: TextStyle(
+                                          color: c.muted,
                                           fontSize: 13),
                                     ),
                                   ],

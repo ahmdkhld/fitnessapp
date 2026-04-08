@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 
 class PlanSetupScreen extends StatelessWidget {
   const PlanSetupScreen({super.key, this.goal});
@@ -9,6 +10,7 @@ class PlanSetupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Your plan')),
       body: Padding(
@@ -37,9 +39,9 @@ class PlanSetupScreen extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'How would you like to set up your diet and supplement plan?',
-              style: TextStyle(color: AppColors.muted, fontSize: 15),
+              style: TextStyle(color: c.muted, fontSize: 15),
             ),
             const SizedBox(height: 24),
             _PlanOption(
@@ -89,14 +91,15 @@ class _PlanOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: c.card,
           borderRadius: BorderRadius.circular(AppColors.radiusMd),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: c.border),
         ),
         child: Row(
           children: [
@@ -119,12 +122,12 @@ class _PlanOption extends StatelessWidget {
                           fontWeight: FontWeight.w500, fontSize: 15)),
                   const SizedBox(height: 2),
                   Text(subtitle,
-                      style: const TextStyle(
-                          color: AppColors.muted, fontSize: 13)),
+                      style: TextStyle(
+                          color: c.muted, fontSize: 13)),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.border, size: 20),
+            Icon(Icons.chevron_right, color: c.border, size: 20),
           ],
         ),
       ),

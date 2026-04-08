@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 import '../../../models/schedule_item.dart';
 
 class TimelineCard extends StatelessWidget {
@@ -29,7 +30,7 @@ class TimelineCard extends StatelessWidget {
     return Icons.check_circle_outline;
   }
 
-  Color get _iconBgColor {
+  Color _iconBgColor(ThemedColors c) {
     switch (item.itemType) {
       case 'meal':
         return AppColors.badgeAmberBg;
@@ -40,10 +41,10 @@ class TimelineCard extends StatelessWidget {
       case 'workout':
         return AppColors.badgeGreenBg;
     }
-    return AppColors.border;
+    return c.border;
   }
 
-  Color get _iconColor {
+  Color _iconColor(ThemedColors c) {
     switch (item.itemType) {
       case 'meal':
         return AppColors.badgeAmber;
@@ -54,11 +55,12 @@ class TimelineCard extends StatelessWidget {
       case 'workout':
         return AppColors.accentGreen;
     }
-    return AppColors.muted;
+    return c.muted;
   }
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     final done = item.status == 'completed';
 
     // Web-style timeline card: dark bg + left gradient border (blue→purple)
@@ -66,9 +68,9 @@ class TimelineCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: c.card,
           borderRadius: BorderRadius.circular(AppColors.radiusMd),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: c.border),
         ),
         clipBehavior: Clip.antiAlias,
         child: IntrinsicHeight(
@@ -92,10 +94,10 @@ class TimelineCard extends StatelessWidget {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: _iconBgColor,
+                          color: _iconBgColor(c),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(_icon, size: 20, color: _iconColor),
+                        child: Icon(_icon, size: 20, color: _iconColor(c)),
                       ),
                       const SizedBox(width: 14),
                       // Text
@@ -108,21 +110,21 @@ class TimelineCard extends StatelessWidget {
                               item.title,
                               style: TextStyle(
                                 color: done
-                                    ? AppColors.muted
-                                    : AppColors.fg,
+                                    ? c.muted
+                                    : c.fg,
                                 fontWeight: FontWeight.w500,
                                 fontSize: 15,
                                 decoration:
                                     done ? TextDecoration.lineThrough : null,
-                                decorationColor: AppColors.muted,
+                                decorationColor: c.muted,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               '${DateFormat.Hm().format(item.scheduledTime)}'
                               '${item.subtitle != null ? ' \u00b7 ${item.subtitle}' : ''}',
-                              style: const TextStyle(
-                                color: AppColors.muted,
+                              style: TextStyle(
+                                color: c.muted,
                                 fontSize: 13,
                               ),
                             ),
@@ -143,7 +145,7 @@ class TimelineCard extends StatelessWidget {
                             border: Border.all(
                               color: done
                                   ? AppColors.accentGreen
-                                  : AppColors.border,
+                                  : c.border,
                               width: 1.5,
                             ),
                           ),

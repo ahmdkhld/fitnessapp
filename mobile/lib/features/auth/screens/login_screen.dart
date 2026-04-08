@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -22,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
+          final c = ThemedColors.of(context);
           final busy = state.status == AuthStatus.loading;
           return Center(
             child: SingleChildScrollView(
@@ -37,21 +39,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       gradient: AppColors.avatarGradient,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Icon(Icons.bolt, size: 36, color: AppColors.fg),
+                    child: Icon(Icons.bolt, size: 36, color: c.fg),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     'NutriTrack',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.fg,
+                      color: c.fg,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Sign in to continue',
-                    style: TextStyle(color: AppColors.muted, fontSize: 15),
+                    style: TextStyle(color: c.muted, fontSize: 15),
                   ),
                   const SizedBox(height: 40),
 
@@ -59,17 +61,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: AppColors.glassBg,
+                      color: c.glassBg,
                       borderRadius: BorderRadius.circular(AppColors.radiusMd),
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: c.border),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'EMAIL',
                           style: TextStyle(
-                            color: AppColors.muted,
+                            color: c.muted,
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 0.5,
@@ -84,10 +86,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        const Text(
+                        Text(
                           'PASSWORD',
                           style: TextStyle(
-                            color: AppColors.muted,
+                            color: c.muted,
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 0.5,
@@ -144,12 +146,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     ),
                             child: busy
-                                ? const SizedBox(
+                                ? SizedBox(
                                     height: 16,
                                     width: 16,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      color: AppColors.fg,
+                                      color: c.fg,
                                     ),
                                   )
                                 : const Text('Sign in'),

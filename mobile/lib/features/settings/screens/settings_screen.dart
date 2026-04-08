@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/bloc/auth_event.dart';
 
@@ -139,10 +140,11 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     return Text(
       label,
-      style: const TextStyle(
-        color: AppColors.muted,
+      style: TextStyle(
+        color: c.muted,
         fontSize: 11,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.5,
@@ -158,11 +160,12 @@ class _SettingsGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: c.card,
         borderRadius: BorderRadius.circular(AppColors.radiusMd),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: c.border),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -197,21 +200,22 @@ class _SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     return ListTile(
-      leading: Icon(icon, color: iconColor ?? AppColors.muted, size: 22),
+      leading: Icon(icon, color: iconColor ?? c.muted, size: 22),
       title: Text(
         label,
         style: TextStyle(
-          color: labelColor ?? AppColors.fg,
+          color: labelColor ?? c.fg,
           fontSize: 15,
           fontWeight: FontWeight.w400,
         ),
       ),
       subtitle: subtitle != null
           ? Text(subtitle!,
-              style: const TextStyle(color: AppColors.muted, fontSize: 13))
+              style: TextStyle(color: c.muted, fontSize: 13))
           : null,
-      trailing: const Icon(Icons.chevron_right, color: AppColors.border, size: 20),
+      trailing: Icon(Icons.chevron_right, color: c.border, size: 20),
       onTap: onTap,
     );
   }

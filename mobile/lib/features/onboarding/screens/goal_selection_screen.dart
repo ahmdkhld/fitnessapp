@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 
 class GoalSelectionScreen extends StatefulWidget {
   const GoalSelectionScreen({super.key});
@@ -15,6 +16,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     final l = AppLocalizations.of(context)!;
     final goals = [
       ('fat_loss', l.goalFatLoss, Icons.local_fire_department, AppColors.dangerMuted),
@@ -30,10 +32,10 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
           children: [
             Text(
               l.goalHeadline,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: AppColors.fg,
+                color: c.fg,
               ),
             ),
             const SizedBox(height: 16),
@@ -48,14 +50,14 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                     onTap: () => setState(() => _selected = g.$1),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: AppColors.card,
+                        color: c.card,
                         border: Border.all(
-                          color: selected ? AppColors.accent : AppColors.border,
+                          color: selected ? AppColors.accent : c.border,
                           width: selected ? 2 : 1,
                         ),
                         borderRadius:
                             BorderRadius.circular(AppColors.radiusMd),
-                        boxShadow: selected ? AppColors.glowBlueShadow : null,
+                        boxShadow: selected ? c.glowBlue : null,
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -74,7 +76,7 @@ class _GoalSelectionScreenState extends State<GoalSelectionScreen> {
                             g.$2,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: selected ? AppColors.fg : AppColors.muted,
+                              color: selected ? c.fg : c.muted,
                               fontWeight:
                                   selected ? FontWeight.w600 : FontWeight.w400,
                               fontSize: 14,

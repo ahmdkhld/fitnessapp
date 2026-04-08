@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 import '../models/workout_plan.dart';
 import '../repositories/workout_plans_repository.dart';
 
@@ -49,6 +50,7 @@ class _WorkoutTemplatesScreenState extends State<WorkoutTemplatesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Plan templates')),
       body: _loading
@@ -62,10 +64,10 @@ class _WorkoutTemplatesScreenState extends State<WorkoutTemplatesScreen> {
                 return Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.card,
+                    color: c.card,
                     borderRadius:
                         BorderRadius.circular(AppColors.radiusMd),
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: c.border),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,14 +84,14 @@ class _WorkoutTemplatesScreenState extends State<WorkoutTemplatesScreen> {
                             '${t.daysPerWeek}\u00d7/week',
                           if (t.goal != null) t.goal!,
                         ].join(' \u00b7 '),
-                        style: const TextStyle(
-                            color: AppColors.muted, fontSize: 13),
+                        style: TextStyle(
+                            color: c.muted, fontSize: 13),
                       ),
                       if (t.description != null) ...[
                         const SizedBox(height: 8),
                         Text(t.description!,
-                            style: const TextStyle(
-                                color: AppColors.muted, fontSize: 14)),
+                            style: TextStyle(
+                                color: c.muted, fontSize: 14)),
                       ],
                       const SizedBox(height: 12),
                       Wrap(

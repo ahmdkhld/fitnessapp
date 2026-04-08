@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/notifications/local_notification_service.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 import '../models/workout_plan.dart';
 import '../models/workout_session.dart';
 import '../repositories/workout_plans_repository.dart';
@@ -131,6 +132,7 @@ class _SessionActiveScreenState extends State<SessionActiveScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -158,10 +160,10 @@ class _SessionActiveScreenState extends State<SessionActiveScreen> {
       ),
       bottomNavigationBar: _restRemaining > 0
           ? Container(
-              decoration: const BoxDecoration(
-                color: AppColors.card,
+              decoration: BoxDecoration(
+                color: c.card,
                 border: Border(
-                  top: BorderSide(color: AppColors.border),
+                  top: BorderSide(color: c.border),
                 ),
               ),
               padding: const EdgeInsets.all(16),
@@ -172,10 +174,10 @@ class _SessionActiveScreenState extends State<SessionActiveScreen> {
                   const SizedBox(width: 8),
                   Text(
                     'Rest: ${_restRemaining}s',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.fg,
+                      color: c.fg,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -313,6 +315,7 @@ class _ExerciseLoggerState extends State<_ExerciseLogger> {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     final isCardio = widget.prescription.exercise.isCardio;
     final nextSetNumber = widget.loggedSets.length + 1;
 
@@ -320,19 +323,19 @@ class _ExerciseLoggerState extends State<_ExerciseLogger> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: c.card,
         borderRadius: BorderRadius.circular(AppColors.radiusMd),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: c.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             widget.prescription.exercise.name,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.fg,
+              color: c.fg,
             ),
           ),
           const SizedBox(height: 2),
@@ -344,11 +347,11 @@ class _ExerciseLoggerState extends State<_ExerciseLogger> {
               if (widget.prescription.restSeconds != null)
                 'rest ${widget.prescription.restSeconds}s',
             ].join(' \u00b7 '),
-            style: const TextStyle(color: AppColors.muted, fontSize: 12),
+            style: TextStyle(color: c.muted, fontSize: 12),
           ),
           const SizedBox(height: 12),
           ...widget.loggedSets.map((s) => _SetRow(set: s)),
-          const Divider(color: AppColors.border),
+          Divider(color: c.border),
           const SizedBox(height: 4),
           if (isCardio)
             Row(
@@ -430,6 +433,7 @@ class _SetRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     final parts = <String>[
       if (set.weightKg != null) '${set.weightKg!.toStringAsFixed(1)} kg',
       if (set.reps != null) '${set.reps} reps',
@@ -444,12 +448,12 @@ class _SetRow extends StatelessWidget {
           SizedBox(
             width: 28,
             child: Text('#${set.setNumber}',
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold, color: AppColors.muted)),
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, color: c.muted)),
           ),
           Expanded(
               child: Text(parts.join(' \u00b7 '),
-                  style: const TextStyle(color: AppColors.fg))),
+                  style: TextStyle(color: c.fg))),
           const Icon(Icons.check, size: 16, color: AppColors.accentGreen),
         ],
       ),

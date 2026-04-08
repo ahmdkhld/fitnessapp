@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 import '../models/workout_session.dart';
 import '../repositories/workout_sessions_repository.dart';
 
@@ -34,6 +35,7 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Workout history')),
       body: _loading
@@ -41,9 +43,9 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
           : RefreshIndicator(
               onRefresh: _load,
               child: _sessions.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text('No sessions logged yet.',
-                          style: TextStyle(color: AppColors.muted)))
+                          style: TextStyle(color: c.muted)))
                   : ListView.separated(
                       padding: const EdgeInsets.all(16),
                       itemCount: _sessions.length,
@@ -61,10 +63,10 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
                         return Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: AppColors.card,
+                            color: c.card,
                             borderRadius:
                                 BorderRadius.circular(AppColors.radiusMd),
-                            border: Border.all(color: AppColors.border),
+                            border: Border.all(color: c.border),
                           ),
                           child: Row(
                             children: [
@@ -74,7 +76,7 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
                                 decoration: BoxDecoration(
                                   color: completed
                                       ? AppColors.badgeGreenBg
-                                      : AppColors.border,
+                                      : c.border,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
@@ -83,7 +85,7 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
                                       : Icons.pending,
                                   color: completed
                                       ? AppColors.accentGreen
-                                      : AppColors.muted,
+                                      : c.muted,
                                   size: 20,
                                 ),
                               ),
@@ -95,10 +97,10 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
                                   children: [
                                     Text(
                                       s.day?.name ?? 'Freeform workout',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.w500,
                                         fontSize: 15,
-                                        color: AppColors.fg,
+                                        color: c.fg,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
@@ -111,8 +113,8 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
                                         if (totalVolume > 0)
                                           '${totalVolume.round()} kg vol',
                                       ].join(' \u00b7 '),
-                                      style: const TextStyle(
-                                        color: AppColors.muted,
+                                      style: TextStyle(
+                                        color: c.muted,
                                         fontSize: 13,
                                       ),
                                     ),

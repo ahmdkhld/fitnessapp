@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/themed_colors.dart';
 import '../models/workout_plan.dart';
 import '../repositories/workout_plans_repository.dart';
 
@@ -38,6 +39,7 @@ class _WorkoutPlansListScreenState extends State<WorkoutPlansListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Workout plans'),
@@ -57,12 +59,12 @@ class _WorkoutPlansListScreenState extends State<WorkoutPlansListScreen> {
                   ? ListView(
                       children: [
                         const SizedBox(height: 120),
-                        const Icon(Icons.fitness_center,
-                            size: 64, color: AppColors.muted),
+                        Icon(Icons.fitness_center,
+                            size: 64, color: c.muted),
                         const SizedBox(height: 16),
-                        const Center(
+                        Center(
                           child: Text('No workout plans yet.',
-                              style: TextStyle(color: AppColors.muted)),
+                              style: TextStyle(color: c.muted)),
                         ),
                         const SizedBox(height: 24),
                         Center(
@@ -86,10 +88,10 @@ class _WorkoutPlansListScreenState extends State<WorkoutPlansListScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 14),
                           decoration: BoxDecoration(
-                            color: AppColors.card,
+                            color: c.card,
                             borderRadius:
                                 BorderRadius.circular(AppColors.radiusMd),
-                            border: Border.all(color: AppColors.border),
+                            border: Border.all(color: c.border),
                           ),
                           child: InkWell(
                             borderRadius:
@@ -119,8 +121,8 @@ class _WorkoutPlansListScreenState extends State<WorkoutPlansListScreen> {
                                             '${plan.daysPerWeek} days/week',
                                           if (plan.goal != null) plan.goal!,
                                         ].join(' \u00b7 '),
-                                        style: const TextStyle(
-                                          color: AppColors.muted,
+                                        style: TextStyle(
+                                          color: c.muted,
                                           fontSize: 13,
                                         ),
                                       ),
