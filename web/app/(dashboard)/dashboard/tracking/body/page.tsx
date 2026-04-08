@@ -29,71 +29,132 @@ export default async function BodyLogPage() {
   const tc = await getTranslations('common');
 
   return (
-    <div>
+    <div className="reveal">
       <div className="page-header">
         <h1>{t('bodyLogTitle')}</h1>
+        <p>Weight, waist, body-fat and energy — log what you measure, leave the rest blank.</p>
       </div>
+
       {error && <div className="error-banner">{error}</div>}
 
-      <form
-        action={createBodyLog}
-        className="glass-card"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '0.75rem',
-          marginTop: '1rem',
-          marginBottom: '2rem',
-        }}
-      >
-        <div>
-          <label className="form-label">{t('weightKg')}</label>
-          <input name="weightKg" type="number" step="0.1" placeholder={t('weightKg')} className="input-field" style={{ marginTop: 4 }} />
+      <form action={createBodyLog} className="form-card body-log-grid">
+        <div className="onb-field">
+          <label htmlFor="bl-weight">{t('weightKg')}</label>
+          <input
+            id="bl-weight"
+            name="weightKg"
+            type="number"
+            step="0.1"
+            placeholder="75.0"
+            className="input-field"
+          />
         </div>
-        <div>
-          <label className="form-label">{t('waistCm')}</label>
-          <input name="waistCm" type="number" step="0.1" placeholder={t('waistCm')} className="input-field" style={{ marginTop: 4 }} />
+        <div className="onb-field">
+          <label htmlFor="bl-waist">{t('waistCm')}</label>
+          <input
+            id="bl-waist"
+            name="waistCm"
+            type="number"
+            step="0.1"
+            placeholder="80.0"
+            className="input-field"
+          />
         </div>
-        <div>
-          <label className="form-label">{t('bodyFatPct')}</label>
-          <input name="bodyFatPct" type="number" step="0.1" placeholder={t('bodyFatPct')} className="input-field" style={{ marginTop: 4 }} />
+        <div className="onb-field">
+          <label htmlFor="bl-bf">{t('bodyFatPct')}</label>
+          <input
+            id="bl-bf"
+            name="bodyFatPct"
+            type="number"
+            step="0.1"
+            placeholder="15.0"
+            className="input-field"
+          />
         </div>
-        <div>
-          <label className="form-label">{t('energy')}</label>
-          <input name="energyLevel" type="number" min="1" max="5" placeholder={t('energy')} className="input-field" style={{ marginTop: 4 }} />
+        <div className="onb-field">
+          <label htmlFor="bl-energy">{t('energy')}</label>
+          <input
+            id="bl-energy"
+            name="energyLevel"
+            type="number"
+            min="1"
+            max="5"
+            placeholder="1–5"
+            className="input-field"
+          />
         </div>
-        <div style={{ gridColumn: '1 / span 3' }}>
-          <label className="form-label">{t('notes')}</label>
-          <input name="notes" placeholder={t('notes')} className="input-field" style={{ marginTop: 4 }} />
+        <div className="onb-field" style={{ gridColumn: '1 / -1' }}>
+          <label htmlFor="bl-notes">{t('notes')}</label>
+          <input
+            id="bl-notes"
+            name="notes"
+            placeholder={t('notes')}
+            className="input-field"
+          />
         </div>
-        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-          <button type="submit" className="btn-primary" style={{ width: '100%' }}>{tc('log')}</button>
+        <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end' }}>
+          <button type="submit" className="btn-primary">
+            {tc('log')}
+          </button>
         </div>
       </form>
 
-      <div style={{ display: 'grid', gap: '0.5rem' }}>
-        {logs.map((l) => {
-          const parts = [
-            l.weightKg != null && `${l.weightKg} kg`,
-            l.waistCm != null && `waist ${l.waistCm} cm`,
-            l.bodyFatPct != null && `bf ${l.bodyFatPct}%`,
-            l.energyLevel != null && `energy ${l.energyLevel}/5`,
-          ].filter(Boolean);
-          return (
-            <div key={l.id} className="list-card">
-              <div style={{ color: 'var(--muted)', fontSize: 12 }}>
-                {l.date.slice(0, 10)}
-              </div>
-              <div style={{ fontWeight: 500, marginTop: 2 }}>{parts.join(' · ')}</div>
-              {l.notes && (
-                <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 4 }}>
-                  {l.notes}
+      {logs.length === 0 ? (
+        <div className="empty-state" style={{ marginTop: '2rem' }}>
+          <p className="empty-state__title">No entries yet</p>
+          <p className="empty-state__body">
+            Log your first measurement above. We&apos;ll start charting trends after a few days.
+          </p>
+        </div>
+      ) : (
+        <>
+          <h2 className="section-title">History</h2>
+          <div style={{ display: 'grid', gap: '0.5rem' }}>
+            {logs.map((l, idx) => {
+              const parts = [
+                l.weightKg != null && `${l.weightKg} kg`,
+                l.waistCm != null && `waist ${l.waistCm} cm`,
+                l.bodyFatPct != null && `bf ${l.bodyFatPct}%`,
+                l.energyLevel != null && `energy ${l.energyLevel}/5`,
+              ].filter(Boolean);
+              return (
+                <div
+                  key={l.id}
+                  className="list-card reveal"
+                  style={{ animationDelay: `${idx * 0.04}s` }}
+                >
+                  <div
+                    style={{
+                      color: 'var(--muted)',
+                      fontSize: 11,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {l.date.slice(0, 10)}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '1.05rem',
+                      marginTop: 4,
+                      fontFeatureSettings: "'tnum'",
+                    }}
+                  >
+                    {parts.join(' · ')}
+                  </div>
+                  {l.notes && (
+                    <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 6 }}>
+                      {l.notes}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }

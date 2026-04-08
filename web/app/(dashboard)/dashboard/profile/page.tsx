@@ -57,7 +57,7 @@ export default async function ProfilePage() {
   const t = await getTranslations('profile');
 
   return (
-    <div style={{ maxWidth: 600 }}>
+    <div className="reveal" style={{ maxWidth: 640 }}>
       <div className="page-header">
         <h1>{t('title')}</h1>
         <p>{t('description')}</p>
@@ -67,14 +67,18 @@ export default async function ProfilePage() {
       {user && (
         <>
           <Card title={t('account')} style={{ marginBottom: '1.5rem' }}>
-            <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: '1rem', marginTop: '-0.5rem' }}>
-              {user.email} &middot; {t('memberSince')}{' '}
+            <div
+              style={{
+                color: 'var(--muted)',
+                fontSize: 13,
+                marginBottom: '1.25rem',
+                marginTop: '-0.5rem',
+              }}
+            >
+              {user.email} · {t('memberSince')}{' '}
               {new Date(user.createdAt).toLocaleDateString()}
             </div>
-            <form
-              action={updateUser}
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}
-            >
+            <form action={updateUser} className="profile-form-grid">
               <Input label={t('fullName')} name="fullName" defaultValue={user.fullName ?? ''} placeholder={t('fullName')} />
               <Select label={t('goal')} name="goal" defaultValue={user.goal ?? ''}>
                 <option value="">{t('selectGoal')}</option>
@@ -95,10 +99,7 @@ export default async function ProfilePage() {
           </Card>
 
           <Card title={t('bodyProfile')} subtitle={t('bodyProfileDesc')}>
-            <form
-              action={upsertProfile}
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}
-            >
+            <form action={upsertProfile} className="profile-form-grid">
               <Input label={t('heightCm')} name="heightCm" type="number" step="0.1" defaultValue={profile?.heightCm ?? ''} placeholder="170" />
               <Input label={t('weightKg')} name="weightKg" type="number" step="0.1" defaultValue={profile?.weightKg ?? ''} placeholder="75" />
               <Input label={t('bodyFatPct')} name="bodyFatPct" type="number" step="0.1" defaultValue={profile?.bodyFatPct ?? ''} placeholder="15" />

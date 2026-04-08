@@ -1,67 +1,15 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { submitOnboarding, type OnboardingPayload } from './actions';
-
-/* ---------- shared inline styles ---------- */
-
-const card: React.CSSProperties = {
-  background: 'var(--card)',
-  border: '1px solid var(--border)',
-  borderRadius: 16,
-  padding: '2.5rem',
-  maxWidth: 560,
-  width: '100%',
-};
-
-const btn: React.CSSProperties = {
-  padding: '0.75rem 1.5rem',
-  background: 'var(--accent)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: 8,
-  cursor: 'pointer',
-  fontWeight: 600,
-  fontSize: 15,
-};
-
-const btnOutline: React.CSSProperties = {
-  ...btn,
-  background: 'transparent',
-  border: '1px solid var(--border)',
-  color: 'var(--fg)',
-};
-
-const input: React.CSSProperties = {
-  padding: '0.6rem 0.75rem',
-  background: 'var(--card)',
-  border: '1px solid var(--border)',
-  borderRadius: 8,
-  color: 'var(--fg)',
-  width: '100%',
-  fontSize: 14,
-};
-
-const label: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 6,
-  fontSize: 14,
-  color: 'var(--muted)',
-};
 
 const TOTAL_STEPS = 5;
 
-/* ------------------------------------------------------------------ */
-/*  Goal cards                                                         */
-/* ------------------------------------------------------------------ */
-
 const GOALS = [
-  { id: 'fat_loss', label: 'Weight Loss', icon: '\uD83D\uDD25' },
-  { id: 'muscle_gain', label: 'Muscle Gain', icon: '\uD83D\uDCAA' },
-  { id: 'maintenance', label: 'Maintenance', icon: '\u2696\uFE0F' },
-  { id: 'general_health', label: 'General Health', icon: '\u2764\uFE0F' },
+  { id: 'fat_loss', label: 'Fat loss' },
+  { id: 'muscle_gain', label: 'Muscle gain' },
+  { id: 'maintenance', label: 'Maintenance' },
+  { id: 'general_health', label: 'General health' },
 ] as const;
 
 const GENDERS = [
@@ -72,29 +20,25 @@ const GENDERS = [
 ] as const;
 
 const ACTIVITY_LEVELS = [
-  { id: 'sedentary', label: 'Sedentary' },
-  { id: 'light', label: 'Lightly active' },
-  { id: 'moderate', label: 'Moderately active' },
-  { id: 'active', label: 'Active' },
-  { id: 'very_active', label: 'Very active' },
+  { id: 'sedentary', label: 'Sedentary — desk job, little exercise' },
+  { id: 'light', label: 'Lightly active — 1-3 sessions / week' },
+  { id: 'moderate', label: 'Moderately active — 3-5 sessions / week' },
+  { id: 'active', label: 'Active — 6-7 sessions / week' },
+  { id: 'very_active', label: 'Very active — twice daily training' },
 ] as const;
 
-/* ================================================================== */
-
 export function OnboardingWizard() {
-  const router = useRouter();
   const [step, setStep] = useState(1);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  // form state
   const [goal, setGoal] = useState('');
   const [heightCm, setHeightCm] = useState('');
   const [weightKg, setWeightKg] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [gender, setGender] = useState('unspecified');
   const [activityLevel, setActivityLevel] = useState('moderate');
-  const [unitSystem, setUnitSystem] = useState('metric');
+  const [unitSystem, setUnitSystem] = useState<'metric' | 'imperial'>('metric');
   const [timezone, setTimezone] = useState(
     Intl.DateTimeFormat().resolvedOptions().timeZone,
   );
@@ -105,13 +49,8 @@ export function OnboardingWizard() {
     return true;
   };
 
-  const next = () => {
-    if (step < TOTAL_STEPS) setStep(step + 1);
-  };
-
-  const back = () => {
-    if (step > 1) setStep(step - 1);
-  };
+  const next = () => step < TOTAL_STEPS && setStep(step + 1);
+  const back = () => step > 1 && setStep(step - 1);
 
   const handleSubmit = () => {
     setError(null);
@@ -126,7 +65,6 @@ export function OnboardingWizard() {
       timezone,
       dailyWaterGoalMl: Number(dailyWaterGoalMl) || 2500,
     };
-
     startTransition(async () => {
       try {
         await submitOnboarding(payload);
@@ -136,347 +74,260 @@ export function OnboardingWizard() {
     });
   };
 
-  /* ---- progress bar ---- */
-  const progress = (
-    <div style={{ display: 'flex', gap: 8, marginBottom: '2rem' }}>
-      {Array.from({ length: TOTAL_STEPS }, (_, i) => (
-        <div
-          key={i}
-          style={{
-            flex: 1,
-            height: 4,
-            borderRadius: 2,
-            background: i < step ? 'var(--accent)' : 'var(--border)',
-            transition: 'background 0.3s',
-          }}
-        />
-      ))}
-    </div>
+  const Progress = () => (
+    <>
+      <div className="onb-progress">
+        {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+          <div
+            key={i}
+            className={`onb-progress__seg${i < step ? ' onb-progress__seg--done' : ''}`}
+          />
+        ))}
+      </div>
+      <div className="onb-step-label">
+        Step {step} of {TOTAL_STEPS}
+      </div>
+    </>
   );
 
-  /* ---- step indicator ---- */
-  const stepLabel = (
-    <div
-      style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 8 }}
-    >
-      Step {step} of {TOTAL_STEPS}
-    </div>
-  );
-
-  /* ---- navigation buttons ---- */
-  const navButtons = (showBack: boolean, showNext: boolean, nextLabel = 'Next') => (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: showBack ? 'space-between' : 'flex-end',
-        marginTop: '2rem',
-      }}
-    >
+  const Nav = ({
+    showBack = true,
+    nextLabel = 'Continue',
+    onNext,
+    disabled,
+  }: {
+    showBack?: boolean;
+    nextLabel?: string;
+    onNext: () => void;
+    disabled?: boolean;
+  }) => (
+    <div className="onb-nav">
       {showBack && (
-        <button type="button" style={btnOutline} onClick={back}>
+        <button type="button" className="onb-nav__back" onClick={back}>
           Back
         </button>
       )}
-      {showNext && (
-        <button
-          type="button"
-          style={{
-            ...btn,
-            opacity: canAdvance() ? 1 : 0.5,
-            cursor: canAdvance() ? 'pointer' : 'not-allowed',
-          }}
-          disabled={!canAdvance()}
-          onClick={next}
-        >
-          {nextLabel}
-        </button>
-      )}
+      <button
+        type="button"
+        className="onb-nav__next"
+        onClick={onNext}
+        disabled={disabled}
+      >
+        {nextLabel}
+      </button>
     </div>
   );
 
-  /* ================================================================ */
-  /*  Step 1: Welcome                                                  */
-  /* ================================================================ */
-  if (step === 1) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem 1rem' }}>
-        <div style={card}>
-          {progress}
-          {stepLabel}
-          <h1 style={{ margin: '0 0 0.75rem', fontSize: '1.75rem' }}>
-            Welcome to NutriTrack
-          </h1>
-          <p style={{ color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 1.5rem' }}>
-            Track your nutrition, workouts, and supplements all in one place.
-            Let us set up your profile so we can personalize your experience.
-            This takes about a minute.
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button type="button" style={btn} onClick={next}>
-              Get started
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  return (
+    <div className="onb-shell">
+      <div className="onb-card reveal">
+        <Progress />
 
-  /* ================================================================ */
-  /*  Step 2: Goal selection                                           */
-  /* ================================================================ */
-  if (step === 2) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem 1rem' }}>
-        <div style={card}>
-          {progress}
-          {stepLabel}
-          <h2 style={{ margin: '0 0 0.5rem' }}>What is your main goal?</h2>
-          <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', fontSize: 14 }}>
-            This helps us tailor calorie targets and recommendations.
-          </p>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: 12,
-            }}
-          >
-            {GOALS.map((g) => {
-              const selected = goal === g.id;
-              return (
+        {/* ── Step 1: Welcome ───────────────────────────── */}
+        {step === 1 && (
+          <>
+            <h1 className="onb-title">Welcome to NutriTrack.</h1>
+            <p className="onb-lede">
+              We&apos;ll set up a profile so calorie targets, water goals, and weekly
+              insights actually fit your routine. Five short questions, about a minute
+              total. You can change all of this later in settings.
+            </p>
+            <Nav showBack={false} nextLabel="Let's begin" onNext={next} />
+          </>
+        )}
+
+        {/* ── Step 2: Goal ──────────────────────────────── */}
+        {step === 2 && (
+          <>
+            <h1 className="onb-title">What are you working on?</h1>
+            <p className="onb-lede">
+              Pick the goal that&apos;s most front of mind. We use this to bias your
+              calorie targets and which insights surface on the dashboard.
+            </p>
+            <div className="onb-grid">
+              {GOALS.map((g, i) => (
                 <button
                   key={g.id}
                   type="button"
                   onClick={() => setGoal(g.id)}
-                  style={{
-                    padding: '1.25rem',
-                    borderRadius: 12,
-                    border: selected
-                      ? '2px solid var(--accent)'
-                      : '1px solid var(--border)',
-                    background: selected ? 'var(--accent-muted, rgba(46,125,92,0.1))' : 'var(--card)',
-                    cursor: 'pointer',
-                    textAlign: 'center',
-                    color: 'var(--fg)',
-                    transition: 'border-color 0.2s, background 0.2s',
-                  }}
+                  className={`onb-choice${goal === g.id ? ' onb-choice--selected' : ''}`}
                 >
-                  <div style={{ fontSize: 32, marginBottom: 8 }}>{g.icon}</div>
-                  <div style={{ fontWeight: 600, fontSize: 14 }}>{g.label}</div>
+                  <span className="onb-choice__num">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="onb-choice__label">{g.label}</span>
                 </button>
-              );
-            })}
-          </div>
-          {navButtons(true, true)}
-        </div>
-      </div>
-    );
-  }
-
-  /* ================================================================ */
-  /*  Step 3: Body stats                                               */
-  /* ================================================================ */
-  if (step === 3) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem 1rem' }}>
-        <div style={card}>
-          {progress}
-          {stepLabel}
-          <h2 style={{ margin: '0 0 0.5rem' }}>Your body stats</h2>
-          <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', fontSize: 14 }}>
-            Helps calculate calorie targets and track progress. All fields are
-            optional.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <label style={label}>
-                Height ({unitSystem === 'metric' ? 'cm' : 'in'})
-                <input
-                  type="number"
-                  style={input}
-                  value={heightCm}
-                  onChange={(e) => setHeightCm(e.target.value)}
-                  placeholder={unitSystem === 'metric' ? '170' : '67'}
-                />
-              </label>
-              <label style={label}>
-                Weight ({unitSystem === 'metric' ? 'kg' : 'lbs'})
-                <input
-                  type="number"
-                  style={input}
-                  value={weightKg}
-                  onChange={(e) => setWeightKg(e.target.value)}
-                  placeholder={unitSystem === 'metric' ? '70' : '154'}
-                />
-              </label>
+              ))}
             </div>
-            <label style={label}>
-              Date of birth
-              <input
-                type="date"
-                style={input}
-                value={dateOfBirth}
-                onChange={(e) => setDateOfBirth(e.target.value)}
-              />
-            </label>
-            <label style={label}>
-              Gender
-              <select
-                style={input}
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
-              >
-                {GENDERS.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label style={label}>
-              Activity level
-              <select
-                style={input}
-                value={activityLevel}
-                onChange={(e) => setActivityLevel(e.target.value)}
-              >
-                {ACTIVITY_LEVELS.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          {navButtons(true, true)}
-        </div>
-      </div>
-    );
-  }
-
-  /* ================================================================ */
-  /*  Step 4: Preferences                                              */
-  /* ================================================================ */
-  if (step === 4) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem 1rem' }}>
-        <div style={card}>
-          {progress}
-          {stepLabel}
-          <h2 style={{ margin: '0 0 0.5rem' }}>Preferences</h2>
-          <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', fontSize: 14 }}>
-            Customize your experience.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <label style={label}>
-              Unit system
-              <div style={{ display: 'flex', gap: 8 }}>
-                {(['metric', 'imperial'] as const).map((u) => (
-                  <button
-                    key={u}
-                    type="button"
-                    onClick={() => setUnitSystem(u)}
-                    style={{
-                      flex: 1,
-                      padding: '0.6rem',
-                      borderRadius: 8,
-                      border:
-                        unitSystem === u
-                          ? '2px solid var(--accent)'
-                          : '1px solid var(--border)',
-                      background:
-                        unitSystem === u
-                          ? 'var(--accent-muted, rgba(46,125,92,0.1))'
-                          : 'var(--card)',
-                      color: 'var(--fg)',
-                      cursor: 'pointer',
-                      fontWeight: unitSystem === u ? 600 : 400,
-                      textTransform: 'capitalize',
-                    }}
-                  >
-                    {u}
-                  </button>
-                ))}
-              </div>
-            </label>
-            <label style={label}>
-              Timezone
-              <select
-                style={input}
-                value={timezone}
-                onChange={(e) => setTimezone(e.target.value)}
-              >
-                {Intl.supportedValuesOf('timeZone').map((tz) => (
-                  <option key={tz} value={tz}>
-                    {tz.replace(/_/g, ' ')}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label style={label}>
-              Daily water goal (ml)
-              <input
-                type="number"
-                style={input}
-                value={dailyWaterGoalMl}
-                onChange={(e) => setDailyWaterGoalMl(e.target.value)}
-                min={500}
-                max={10000}
-                step={100}
-              />
-            </label>
-          </div>
-          {navButtons(true, true, 'Finish')}
-        </div>
-      </div>
-    );
-  }
-
-  /* ================================================================ */
-  /*  Step 5: Complete                                                 */
-  /* ================================================================ */
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem 1rem' }}>
-      <div style={{ ...card, textAlign: 'center' as const }}>
-        {progress}
-        {stepLabel}
-        <div style={{ fontSize: 48, marginBottom: 16 }}>{'\u2705'}</div>
-        <h2 style={{ margin: '0 0 0.5rem' }}>You are all set!</h2>
-        <p style={{ color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 1.5rem' }}>
-          Your profile has been configured. We will use your preferences to
-          personalize calorie targets, water tracking, and progress insights.
-        </p>
-        {error && (
-          <div
-            style={{
-              padding: '0.75rem 1rem',
-              background: '#3a1f1f',
-              border: '1px solid #6a2a2a',
-              borderRadius: 8,
-              marginBottom: '1rem',
-              color: '#f87171',
-              fontSize: 14,
-            }}
-          >
-            {error}
-          </div>
+            <Nav onNext={next} disabled={!canAdvance()} />
+          </>
         )}
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-          <button type="button" style={btnOutline} onClick={back}>
-            Back
-          </button>
-          <button
-            type="button"
-            style={{
-              ...btn,
-              opacity: isPending ? 0.6 : 1,
-            }}
-            disabled={isPending}
-            onClick={handleSubmit}
-          >
-            {isPending ? 'Saving...' : 'Go to Dashboard'}
-          </button>
-        </div>
+
+        {/* ── Step 3: Body stats ────────────────────────── */}
+        {step === 3 && (
+          <>
+            <h1 className="onb-title">Tell us about you.</h1>
+            <p className="onb-lede">
+              All of this is optional and editable. The more we know, the better the
+              calorie targets — but you can skip anything you&apos;d rather not share.
+            </p>
+            <div className="onb-fields">
+              <div className="onb-row">
+                <div className="onb-field">
+                  <label htmlFor="onb-height">
+                    Height ({unitSystem === 'metric' ? 'cm' : 'in'})
+                  </label>
+                  <input
+                    id="onb-height"
+                    type="number"
+                    value={heightCm}
+                    onChange={(e) => setHeightCm(e.target.value)}
+                    placeholder={unitSystem === 'metric' ? '170' : '67'}
+                  />
+                </div>
+                <div className="onb-field">
+                  <label htmlFor="onb-weight">
+                    Weight ({unitSystem === 'metric' ? 'kg' : 'lbs'})
+                  </label>
+                  <input
+                    id="onb-weight"
+                    type="number"
+                    value={weightKg}
+                    onChange={(e) => setWeightKg(e.target.value)}
+                    placeholder={unitSystem === 'metric' ? '70' : '154'}
+                  />
+                </div>
+              </div>
+              <div className="onb-field">
+                <label htmlFor="onb-dob">Date of birth</label>
+                <input
+                  id="onb-dob"
+                  type="date"
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                />
+              </div>
+              <div className="onb-field">
+                <label htmlFor="onb-gender">Gender</label>
+                <select
+                  id="onb-gender"
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                >
+                  {GENDERS.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="onb-field">
+                <label htmlFor="onb-activity">Activity level</label>
+                <select
+                  id="onb-activity"
+                  value={activityLevel}
+                  onChange={(e) => setActivityLevel(e.target.value)}
+                >
+                  {ACTIVITY_LEVELS.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <Nav onNext={next} />
+          </>
+        )}
+
+        {/* ── Step 4: Preferences ───────────────────────── */}
+        {step === 4 && (
+          <>
+            <h1 className="onb-title">A couple of preferences.</h1>
+            <p className="onb-lede">
+              Units, time zone, and your daily water target. We&apos;ll round
+              everything off in the next step.
+            </p>
+            <div className="onb-fields">
+              <div className="onb-field">
+                <label>Unit system</label>
+                <div className="onb-segmented">
+                  {(['metric', 'imperial'] as const).map((u) => (
+                    <button
+                      key={u}
+                      type="button"
+                      className={unitSystem === u ? 'is-active' : ''}
+                      onClick={() => setUnitSystem(u)}
+                    >
+                      {u}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="onb-field">
+                <label htmlFor="onb-tz">Time zone</label>
+                <select
+                  id="onb-tz"
+                  value={timezone}
+                  onChange={(e) => setTimezone(e.target.value)}
+                >
+                  {Intl.supportedValuesOf('timeZone').map((tz) => (
+                    <option key={tz} value={tz}>
+                      {tz.replace(/_/g, ' ')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="onb-field">
+                <label htmlFor="onb-water">Daily water goal (ml)</label>
+                <input
+                  id="onb-water"
+                  type="number"
+                  value={dailyWaterGoalMl}
+                  onChange={(e) => setDailyWaterGoalMl(e.target.value)}
+                  min={500}
+                  max={10000}
+                  step={100}
+                />
+              </div>
+            </div>
+            <Nav nextLabel="Review" onNext={next} />
+          </>
+        )}
+
+        {/* ── Step 5: Confirm ───────────────────────────── */}
+        {step === 5 && (
+          <>
+            <h1 className="onb-title">All set.</h1>
+            <p className="onb-lede">
+              We&apos;ll save your profile and drop you into the dashboard. From
+              there you can log meals, schedule workouts, and review your week.
+            </p>
+            {error && (
+              <p className="auth-error" role="alert">
+                {error}
+              </p>
+            )}
+            <div className="onb-nav">
+              <button
+                type="button"
+                className="onb-nav__back"
+                onClick={back}
+                disabled={isPending}
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                className="onb-nav__next"
+                onClick={handleSubmit}
+                disabled={isPending}
+              >
+                {isPending ? 'Saving…' : 'Open dashboard'}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

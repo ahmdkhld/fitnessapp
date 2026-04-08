@@ -452,6 +452,229 @@ body::after {
 .btn--md { padding: var(--btn-pad-md); font-size: var(--btn-fs-md); }
 .btn--lg { padding: var(--btn-pad-lg); font-size: var(--btn-fs-lg); }
 
+/* ── Onboarding wizard ────────────────────────────────── */
+.onb-shell {
+  min-height: 70vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem 4rem;
+}
+.onb-card {
+  width: 100%;
+  max-width: 600px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: clamp(2rem, 5vw, 3rem);
+  box-shadow: var(--shadow-card);
+}
+.onb-progress {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 2rem;
+}
+.onb-progress__seg {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  transition: background 0.3s ease;
+}
+.onb-progress__seg--done {
+  background: var(--accent);
+}
+.onb-step-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.onb-step-label::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+}
+.onb-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.85rem, 4vw, 2.4rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 0.75rem 0;
+  color: var(--fg);
+}
+.onb-lede {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--muted);
+  margin: 0 0 2rem 0;
+}
+.onb-fields {
+  display: grid;
+  gap: 1.25rem;
+}
+.onb-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+@media (max-width: 480px) {
+  .onb-row {
+    grid-template-columns: 1fr;
+  }
+}
+.onb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.onb-field label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.onb-field input,
+.onb-field select {
+  padding: 0.75rem 0.9rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.onb-field input:focus,
+.onb-field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--decorative-1);
+}
+.onb-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+}
+.onb-choice {
+  padding: 1.5rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  text-align: left;
+  color: var(--fg);
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: border-color 0.18s ease, transform 0.15s ease, box-shadow 0.18s ease;
+}
+.onb-choice:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.onb-choice--selected {
+  border-color: var(--accent);
+  background: var(--decorative-1);
+}
+.onb-choice__num {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.onb-choice__label {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+.onb-segmented {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.onb-segmented button {
+  flex: 1;
+  padding: 0.7rem;
+  background: var(--card);
+  color: var(--fg);
+  border: none;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  text-transform: capitalize;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.onb-segmented button:last-child {
+  border-right: none;
+}
+.onb-segmented button.is-active {
+  background: var(--fg);
+  color: var(--bg);
+  font-weight: 500;
+}
+.onb-nav {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+.onb-nav__back {
+  padding: var(--btn-pad-md);
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.onb-nav__back:hover {
+  border-color: var(--fg);
+  color: var(--fg);
+}
+.onb-nav__next {
+  padding: var(--btn-pad-md);
+  background: var(--fg);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-left: auto;
+  transition: background 0.18s ease, transform 0.15s ease;
+}
+.onb-nav__next:hover {
+  background: var(--accent);
+  transform: translateY(-1px);
+}
+.onb-nav__next:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  background: var(--fg);
+}
+
 /* ── Landing page ─────────────────────────────────────── */
 .landing {
   min-height: 100vh;
@@ -716,6 +939,51 @@ body::after {
   border-radius: var(--radius-sm);
   color: var(--danger);
   font-size: 0.85rem;
+}
+
+/* ── Body log form grid ───────────────────────────────── */
+.body-log-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem;
+}
+@media (max-width: 720px) {
+  .body-log-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 480px) {
+  .body-log-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Profile form grid ────────────────────────────────── */
+.profile-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+@media (max-width: 560px) {
+  .profile-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Supplement add form grid ─────────────────────────── */
+.supplement-add-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  gap: 0.5rem;
+}
+@media (max-width: 720px) {
+  .supplement-add-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .supplement-add-grid > button {
+    grid-column: span 2;
+    width: 100%;
+  }
 }
 
 /* ── Diet plan create form grid ───────────────────────── */
