@@ -41,7 +41,7 @@ export default async function TemplatesPage() {
               </div>
               <form action={cloneTemplateAction.bind(null, tmpl.id)}>
                 <button type="submit" className="btn-primary">
-                  <i className="fa-solid fa-copy" style={{ marginRight: 6 }} />{t('useThisPlan')}
+                  {t('useThisPlan')}
                 </button>
               </form>
             </div>

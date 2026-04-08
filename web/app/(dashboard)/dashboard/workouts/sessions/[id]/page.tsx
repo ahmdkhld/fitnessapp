@@ -33,7 +33,7 @@ export default async function SessionDetail({
   return (
     <div>
       <div className="page-header">
-        <h1><i className="fa-solid fa-dumbbell" style={{ marginRight: 10, color: 'var(--accent)' }} />{session.day?.name ?? t('freeformWorkout')}</h1>
+        <h1>{session.day?.name ?? t('freeformWorkout')}</h1>
         <p>
           {session.date.slice(0, 10)} · {session.durationMin ?? 0} {t('min')} ·{' '}
           {session.sets.length} {t('sets')}

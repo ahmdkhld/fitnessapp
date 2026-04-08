@@ -5,34 +5,32 @@ export default async function NotificationSettingsPage() {
   const t = await getTranslations('notifications');
   const tc = await getTranslations('common');
 
-  const checkboxes: [string, string, string][] = [
-    ['pushEnabled', t('pushEnabled'), 'fa-solid fa-bell'],
-    ['mealReminder', t('mealReminder'), 'fa-solid fa-utensils'],
-    ['supplementReminder', t('supplementReminder'), 'fa-solid fa-pills'],
-    ['waterReminder', t('waterReminder'), 'fa-solid fa-droplet'],
-    ['overdueReminder', t('overdueReminder'), 'fa-solid fa-clock'],
+  const checkboxes: [string, string][] = [
+    ['pushEnabled', t('pushEnabled')],
+    ['mealReminder', t('mealReminder')],
+    ['supplementReminder', t('supplementReminder')],
+    ['waterReminder', t('waterReminder')],
+    ['overdueReminder', t('overdueReminder')],
   ];
 
   return (
-    <div>
+    <div className="reveal">
       <div className="page-header">
-        <h1><i className="fa-solid fa-bell" style={{ marginRight: 10, color: 'var(--purple)' }} />{t('title')}</h1>
+        <h1>{t('title')}</h1>
         <p>{t('description')}</p>
       </div>
       <form
         action={updateNotifications}
         className="glass-card"
         style={{
-          marginTop: '1rem',
           display: 'grid',
-          gap: '0.75rem',
-          maxWidth: 500,
+          gap: '0.5rem',
+          maxWidth: 520,
         }}
       >
-        {checkboxes.map(([name, label, icon]) => (
+        {checkboxes.map(([name, label]) => (
           <label key={name} className="checkbox-label">
             <input type="checkbox" name={name} defaultChecked />
-            <i className={icon} style={{ color: 'var(--muted)', width: 20, textAlign: 'center' }} />
             <span>{label}</span>
           </label>
         ))}
@@ -51,7 +49,7 @@ export default async function NotificationSettingsPage() {
           />
         </div>
         <button type="submit" className="btn-primary" style={{ justifySelf: 'start', marginTop: '0.5rem' }}>
-          <i className="fa-solid fa-floppy-disk" style={{ marginRight: 6 }} />{tc('save')}
+          {tc('save')}
         </button>
       </form>
     </div>

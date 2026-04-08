@@ -68,7 +68,7 @@ export default async function AdminPage({
     return (
       <div>
         <div className="page-header">
-          <h1><i className="fa-solid fa-shield-halved" style={{ marginRight: 10, color: '#e07b5f' }} />{t('title')}</h1>
+          <h1>{t('title')}</h1>
         </div>
         <div className="glass-card" style={{ marginTop: '1rem' }}>
           <div style={{ fontWeight: 600, fontSize: '1.05rem' }}>{t('adminRoleRequired')}</div>
@@ -80,7 +80,7 @@ export default async function AdminPage({
   return (
     <div>
       <div className="page-header">
-        <h1><i className="fa-solid fa-shield-halved" style={{ marginRight: 10, color: 'var(--accent)' }} />{t('title')}</h1>
+        <h1>{t('title')}</h1>
         <p>{t('description')}</p>
       </div>
       {error && <div className="error-banner">{error}</div>}
@@ -96,22 +96,22 @@ export default async function AdminPage({
         >
           <div className="stat-card">
             <div className="stat-accent" style={{ background: 'var(--accent)' }} />
-            <div className="stat-label"><i className="fa-solid fa-users" style={{ marginRight: 6 }} />{t('users')}</div>
+            <div className="stat-label">{t('users')}</div>
             <div className="stat-value">{stats.users}</div>
           </div>
           <div className="stat-card">
             <div className="stat-accent" style={{ background: 'var(--purple)' }} />
-            <div className="stat-label"><i className="fa-solid fa-user-tie" style={{ marginRight: 6 }} />{t('coaches')}</div>
+            <div className="stat-label">{t('coaches')}</div>
             <div className="stat-value">{stats.coaches}</div>
           </div>
           <div className="stat-card">
             <div className="stat-accent" style={{ background: 'var(--green)' }} />
-            <div className="stat-label"><i className="fa-solid fa-dumbbell" style={{ marginRight: 6 }} />{t('workoutPlans')}</div>
+            <div className="stat-label">{t('workoutPlans')}</div>
             <div className="stat-value">{stats.workoutPlans}</div>
           </div>
           <div className="stat-card">
             <div className="stat-accent" style={{ background: '#d8a24a' }} />
-            <div className="stat-label"><i className="fa-solid fa-check-double" style={{ marginRight: 6 }} />{t('completedSessions')}</div>
+            <div className="stat-label">{t('completedSessions')}</div>
             <div className="stat-value">{stats.completedSessions}</div>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default async function AdminPage({
           <div key={u.id} className="list-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ fontWeight: 600 }}>
-                <i className="fa-solid fa-user" style={{ marginRight: 8, color: 'var(--muted)', fontSize: 12 }} />
+                
                 {u.fullName ?? u.email}
               </div>
               <div style={{ color: 'var(--muted)', fontSize: 12, marginLeft: 22 }}>

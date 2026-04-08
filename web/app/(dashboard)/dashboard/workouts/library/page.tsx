@@ -42,7 +42,7 @@ export default async function ExerciseLibraryPage({
   return (
     <div>
       <div className="page-header">
-        <h1><i className="fa-solid fa-book-open" style={{ marginRight: 10, color: 'var(--accent)' }} />{t('exerciseLibrary')}</h1>
+        <h1>{t('exerciseLibrary')}</h1>
         <p>{t('exerciseCount', { count: exercises.length })}</p>
       </div>
 
@@ -75,7 +75,7 @@ export default async function ExerciseLibraryPage({
 
       <details className="glass-card" style={{ marginBottom: '1.5rem' }}>
         <summary style={{ cursor: 'pointer', fontWeight: 600 }}>
-          <i className="fa-solid fa-plus" style={{ marginRight: 8 }} />{t('createCustomExercise')}
+          {t('createCustomExercise')}
         </summary>
         <form
           action={createExercise}
@@ -115,7 +115,7 @@ export default async function ExerciseLibraryPage({
         {exercises.map((e) => (
           <div key={e.id} className="list-card">
             <div style={{ fontWeight: 600 }}>
-              <i className="fa-solid fa-dumbbell" style={{ marginRight: 8, color: 'var(--accent)', fontSize: 12 }} />
+              
               {e.name}
             </div>
             <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 4 }}>

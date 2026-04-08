@@ -31,7 +31,7 @@ export default async function BodyLogPage() {
   return (
     <div>
       <div className="page-header">
-        <h1><i className="fa-solid fa-weight-scale" style={{ marginRight: 10, color: 'var(--green)' }} />{t('bodyLogTitle')}</h1>
+        <h1>{t('bodyLogTitle')}</h1>
       </div>
       {error && <div className="error-banner">{error}</div>}
 

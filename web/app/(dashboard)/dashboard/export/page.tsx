@@ -27,11 +27,11 @@ export default async function ExportPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div className="page-header">
-          <h1><i className="fa-solid fa-file-export" style={{ marginRight: 10, color: 'var(--green)' }} />{t('title')}</h1>
+          <h1>{t('title')}</h1>
           <p>{t('description')}</p>
         </div>
         <a href={pdfHref} className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <i className="fa-solid fa-file-pdf" />{t('downloadPdf')}
+          {t('downloadPdf')}
         </a>
       </div>
       {error && <div className="error-banner" style={{ marginTop: '1rem' }}>{error}</div>}

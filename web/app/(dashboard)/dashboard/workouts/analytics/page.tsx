@@ -35,7 +35,7 @@ export default async function WorkoutAnalyticsPage() {
   return (
     <div>
       <div className="page-header">
-        <h1><i className="fa-solid fa-chart-line" style={{ marginRight: 10, color: 'var(--green)' }} />{t('workoutAnalytics')}</h1>
+        <h1>{t('workoutAnalytics')}</h1>
       </div>
       {error && <div className="error-banner">{error}</div>}
 
@@ -44,7 +44,7 @@ export default async function WorkoutAnalyticsPage() {
       </div>
 
       <h2 className="section-title">
-        <i className="fa-solid fa-trophy" style={{ marginRight: 8, color: 'var(--green)' }} />
+        
         {t('recentPersonalRecords')}
       </h2>
       {topPrs.length === 0 ? (

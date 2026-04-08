@@ -59,7 +59,7 @@ export default async function ProfilePage() {
   return (
     <div style={{ maxWidth: 600 }}>
       <div className="page-header">
-        <h1><i className="fa-solid fa-user-circle" style={{ marginRight: 10, color: 'var(--accent)' }} />{t('title')}</h1>
+        <h1>{t('title')}</h1>
         <p>{t('description')}</p>
       </div>
       {error && <div className="error-banner">{error}</div>}

@@ -61,7 +61,7 @@ export default async function ClientSummaryPage({
   return (
     <div>
       <div className="page-header">
-        <h1><i className="fa-solid fa-user" style={{ marginRight: 10, color: 'var(--accent)' }} />{data.client.fullName ?? data.client.email}</h1>
+        <h1>{data.client.fullName ?? data.client.email}</h1>
         <p>{data.client.goal ?? '\u2014'} · {t('readOnlyView')}</p>
       </div>
 
@@ -91,7 +91,7 @@ export default async function ClientSummaryPage({
         </div>
       </div>
 
-      <h2 className="section-title"><i className="fa-solid fa-dumbbell" style={{ marginRight: 8, color: 'var(--accent)' }} />{t('recentSessions')}</h2>
+      <h2 className="section-title">{t('recentSessions')}</h2>
       {data.recentSessions.length === 0 ? (
         <p style={{ color: 'var(--muted)' }}>{t('noRecentSessions')}</p>
       ) : (
@@ -107,7 +107,7 @@ export default async function ClientSummaryPage({
         </div>
       )}
 
-      <h2 className="section-title"><i className="fa-solid fa-trophy" style={{ marginRight: 8, color: 'var(--green)' }} />{t('recentPRs')}</h2>
+      <h2 className="section-title">{t('recentPRs')}</h2>
       {data.recentPRs.length === 0 ? (
         <p style={{ color: 'var(--muted)' }}>{t('noRecentPRs')}</p>
       ) : (

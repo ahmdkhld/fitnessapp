@@ -25,10 +25,10 @@ export default function ChangePasswordPage() {
         href="/dashboard/settings"
         style={{ color: 'var(--muted)', fontSize: 13, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
       >
-        <i className="fa-solid fa-arrow-left" /> Back to settings
+         Back to settings
       </Link>
       <div className="page-header" style={{ marginTop: '0.75rem' }}>
-        <h1><i className="fa-solid fa-key" style={{ marginRight: 10, color: 'var(--accent)' }} />Change password</h1>
+        <h1>Change password</h1>
         <p>After changing your password you will be signed out and need to log in again.</p>
       </div>
 
@@ -41,7 +41,7 @@ export default function ChangePasswordPage() {
           {state.error && <div className="error-banner" style={{ margin: 0 }}>{state.error}</div>}
           {state.success && (
             <p style={{ color: 'var(--green)', margin: 0, fontSize: 14 }}>
-              <i className="fa-solid fa-check" style={{ marginRight: 6 }} />Password changed successfully.
+              Password changed successfully.
             </p>
           )}
 

@@ -21,7 +21,7 @@ export default async function DailyNotesPage() {
   return (
     <div>
       <div className="page-header">
-        <h1><i className="fa-solid fa-note-sticky" style={{ marginRight: 10, color: 'var(--purple)' }} />{t('dailyNotesTitle')}</h1>
+        <h1>{t('dailyNotesTitle')}</h1>
         <p>{t('dailyNotesDesc')}</p>
       </div>
       {error && <div className="error-banner">{error}</div>}
@@ -63,7 +63,7 @@ export default async function DailyNotesPage() {
           />
         </div>
         <button type="submit" className="btn-primary" style={{ justifySelf: 'start' }}>
-          <i className="fa-solid fa-floppy-disk" style={{ marginRight: 6 }} />{tc('save')}
+          {tc('save')}
         </button>
       </form>
     </div>

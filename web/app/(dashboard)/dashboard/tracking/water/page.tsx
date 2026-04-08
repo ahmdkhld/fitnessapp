@@ -30,7 +30,7 @@ export default async function WaterPage() {
   return (
     <div>
       <div className="page-header">
-        <h1><i className="fa-solid fa-droplet" style={{ marginRight: 10, color: '#3b82f6' }} />{t('water')}</h1>
+        <h1>{t('water')}</h1>
       </div>
       {error && <div className="error-banner">{error}</div>}
 
@@ -52,7 +52,7 @@ export default async function WaterPage() {
           <form key={amt} action={logWater}>
             <input type="hidden" name="amountMl" value={amt} />
             <button type="submit" className="btn-primary">
-              <i className="fa-solid fa-plus" style={{ marginRight: 6 }} />+{amt} ml
+              +{amt} ml
             </button>
           </form>
         ))}
@@ -68,7 +68,7 @@ export default async function WaterPage() {
                   {new Date(l.loggedAt).toLocaleTimeString()}
                 </span>
                 <span style={{ fontWeight: 600, color: '#3b82f6' }}>
-                  <i className="fa-solid fa-droplet" style={{ marginRight: 6, fontSize: 11 }} />{l.amountMl} ml
+                  {l.amountMl} ml
                 </span>
               </div>
             ))}

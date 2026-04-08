@@ -31,7 +31,7 @@ export default function ImportPage() {
   return (
     <div>
       <div className="page-header">
-        <h1><i className="fa-solid fa-file-import" style={{ marginRight: 10, color: 'var(--accent)' }} />{t('title')}</h1>
+        <h1>{t('title')}</h1>
         <p>{t('description')}</p>
       </div>
       <textarea
@@ -49,7 +49,7 @@ export default function ImportPage() {
           className="btn-primary"
           style={{ opacity: loading || !text ? 0.5 : 1 }}
         >
-          <i className="fa-solid fa-wand-magic-sparkles" style={{ marginRight: 6 }} />
+          
           {loading ? t('parsing') : t('parse')}
         </button>
       </div>

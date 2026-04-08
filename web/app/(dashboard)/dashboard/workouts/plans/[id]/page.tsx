@@ -91,7 +91,7 @@ export default async function WorkoutPlanDetail({
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <form action={startSession.bind(null, d.id)}>
                       <button type="submit" className="btn-success">
-                        <i className="fa-solid fa-play" style={{ marginRight: 6 }} />{tc('start')}
+                        {tc('start')}
                       </button>
                     </form>
                     <form action={removeDay.bind(null, plan.id, d.id)}>

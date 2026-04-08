@@ -37,7 +37,7 @@ export default async function CoachPortalPage() {
   return (
     <div>
       <div className="page-header">
-        <h1><i className="fa-solid fa-user-tie" style={{ marginRight: 10, color: 'var(--purple)' }} />{t('title')}</h1>
+        <h1>{t('title')}</h1>
         <p>{t('description')}</p>
       </div>
       {error && <div className="error-banner">{error}</div>}
@@ -54,7 +54,7 @@ export default async function CoachPortalPage() {
             style={{ flex: 1 }}
           />
           <button type="submit" className="btn-primary">
-            <i className="fa-solid fa-paper-plane" style={{ marginRight: 6 }} />{t('invite')}
+            {t('invite')}
           </button>
         </form>
         <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 8 }}>{t('inviteNote')}</p>
@@ -71,7 +71,7 @@ export default async function CoachPortalPage() {
           >
             <div>
               <div style={{ fontWeight: 600 }}>
-                <i className="fa-solid fa-user" style={{ marginRight: 8, color: 'var(--accent)', fontSize: 12 }} />
+                
                 {link.client.fullName ?? link.client.email}
               </div>
               <div style={{ color: 'var(--muted)', fontSize: 13, marginLeft: 22 }}>{link.client.goal ?? '\u2014'}</div>
@@ -94,7 +94,7 @@ export default async function CoachPortalPage() {
           <div key={link.id} className="list-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ fontWeight: 600 }}>
-                <i className="fa-solid fa-user-tie" style={{ marginRight: 8, color: 'var(--purple)', fontSize: 12 }} />
+                
                 {link.coach.fullName ?? link.coach.email}
               </div>
               <div style={{ color: 'var(--muted)', fontSize: 13, marginLeft: 22 }}>

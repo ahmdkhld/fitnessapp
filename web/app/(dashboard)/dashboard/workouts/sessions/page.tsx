@@ -21,7 +21,7 @@ export default async function SessionsPage() {
   return (
     <div>
       <div className="page-header">
-        <h1><i className="fa-solid fa-clock-rotate-left" style={{ marginRight: 10, color: 'var(--purple)' }} />{t('workoutHistory')}</h1>
+        <h1>{t('workoutHistory')}</h1>
       </div>
       {error && <div className="error-banner">{error}</div>}
       {sessions.length === 0 && <p style={{ color: 'var(--muted)' }}>{t('nothingYet')}</p>}
@@ -44,7 +44,7 @@ export default async function SessionsPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontWeight: 600 }}>
-                    <i className="fa-solid fa-dumbbell" style={{ marginRight: 8, color: 'var(--accent)', fontSize: 12 }} />
+                    
                     {s.day?.name ?? t('freeform')}
                   </div>
                   <div style={{ color: 'var(--muted)', fontSize: 13, marginLeft: 22 }}>

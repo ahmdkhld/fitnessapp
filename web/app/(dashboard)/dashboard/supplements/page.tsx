@@ -27,7 +27,7 @@ export default async function SupplementsPage() {
   return (
     <div>
       <div className="page-header">
-        <h1><i className="fa-solid fa-pills" style={{ marginRight: 10, color: 'var(--purple)' }} />{t('title')}</h1>
+        <h1>{t('title')}</h1>
       </div>
       {error && <div className="error-banner">{error}</div>}
 
@@ -78,7 +78,7 @@ export default async function SupplementsPage() {
             {plan.supplements.map((s) => (
               <div key={s.id} className="list-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ fontWeight: 600 }}><i className="fa-solid fa-capsules" style={{ marginRight: 8, color: 'var(--purple)', fontSize: 13 }} />{s.name}</div>
+                  <div style={{ fontWeight: 600 }}>{s.name}</div>
                   <div style={{ color: 'var(--muted)', fontSize: 13, marginLeft: 22 }}>
                     {s.dosage ?? ''}
                   </div>

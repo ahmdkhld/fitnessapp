@@ -60,7 +60,7 @@ export default async function ActiveSessionPage({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
         <div className="page-header">
           <h1>
-            <i className="fa-solid fa-fire" style={{ marginRight: 10, color: 'var(--green)' }} />
+            
             {day?.name ?? session.day?.name ?? t('freeformWorkout')}
           </h1>
           <p>
@@ -69,7 +69,7 @@ export default async function ActiveSessionPage({
         </div>
         <form action={completeSessionAction.bind(null, session.id)}>
           <button type="submit" className="btn-success" style={{ padding: '0.6rem 1.25rem' }}>
-            <i className="fa-solid fa-flag-checkered" style={{ marginRight: 6 }} />{t('finishWorkout')}
+            {t('finishWorkout')}
           </button>
         </form>
       </div>
@@ -122,7 +122,7 @@ export default async function ActiveSessionPage({
           return (
             <div key={px.id} className="glass-card">
               <div style={{ fontWeight: 600 }}>
-                <i className="fa-solid fa-dumbbell" style={{ marginRight: 8, color: 'var(--accent)', fontSize: 13 }} />
+                
                 {px.exercise.name}
               </div>
               <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 2 }}>
