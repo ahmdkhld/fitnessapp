@@ -1,0 +1,76 @@
+{
+  "common": {
+    "appName": "نيوتري تراك",
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "tryAgain": "حاول مرة أخرى",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "search": "بحث",
+    "confirm": "تأكيد",
+    "back": "رجوع",
+    "next": "التالي",
+    "submit": "إرسال",
+    "close": "إغلاق",
+    "yes": "نعم",
+    "no": "لا"
+  },
+  "nav": {
+    "overview": "نظرة عامة",
+    "timeline": "الجدول الزمني",
+    "dietPlans": "خطط الحمية",
+    "supplements": "المكملات",
+    "workouts": "التمارين",
+    "water": "الماء",
+    "bodyLog": "سجل الجسم",
+    "notes": "الملاحظات",
+    "insights": "الرؤى",
+    "import": "استيراد",
+    "coachReport": "تقرير المدرب",
+    "notifications": "الإشعارات",
+    "coachPortal": "بوابة المدرب",
+    "admin": "الإدارة",
+    "settings": "الإعدادات",
+    "sections": "الأقسام"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "signOut": "تسجيل الخروج",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "forgotPassword": "نسيت كلمة المرور؟"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "welcome": "مرحباً بعودتك",
+    "recentActivity": "النشاط الأخير",
+    "quickActions": "إجراءات سريعة"
+  },
+  "tracking": {
+    "waterTracking": "تتبع الماء",
+    "bodyLog": "سجل الجسم",
+    "dailyNotes": "ملاحظات يومية",
+    "addEntry": "إضافة سجل",
+    "todayProgress": "تقدم اليوم"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "editProfile": "تعديل الملف الشخصي",
+    "preferences": "التفضيلات"
+  },
+  "analytics": {
+    "title": "التحليلات",
+    "insights": "الرؤى",
+    "trends": "الاتجاهات",
+    "weeklyReport": "التقرير الأسبوعي"
+  },
+  "language": {
+    "switchLanguage": "اللغة",
+    "english": "الإنجليزية",
+    "arabic": "العربية"
+  }
+}

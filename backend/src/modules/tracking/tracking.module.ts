@@ -5,9 +5,11 @@ import { BodyLogController } from './body-log.controller';
 import { BodyLogService } from './body-log.service';
 import { DailyNotesController } from './daily-notes.controller';
 import { DailyNotesService } from './daily-notes.service';
+import { NutritionController } from './nutrition.controller';
+import { NutritionService } from './nutrition.service';
 
 @Module({
-  controllers: [WaterController, BodyLogController, DailyNotesController],
-  providers: [WaterService, BodyLogService, DailyNotesService],
+  controllers: [WaterController, BodyLogController, DailyNotesController, NutritionController],
+  providers: [WaterService, BodyLogService, DailyNotesService, NutritionService],
 })
 export class TrackingModule {}

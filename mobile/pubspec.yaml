@@ -25,8 +25,17 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   shared_preferences: ^2.2.2
 
+  # Offline database (Drift / SQLite)
+  drift: ^2.22.0
+  sqlite3_flutter_libs: ^0.5.0
+  path: ^1.9.0
+
   # Notifications
   flutter_local_notifications: ^17.0.0
+
+  # Firebase (push notifications)
+  firebase_core: ^3.6.0
+  firebase_messaging: ^15.1.0
 
   # Navigation
   go_router: ^14.0.0
@@ -48,6 +57,10 @@ dependencies:
   image_picker: ^1.0.7
   http: ^1.2.0
 
+  # File sharing & storage
+  share_plus: ^10.0.0
+  path_provider: ^2.1.2
+
   # Misc
   intl: ^0.19.0
   permission_handler: ^11.3.0
@@ -57,6 +70,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.1
+  drift_dev: ^2.22.0
+  build_runner: ^2.4.0
+  bloc_test: ^9.1.7
+  mocktail: ^1.0.3
 
 flutter:
   uses-material-design: true

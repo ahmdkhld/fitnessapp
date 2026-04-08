@@ -16,9 +16,12 @@ model User {
   goal         String?  @db.VarChar(50)
   timezone     String   @default("UTC") @db.VarChar(50)
   unitSystem   String   @default("metric") @map("unit_system") @db.VarChar(10)
-  role         String   @default("user") @db.VarChar(20) // user | coach | admin
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+  role               String    @default("user") @db.VarChar(20) // user | coach | admin
+  emailVerified      Boolean   @default(false) @map("email_verified")
+  emailVerifyToken   String?   @map("email_verify_token") @db.VarChar(128)
+  emailVerifyExpires DateTime? @map("email_verify_expires") @db.Timestamptz()
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
 
   profiles             UserProfile[]
   dietPlans            DietPlan[]
@@ -36,6 +39,7 @@ model User {
   personalRecords      PersonalRecord[]
   coachingClients      CoachLink[] @relation("CoachLinks")
   coachedBy            CoachLink[] @relation("ClientLinks")
+  nutritionLogs        NutritionLog[]
 
   @@map("users")
 }
@@ -278,6 +282,29 @@ model UploadedPlan {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("uploaded_plans")
+}
+
+// ===== Nutrition Tracking =====
+
+model NutritionLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  date           DateTime @db.Date
+  targetCalories Int?     @map("target_calories")
+  actualCalories Int?     @map("actual_calories")
+  targetProteinG Decimal? @map("target_protein_g") @db.Decimal(6,1)
+  actualProteinG Decimal? @map("actual_protein_g") @db.Decimal(6,1)
+  targetCarbsG   Decimal? @map("target_carbs_g") @db.Decimal(6,1)
+  actualCarbsG   Decimal? @map("actual_carbs_g") @db.Decimal(6,1)
+  targetFatG     Decimal? @map("target_fat_g") @db.Decimal(6,1)
+  actualFatG     Decimal? @map("actual_fat_g") @db.Decimal(6,1)
+  notes          String?
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId, date])
+  @@index([userId, date])
+  @@map("nutrition_logs")
 }
 
 // ===== Workouts =====

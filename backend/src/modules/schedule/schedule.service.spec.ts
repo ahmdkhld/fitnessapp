@@ -48,6 +48,9 @@ describe('ScheduleService.generateDay', () => {
           ],
         }),
       },
+      workoutPlan: {
+        findFirst: jest.fn().mockResolvedValue(null),
+      },
       dailyScheduleItem: {
         deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
         createMany: jest.fn().mockImplementation(async ({ data }) => {

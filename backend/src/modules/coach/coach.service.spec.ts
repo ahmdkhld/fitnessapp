@@ -1,5 +1,7 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CoachService } from './coach.service';
+import { DietPlansService } from '../diet-plans/diet-plans.service';
+import { WorkoutPlansService } from '../workouts/workout-plans.service';
 
 describe('CoachService', () => {
   const makeMailer = () =>
@@ -90,9 +92,25 @@ describe('CoachService', () => {
     } as any;
   };
 
+  const makeDietPlans = () =>
+    ({
+      list: jest.fn(async () => []),
+      create: jest.fn(async (_uid: string, dto: any) => ({ id: 'dp1', ...dto })),
+      update: jest.fn(async (_uid: string, _id: string, dto: any) => ({ id: 'dp1', ...dto })),
+      remove: jest.fn(async () => ({ success: true })),
+    }) as unknown as DietPlansService;
+
+  const makeWorkoutPlans = () =>
+    ({
+      list: jest.fn(async () => []),
+      create: jest.fn(async (_uid: string, dto: any) => ({ id: 'wp1', ...dto })),
+      update: jest.fn(async (_uid: string, _id: string, dto: any) => ({ id: 'wp1', ...dto })),
+      remove: jest.fn(async () => ({ success: true })),
+    }) as unknown as WorkoutPlansService;
+
   it('blocks non-coach callers from inviting clients', async () => {
     const prisma = makePrisma();
-    const svc = new CoachService(prisma, makeMailer());
+    const svc = new CoachService(prisma, makeMailer(), makeDietPlans(), makeWorkoutPlans());
     await expect(svc.inviteClient('plain', 'client@x.com')).rejects.toBeInstanceOf(
       ForbiddenException,
     );
@@ -106,7 +124,7 @@ describe('CoachService', () => {
       if (where.email === 'self@x.com') return { id: 'coach', email: 'self@x.com' };
       return null;
     });
-    const svc = new CoachService(prisma, makeMailer());
+    const svc = new CoachService(prisma, makeMailer(), makeDietPlans(), makeWorkoutPlans());
     await expect(svc.inviteClient('coach', 'self@x.com')).rejects.toBeInstanceOf(
       ForbiddenException,
     );
@@ -115,7 +133,7 @@ describe('CoachService', () => {
   it('creates a pending invite for an existing client and sends an email', async () => {
     const prisma = makePrisma();
     const mailer = makeMailer();
-    const svc = new CoachService(prisma, mailer);
+    const svc = new CoachService(prisma, mailer, makeDietPlans(), makeWorkoutPlans());
     const link = await svc.inviteClient('coach', 'client@x.com');
     expect(link.acceptedAt).toBeNull();
     expect(prisma.links).toHaveLength(1);
@@ -133,7 +151,7 @@ describe('CoachService', () => {
         throw new Error('SMTP down');
       }),
     } as any;
-    const svc = new CoachService(prisma, mailer);
+    const svc = new CoachService(prisma, mailer, makeDietPlans(), makeWorkoutPlans());
     const link = await svc.inviteClient('coach', 'client@x.com');
     expect(link).toBeDefined();
     expect(prisma.links).toHaveLength(1);
@@ -145,7 +163,7 @@ describe('CoachService', () => {
       if (where.id === 'coach') return { id: 'coach', role: 'coach' };
       return null;
     });
-    const svc = new CoachService(prisma, makeMailer());
+    const svc = new CoachService(prisma, makeMailer(), makeDietPlans(), makeWorkoutPlans());
     await expect(
       svc.inviteClient('coach', 'ghost@x.com'),
     ).rejects.toBeInstanceOf(NotFoundException);
@@ -153,7 +171,7 @@ describe('CoachService', () => {
 
   it('client summary refuses unauthorised coaches', async () => {
     const prisma = makePrisma();
-    const svc = new CoachService(prisma, makeMailer());
+    const svc = new CoachService(prisma, makeMailer(), makeDietPlans(), makeWorkoutPlans());
     await expect(
       svc.clientSummary('coach', 'client'),
     ).rejects.toBeInstanceOf(ForbiddenException);
@@ -167,10 +185,120 @@ describe('CoachService', () => {
       clientId: 'client',
       acceptedAt: new Date(),
     });
-    const svc = new CoachService(prisma, makeMailer());
+    const svc = new CoachService(prisma, makeMailer(), makeDietPlans(), makeWorkoutPlans());
     const summary = await svc.clientSummary('coach', 'client');
     expect(summary.summary.totalItems).toBe(2);
     expect(summary.summary.completedItems).toBe(1);
     expect(summary.summary.adherencePct).toBe(50);
+  });
+
+  // ==================== Coach Plan Editing Authorization ====================
+
+  describe('coach plan editing', () => {
+    it('rejects diet plan listing when no active coach link exists', async () => {
+      const prisma = makePrisma();
+      const svc = new CoachService(prisma, makeMailer(), makeDietPlans(), makeWorkoutPlans());
+      await expect(
+        svc.listClientDietPlans('coach', 'client'),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('rejects workout plan creation when no active coach link exists', async () => {
+      const prisma = makePrisma();
+      const svc = new CoachService(prisma, makeMailer(), makeDietPlans(), makeWorkoutPlans());
+      await expect(
+        svc.createClientWorkoutPlan('coach', 'client', { name: 'PPL' }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('rejects diet plan update when link is pending (not accepted)', async () => {
+      const prisma = makePrisma();
+      // Push a link that has NOT been accepted
+      prisma.links.push({
+        id: 'l1',
+        coachId: 'coach',
+        clientId: 'client',
+        acceptedAt: null,
+      });
+      const svc = new CoachService(prisma, makeMailer(), makeDietPlans(), makeWorkoutPlans());
+      await expect(
+        svc.updateClientDietPlan('coach', 'client', 'dp1', { name: 'Updated' }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('delegates diet plan list to DietPlansService when link is accepted', async () => {
+      const prisma = makePrisma();
+      prisma.links.push({
+        id: 'l1',
+        coachId: 'coach',
+        clientId: 'client',
+        acceptedAt: new Date(),
+      });
+      const dietPlans = makeDietPlans();
+      const svc = new CoachService(prisma, makeMailer(), dietPlans, makeWorkoutPlans());
+      await svc.listClientDietPlans('coach', 'client');
+      expect(dietPlans.list).toHaveBeenCalledWith('client');
+    });
+
+    it('delegates diet plan creation to DietPlansService with clientId', async () => {
+      const prisma = makePrisma();
+      prisma.links.push({
+        id: 'l1',
+        coachId: 'coach',
+        clientId: 'client',
+        acceptedAt: new Date(),
+      });
+      const dietPlans = makeDietPlans();
+      const dto = { name: 'Cut Plan', goal: 'fat_loss' };
+      const svc = new CoachService(prisma, makeMailer(), dietPlans, makeWorkoutPlans());
+      const result = await svc.createClientDietPlan('coach', 'client', dto);
+      expect(dietPlans.create).toHaveBeenCalledWith('client', dto);
+      expect(result).toHaveProperty('id');
+    });
+
+    it('delegates workout plan creation to WorkoutPlansService with clientId', async () => {
+      const prisma = makePrisma();
+      prisma.links.push({
+        id: 'l1',
+        coachId: 'coach',
+        clientId: 'client',
+        acceptedAt: new Date(),
+      });
+      const workoutPlans = makeWorkoutPlans();
+      const dto = { name: 'PPL Split', daysPerWeek: 6 };
+      const svc = new CoachService(prisma, makeMailer(), makeDietPlans(), workoutPlans);
+      const result = await svc.createClientWorkoutPlan('coach', 'client', dto);
+      expect(workoutPlans.create).toHaveBeenCalledWith('client', dto);
+      expect(result).toHaveProperty('id');
+    });
+
+    it('delegates diet plan update to DietPlansService with clientId', async () => {
+      const prisma = makePrisma();
+      prisma.links.push({
+        id: 'l1',
+        coachId: 'coach',
+        clientId: 'client',
+        acceptedAt: new Date(),
+      });
+      const dietPlans = makeDietPlans();
+      const svc = new CoachService(prisma, makeMailer(), dietPlans, makeWorkoutPlans());
+      await svc.updateClientDietPlan('coach', 'client', 'dp1', { name: 'New Name' });
+      expect(dietPlans.update).toHaveBeenCalledWith('client', 'dp1', { name: 'New Name' });
+    });
+
+    it('delegates workout plan removal to WorkoutPlansService with clientId', async () => {
+      const prisma = makePrisma();
+      prisma.links.push({
+        id: 'l1',
+        coachId: 'coach',
+        clientId: 'client',
+        acceptedAt: new Date(),
+      });
+      const workoutPlans = makeWorkoutPlans();
+      const svc = new CoachService(prisma, makeMailer(), makeDietPlans(), workoutPlans);
+      const result = await svc.removeClientWorkoutPlan('coach', 'client', 'wp1');
+      expect(workoutPlans.remove).toHaveBeenCalledWith('client', 'wp1');
+      expect(result).toEqual({ success: true });
+    });
   });
 });

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { setTokenCookie } from '@/lib/auth';
+import { setTokenCookies } from '@/lib/auth';
 
 async function registerAction(formData: FormData) {
   'use server';
@@ -21,7 +21,7 @@ async function registerAction(formData: FormData) {
       accessToken: string;
       refreshToken: string;
     };
-    setTokenCookie(tokens.accessToken);
+    setTokenCookies(tokens.accessToken, tokens.refreshToken);
   } catch {
     redirect('/register?error=1');
   }

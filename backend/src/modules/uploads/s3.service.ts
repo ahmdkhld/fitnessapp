@@ -1,5 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  HeadObjectCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as crypto from 'crypto';
 
@@ -24,6 +30,9 @@ export class S3Service {
     });
   }
 
+  /** Maximum upload size in bytes (10 MB). */
+  private readonly MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
   async presignUpload(params: {
     userId: string;
     kind: 'body-photo' | 'plan-upload' | 'avatar';
@@ -39,6 +48,7 @@ export class S3Service {
         Bucket: this.bucket,
         Key: key,
         ContentType: params.contentType,
+        ContentLength: this.MAX_UPLOAD_BYTES,
       });
       const url = await getSignedUrl(this.client, command, { expiresIn: 300 });
       const publicUrl = this.publicBase
@@ -55,6 +65,71 @@ export class S3Service {
         key,
         expiresIn: 300,
       };
+    }
+  }
+
+  /**
+   * Generate a presigned GET URL so the client can download a private object.
+   */
+  async presignDownload(key: string): Promise<{ downloadUrl: string }> {
+    await this.assertObjectExists(key);
+
+    try {
+      const command = new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+      });
+      const downloadUrl = await getSignedUrl(this.client, command, {
+        expiresIn: 900, // 15 minutes
+      });
+      return { downloadUrl };
+    } catch (err) {
+      this.logger.warn(
+        `S3 presign-download failed (likely no creds in dev): ${(err as Error).message}`,
+      );
+      return { downloadUrl: `dev://local-download/${key}` };
+    }
+  }
+
+  /**
+   * Delete an object from S3.
+   */
+  async deleteObject(key: string): Promise<void> {
+    await this.assertObjectExists(key);
+
+    try {
+      const command = new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+      });
+      await this.client.send(command);
+    } catch (err) {
+      this.logger.warn(
+        `S3 delete failed (likely no creds in dev): ${(err as Error).message}`,
+      );
+    }
+  }
+
+  /**
+   * Verify that an object exists in the bucket. Throws 404 if it does not.
+   */
+  private async assertObjectExists(key: string): Promise<void> {
+    try {
+      await this.client.send(
+        new HeadObjectCommand({ Bucket: this.bucket, Key: key }),
+      );
+    } catch (err: any) {
+      // HeadObject returns 404 / NotFound when the key is missing
+      if (
+        err?.name === 'NotFound' ||
+        err?.$metadata?.httpStatusCode === 404
+      ) {
+        throw new NotFoundException(`Object not found: ${key}`);
+      }
+      // In dev without real S3 credentials, log and let the caller proceed
+      this.logger.warn(
+        `HeadObject check failed (likely no creds in dev): ${(err as Error).message}`,
+      );
     }
   }
 }

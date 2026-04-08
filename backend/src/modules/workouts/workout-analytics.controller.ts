@@ -1,12 +1,10 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 import { WorkoutAnalyticsService } from './workout-analytics.service';
 
 @ApiTags('workout-analytics')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('workout-analytics')
 export class WorkoutAnalyticsController {
   constructor(private readonly analytics: WorkoutAnalyticsService) {}

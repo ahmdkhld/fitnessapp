@@ -33,7 +33,7 @@ describe('WorkoutSessionsService — PR detection + auto-progression', () => {
         progressionKg: { toString: () => '2.5' },
         exercise: { isCardio: false },
         // Personal plan — auto-progression should fire on this row.
-        day: { plan: { userId: overrides.planUserId ?? 'u1' } },
+        day: { plan: { userId: 'planUserId' in overrides ? overrides.planUserId : 'u1' } },
       } as any,
       updatedWeight: null as number | null,
     };

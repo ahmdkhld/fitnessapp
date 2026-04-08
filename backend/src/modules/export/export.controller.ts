@@ -1,14 +1,12 @@
-import { Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Res } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 import { ExportService } from './export.service';
 import { PdfReportService } from './pdf-report.service';
 
 @ApiTags('export')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('export')
 export class ExportController {
   constructor(

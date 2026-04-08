@@ -24,6 +24,22 @@ describe('InsightsService', () => {
       userProfile: {
         findFirst: jest.fn().mockResolvedValue(null),
       },
+      workoutPlan: {
+        findFirst: jest.fn().mockResolvedValue(null),
+      },
+      workoutSession: {
+        count: jest.fn().mockResolvedValue(0),
+      },
+      personalRecord: {
+        groupBy: jest.fn().mockResolvedValue([]),
+        count: jest.fn().mockResolvedValue(0),
+      },
+      workoutSet: {
+        findMany: jest.fn().mockResolvedValue([]),
+      },
+      exercise: {
+        findMany: jest.fn().mockResolvedValue([]),
+      },
       ...overrides,
     }) as any;
 

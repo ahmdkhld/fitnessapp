@@ -10,6 +10,7 @@ import '../features/timeline/screens/daily_timeline_screen.dart';
 import '../features/analytics/screens/dashboard_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
 import '../features/settings/screens/notification_settings_screen.dart';
+import '../features/settings/screens/profile_screen.dart';
 import '../features/tracking/screens/water_tracker_screen.dart';
 import '../features/tracking/screens/body_log_screen.dart';
 import '../features/diet_plan/screens/diet_plans_list_screen.dart';
@@ -25,6 +26,7 @@ import '../features/workouts/screens/session_history_screen.dart';
 import '../features/workouts/screens/exercises_library_screen.dart';
 import '../features/workouts/screens/workout_analytics_screen.dart';
 import '../features/workouts/screens/workout_plan_editor_screen.dart';
+import '../features/export/screens/coach_report_screen.dart';
 import 'auth_listenable.dart';
 import 'bottom_nav_shell.dart';
 
@@ -92,6 +94,10 @@ class AppRouter {
           builder: (_, __) => const NotificationSettingsScreen(),
         ),
         GoRoute(
+          path: '/settings/profile',
+          builder: (_, __) => const ProfileScreen(),
+        ),
+        GoRoute(
           path: '/workouts/plans',
           builder: (_, __) => const WorkoutPlansListScreen(),
         ),
@@ -125,6 +131,10 @@ class AppRouter {
         GoRoute(
           path: '/workouts/analytics',
           builder: (_, __) => const WorkoutAnalyticsScreen(),
+        ),
+        GoRoute(
+          path: '/coach-report',
+          builder: (_, __) => const CoachReportScreen(),
         ),
         ShellRoute(
           builder: (_, __, child) => BottomNavShell(child: child),

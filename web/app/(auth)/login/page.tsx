@@ -1,25 +1,30 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import { setTokenCookie } from '@/lib/auth';
+import { setTokenCookies } from '@/lib/auth';
 
 async function loginAction(formData: FormData) {
   'use server';
   const email = String(formData.get('email') ?? '');
   const password = String(formData.get('password') ?? '');
+  const redirectTo = String(formData.get('redirect') ?? '/dashboard');
+
+  // Only allow relative paths to prevent open-redirect attacks
+  const safeDest = redirectTo.startsWith('/') ? redirectTo : '/dashboard';
+
   try {
     const tokens = await api.login(email, password);
-    setTokenCookie(tokens.accessToken);
+    setTokenCookies(tokens.accessToken, tokens.refreshToken);
   } catch {
-    redirect('/login?error=1');
+    redirect(`/login?error=1&redirect=${encodeURIComponent(safeDest)}`);
   }
-  redirect('/dashboard');
+  redirect(safeDest);
 }
 
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: { error?: string; redirect?: string };
 }) {
   return (
     <main style={{ padding: '4rem 2rem', maxWidth: 400, margin: '0 auto' }}>
@@ -31,6 +36,9 @@ export default function LoginPage({
         action={loginAction}
         style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '2rem' }}
       >
+        {searchParams.redirect && (
+          <input type="hidden" name="redirect" value={searchParams.redirect} />
+        )}
         <input name="email" type="email" placeholder="Email" style={inputStyle} required />
         <input
           name="password"

@@ -1,44 +1,55 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 
-/// Offline-first cache for in-progress workout sets. Mirrors the
-/// pattern used by `TimelineCache`: any set that fails to POST while
-/// the phone is offline gets queued here and is replayed by the bloc
-/// on reconnect (or next session load).
+import '../../../core/database/app_database.dart';
+
+/// Offline-first cache for in-progress workout sets.  Any set that fails
+/// to POST while the device is offline gets queued here and is replayed by
+/// the bloc on reconnect (or next session load).
 ///
-/// Each entry is keyed by sessionId and holds the raw request payload
-/// so `drainQueue` can fire them back at the API unchanged.
+/// Backed by Drift (SQLite) via [AppDatabase].  The public API is
+/// unchanged so existing blocs continue to work without modification.
 class SessionSetCache {
-  static const _queueKey = 'workouts:queue';
+  SessionSetCache(this._db);
 
-  Future<SharedPreferences> get _prefs => SharedPreferences.getInstance();
+  final AppDatabase _db;
 
+  /// Push a failed set-recording request onto the offline queue.
   Future<void> enqueue({
     required String sessionId,
     required Map<String, dynamic> payload,
   }) async {
-    final p = await _prefs;
-    final raw = p.getString(_queueKey) ?? '[]';
-    final list = (jsonDecode(raw) as List).cast<Map<String, dynamic>>();
-    list.add({
+    final body = jsonEncode({
       'sessionId': sessionId,
       'payload': payload,
       'queuedAt': DateTime.now().toIso8601String(),
     });
-    await p.setString(_queueKey, jsonEncode(list));
+    await _db.enqueueOffline(
+      endpoint: '/api/v1/workout-sessions/$sessionId/sets',
+      method: 'POST',
+      body: body,
+    );
   }
 
+  /// Drain all pending workout-set entries from the queue, returning the
+  /// raw payloads in FIFO order and removing them from the database.
   Future<List<Map<String, dynamic>>> drain() async {
-    final p = await _prefs;
-    final raw = p.getString(_queueKey) ?? '[]';
-    final list = (jsonDecode(raw) as List).cast<Map<String, dynamic>>();
-    await p.setString(_queueKey, '[]');
-    return list;
+    // Only return entries whose endpoint matches workout sessions.
+    final all = await _db.pendingQueueEntries();
+    final workoutEntries = all
+        .where((e) => e.endpoint.contains('workout-sessions'))
+        .toList();
+
+    final results = <Map<String, dynamic>>[];
+    for (final e in workoutEntries) {
+      results.add(jsonDecode(e.body) as Map<String, dynamic>);
+      await _db.deleteQueueEntry(e.id);
+    }
+    return results;
   }
 
+  /// Number of pending workout-set entries waiting to be synced.
   Future<int> pendingCount() async {
-    final p = await _prefs;
-    final raw = p.getString(_queueKey) ?? '[]';
-    return (jsonDecode(raw) as List).length;
+    final all = await _db.pendingQueueEntries();
+    return all.where((e) => e.endpoint.contains('workout-sessions')).length;
   }
 }

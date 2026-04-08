@@ -1,0 +1,76 @@
+{
+  "common": {
+    "appName": "NutriTrack",
+    "loading": "Loading...",
+    "error": "Error",
+    "tryAgain": "Try again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "nav": {
+    "overview": "Overview",
+    "timeline": "Timeline",
+    "dietPlans": "Diet plans",
+    "supplements": "Supplements",
+    "workouts": "Workouts",
+    "water": "Water",
+    "bodyLog": "Body log",
+    "notes": "Notes",
+    "insights": "Insights",
+    "import": "Import",
+    "coachReport": "Coach report",
+    "notifications": "Notifications",
+    "coachPortal": "Coach portal",
+    "admin": "Admin",
+    "settings": "Settings",
+    "sections": "Sections"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "signOut": "Sign out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "recentActivity": "Recent activity",
+    "quickActions": "Quick actions"
+  },
+  "tracking": {
+    "waterTracking": "Water Tracking",
+    "bodyLog": "Body Log",
+    "dailyNotes": "Daily Notes",
+    "addEntry": "Add entry",
+    "todayProgress": "Today's progress"
+  },
+  "profile": {
+    "title": "Profile",
+    "editProfile": "Edit profile",
+    "preferences": "Preferences"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "insights": "Insights",
+    "trends": "Trends",
+    "weeklyReport": "Weekly report"
+  },
+  "language": {
+    "switchLanguage": "Language",
+    "english": "English",
+    "arabic": "Arabic"
+  }
+}

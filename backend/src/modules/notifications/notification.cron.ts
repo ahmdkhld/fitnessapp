@@ -44,6 +44,7 @@ export class NotificationCron {
       }
     }
 
+    const dateStr = today.toISOString().slice(0, 10);
     for (const [userId, count] of overdueByUser) {
       const settings = await this.prisma.notificationSettings.findUnique({
         where: { userId },
@@ -53,6 +54,7 @@ export class NotificationCron {
         userId,
         'Missed items',
         `You have ${count} overdue item${count > 1 ? 's' : ''} today.`,
+        `${userId}:overdue::${dateStr}`,
       );
     }
     this.logger.log(`Overdue check: notified ${overdueByUser.size} users`);
@@ -68,6 +70,7 @@ export class NotificationCron {
       select: { id: true },
     });
 
+    const dateStr = today.toISOString().slice(0, 10);
     for (const { id } of users) {
       const items = await this.prisma.dailyScheduleItem.findMany({
         where: { userId: id, date: today },
@@ -79,6 +82,7 @@ export class NotificationCron {
         id,
         'Daily recap',
         `${done}/${items.length} completed (${pct}%). Great work!`,
+        `${id}:recap::${dateStr}`,
       );
     }
   }
@@ -94,12 +98,14 @@ export class NotificationCron {
       include: { plan: { select: { userId: true } } },
     });
 
+    const dateStr = new Date().toISOString().slice(0, 10);
     for (const s of low) {
       if (s.stockQuantity != null && s.stockQuantity <= s.stockAlertAt) {
         await this.notifs.send(
           s.plan.userId,
           `${s.name} running low`,
           `${s.stockQuantity} servings remaining. Consider refilling.`,
+          `${s.plan.userId}:stock:${s.id}:${dateStr}`,
         );
       }
     }

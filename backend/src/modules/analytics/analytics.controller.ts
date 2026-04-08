@@ -1,13 +1,12 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 import { AnalyticsService } from './analytics.service';
 import { InsightsService } from './insights.service';
+import { AdherenceQueryDto } from './dto/adherence-query.dto';
 
 @ApiTags('analytics')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('analytics')
 export class AnalyticsController {
   constructor(
@@ -23,9 +22,9 @@ export class AnalyticsController {
   @Get('adherence')
   adherence(
     @CurrentUser() user: AuthUser,
-    @Query('period') period?: 'week' | 'month',
+    @Query() query: AdherenceQueryDto,
   ) {
-    return this.analytics.adherence(user.userId, period === 'month' ? 30 : 7);
+    return this.analytics.adherence(user.userId, query.period === 'month' ? 30 : 7);
   }
 
   @Get('streaks')

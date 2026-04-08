@@ -11,6 +11,7 @@ describe('AuthService rotation', () => {
   const makeMailer = () =>
     ({
       sendPasswordReset: jest.fn(async () => undefined),
+      sendEmailVerification: jest.fn(async () => undefined),
     }) as any;
 
   const makeJwt = (): jest.Mocked<JwtService> =>
@@ -64,10 +65,11 @@ describe('AuthService rotation', () => {
         updateMany: jest.fn(async ({ where, data }: any) => {
           let count = 0;
           for (const t of tokens) {
-            if (
-              t.userId === where.userId &&
-              (where.revokedAt === null ? t.revokedAt === null : true)
-            ) {
+            const matchUserId = where.userId == null || t.userId === where.userId;
+            const matchHash = where.tokenHash == null || t.tokenHash === where.tokenHash;
+            const matchRevoked =
+              where.revokedAt === null ? t.revokedAt === null : true;
+            if (matchUserId && matchHash && matchRevoked) {
               Object.assign(t, data);
               count++;
             }

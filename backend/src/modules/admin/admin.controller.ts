@@ -1,30 +1,21 @@
-import { Body, Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { IsIn, IsString } from 'class-validator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 import { AdminService } from './admin.service';
-
-class SetRoleDto {
-  @IsString()
-  @IsIn(['user', 'coach', 'admin'])
-  role!: 'user' | 'coach' | 'admin';
-}
+import { SetRoleDto } from './dto/set-role.dto';
+import { ListUsersQueryDto } from './dto/list-users-query.dto';
 
 @ApiTags('admin')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@Roles('admin')
 @Controller('admin')
 export class AdminController {
   constructor(private readonly admin: AdminService) {}
 
   @Get('users')
-  list(
-    @CurrentUser() user: AuthUser,
-    @Query('search') search?: string,
-    @Query('role') role?: string,
-  ) {
-    return this.admin.listUsers(user.userId, { search, role });
+  list(@CurrentUser() user: AuthUser, @Query() query: ListUsersQueryDto) {
+    return this.admin.listUsers(user.userId, { search: query.search, role: query.role });
   }
 
   @Patch('users/:id/role')

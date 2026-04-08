@@ -3,6 +3,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -20,6 +22,7 @@ import { WorkoutsModule } from './modules/workouts/workouts.module';
 import { CoachModule } from './modules/coach/coach.module';
 import { MailerModule } from './modules/mailer/mailer.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { WsModule } from './modules/ws/ws.module';
 
 @Module({
   imports: [
@@ -46,7 +49,12 @@ import { AdminModule } from './modules/admin/admin.module';
     WorkoutsModule,
     CoachModule,
     AdminModule,
+    WsModule,
   ],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+  ],
 })
 export class AppModule {}

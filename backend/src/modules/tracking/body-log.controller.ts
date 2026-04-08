@@ -1,39 +1,22 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { IsInt, IsNumber, IsOptional, IsString } from 'class-validator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 import { BodyLogService } from './body-log.service';
-
-class CreateBodyLogDto {
-  @IsOptional() @IsString() date?: string;
-  @IsOptional() @IsNumber() weightKg?: number;
-  @IsOptional() @IsNumber() waistCm?: number;
-  @IsOptional() @IsNumber() bodyFatPct?: number;
-  @IsOptional() @IsInt() energyLevel?: number;
-  @IsOptional() @IsInt() hungerLevel?: number;
-  @IsOptional() @IsInt() sleepQuality?: number;
-  @IsOptional() @IsString() notes?: string;
-  @IsOptional() @IsString() photoUrl?: string;
-}
+import { CreateBodyLogDto } from './dto/create-body-log.dto';
+import { DateRangeQueryDto } from './dto/date-range-query.dto';
 
 @ApiTags('body-logs')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('body-logs')
 export class BodyLogController {
   constructor(private readonly logs: BodyLogService) {}
 
   @Get()
-  list(
-    @CurrentUser() user: AuthUser,
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-  ) {
+  list(@CurrentUser() user: AuthUser, @Query() query: DateRangeQueryDto) {
     return this.logs.list(
       user.userId,
-      from ? new Date(from) : undefined,
-      to ? new Date(to) : undefined,
+      query.from ? new Date(query.from) : undefined,
+      query.to ? new Date(query.to) : undefined,
     );
   }
 

@@ -33,6 +33,12 @@ describe('ExportService.report', () => {
       dailyNote: {
         findMany: jest.fn().mockResolvedValue([]),
       },
+      workoutSession: {
+        findMany: jest.fn().mockResolvedValue([]),
+      },
+      personalRecord: {
+        findMany: jest.fn().mockResolvedValue([]),
+      },
     }) as any;
 
   it('summarises adherence and aggregates water by day', async () => {

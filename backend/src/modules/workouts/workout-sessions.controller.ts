@@ -7,10 +7,8 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 import { WorkoutSessionsService } from './workout-sessions.service';
 import { StartSessionDto } from './dto/start-session.dto';
@@ -20,7 +18,6 @@ import { UpdateSetDto } from './dto/update-set.dto';
 
 @ApiTags('workout-sessions')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('workout-sessions')
 export class WorkoutSessionsController {
   constructor(private readonly service: WorkoutSessionsService) {}

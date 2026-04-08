@@ -10,6 +10,10 @@ on:
     paths:
       - 'backend/**'
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -42,20 +46,50 @@ jobs:
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
       - run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
       - run: npx prisma migrate deploy
       - run: npm run build
-      - run: npm test
-      - run: npm run test:e2e
+
+      - name: Unit tests with coverage
+        run: npx jest --coverage --coverageReporters=text --coverageReporters=lcov
+
+      - name: E2E tests
+        run: npm run test:e2e
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage/lcov.info
+          retention-days: 14
 
   docker:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
+
       - uses: docker/setup-buildx-action@v3
-      - uses: docker/build-push-action@v5
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
         with:
           context: ./backend
-          push: false
-          tags: nutritrack-backend:latest
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/backend:latest
+            ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

@@ -6,10 +6,8 @@ import {
   Param,
   Patch,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 import { DietPlansService } from './diet-plans.service';
 import { CreateDietPlanDto } from './dto/create-diet-plan.dto';
@@ -17,7 +15,6 @@ import { UpdateDietPlanDto } from './dto/update-diet-plan.dto';
 
 @ApiTags('diet-plans')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('diet-plans')
 export class DietPlansController {
   constructor(private readonly service: DietPlansService) {}

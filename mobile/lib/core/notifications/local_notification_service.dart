@@ -31,6 +31,17 @@ class LocalNotificationService {
         iOS: DarwinNotificationDetails(),
       );
 
+  /// Show an immediate notification (used by push service for foreground FCM
+  /// messages).
+  Future<void> show({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    await _plugin.show(id, title, body, _details, payload: payload);
+  }
+
   /// Schedule or reschedule a one-off notification for an item.
   Future<void> schedule({
     required int id,

@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: nutritrack
-      POSTGRES_PASSWORD: nutritrack
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nutritrack}
       POSTGRES_DB: nutritrack
     ports:
       - '5432:5432'
@@ -21,6 +21,11 @@ services:
     restart: unless-stopped
     ports:
       - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   api:
     build: ./backend
@@ -28,12 +33,14 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://nutritrack:nutritrack@postgres:5432/nutritrack?schema=public
+      DATABASE_URL: postgresql://nutritrack:${POSTGRES_PASSWORD:-nutritrack}@postgres:5432/nutritrack?schema=public
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: dev-secret-change-me
-      JWT_REFRESH_SECRET: dev-refresh-secret-change-me
-      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-me}
+      NODE_ENV: development
       PORT: '3000'
     ports:
       - '3000:3000'

@@ -62,6 +62,20 @@ export class MailerService implements OnModuleInit {
     return this.send({ to, subject, text, html });
   }
 
+  async sendEmailVerification(to: string, verifyUrl: string) {
+    const subject = 'Verify your NutriTrack email';
+    const text =
+      `Welcome to NutriTrack! Please verify your email address by visiting the link below.\n\n` +
+      `${verifyUrl}\n\n` +
+      `This link expires in 24 hours. If you didn't create an account, ignore this email.`;
+    const html = `
+      <p>Welcome to NutriTrack! Please verify your email address.</p>
+      <p><a href="${verifyUrl}" style="display:inline-block;padding:10px 20px;background:#2e7d5c;color:#fff;border-radius:6px;text-decoration:none">Verify email</a></p>
+      <p>This link expires in 24 hours. If you didn't create an account, ignore this email.</p>
+    `;
+    return this.send({ to, subject, text, html });
+  }
+
   async sendCoachInvite(to: string, coachName: string, acceptUrl: string) {
     const subject = `${coachName} invited you to NutriTrack coaching`;
     const text =

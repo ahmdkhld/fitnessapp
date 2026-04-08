@@ -1,6 +1,7 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Optional } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { PrismaService } from '../../prisma/prisma.service';
+import { WsGateway } from '../ws/ws.gateway';
 
 /**
  * Delivers push notifications via Firebase Cloud Messaging when
@@ -16,7 +17,18 @@ export class NotificationsService implements OnModuleInit {
   private readonly logger = new Logger(NotificationsService.name);
   private fcmEnabled = false;
 
-  constructor(private readonly prisma: PrismaService) {}
+  /**
+   * In-memory deduplication cache.
+   * Key format: `${userId}:${type}:${referenceId}:${dateString}`
+   * Value: timestamp when the entry was added.
+   */
+  private readonly dedupeCache = new Map<string, number>();
+  private static readonly DEDUPE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly wsGateway?: WsGateway,
+  ) {}
 
   onModuleInit() {
     const projectId = process.env.FCM_PROJECT_ID;
@@ -79,11 +91,49 @@ export class NotificationsService implements OnModuleInit {
     });
   }
 
-  async send(userId: string, title: string, body: string) {
+  /**
+   * Send a push notification to a user.
+   *
+   * @param userId   Target user ID
+   * @param title    Notification title
+   * @param body     Notification body
+   * @param dedupeKey  Optional deduplication key. When provided, duplicate
+   *                   notifications with the same key within the TTL window
+   *                   (1 hour) will be suppressed.
+   */
+  async send(userId: string, title: string, body: string, dedupeKey?: string) {
+    // --- Deduplication check ---
+    if (dedupeKey) {
+      this.pruneDedupeCache();
+      if (this.dedupeCache.has(dedupeKey)) {
+        this.logger.debug(`[dedup] Suppressed duplicate notification: ${dedupeKey}`);
+        return;
+      }
+    }
+
     const settings = await this.prisma.notificationSettings.findUnique({
       where: { userId },
+      include: { user: { select: { timezone: true } } },
     });
     if (!settings?.pushEnabled) return;
+
+    // --- Quiet hours check ---
+    if (this.isWithinQuietHours(settings.quietStart, settings.quietEnd, (settings as any).user?.timezone)) {
+      this.logger.debug(
+        `[quiet-hours] Suppressed notification for user ${userId}: ${title}`,
+      );
+      return;
+    }
+
+    // Mark as sent for deduplication purposes
+    if (dedupeKey) {
+      this.dedupeCache.set(dedupeKey, Date.now());
+    }
+
+    // --- Real-time WebSocket delivery (always attempted, independent of FCM) ---
+    if (this.wsGateway) {
+      this.wsGateway.emitNotification(userId, { title, body });
+    }
 
     if (!this.fcmEnabled || !settings.fcmToken) {
       this.logger.log(`[push:${userId}] ${title} — ${body}`);
@@ -107,6 +157,69 @@ export class NotificationsService implements OnModuleInit {
           where: { userId },
           data: { fcmToken: null },
         });
+      }
+    }
+  }
+
+  // ----------------------------------------------------------------
+  // Quiet-hours helper
+  // ----------------------------------------------------------------
+
+  /**
+   * Returns true if the current time (in the user's timezone) falls
+   * within the quiet window defined by `quietStart` and `quietEnd`.
+   *
+   * Handles the midnight-crossing case (e.g. 22:00 - 07:00).
+   * The DB stores these as `@db.Time()` values — Prisma returns them as
+   * Date objects whose *time* portion is what we care about.
+   */
+  isWithinQuietHours(
+    quietStart: Date | null | undefined,
+    quietEnd: Date | null | undefined,
+    timezone?: string | null,
+  ): boolean {
+    if (!quietStart || !quietEnd) return false;
+
+    const tz = timezone || 'UTC';
+    const now = new Date();
+
+    // Get current hours/minutes in the user's timezone
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+    });
+    const parts = formatter.formatToParts(now);
+    const nowHour = parseInt(parts.find((p) => p.type === 'hour')!.value, 10);
+    const nowMin = parseInt(parts.find((p) => p.type === 'minute')!.value, 10);
+    const nowMinutes = nowHour * 60 + nowMin;
+
+    // Extract hours/minutes from the Date objects (UTC portion represents the time)
+    const startMinutes = quietStart.getUTCHours() * 60 + quietStart.getUTCMinutes();
+    const endMinutes = quietEnd.getUTCHours() * 60 + quietEnd.getUTCMinutes();
+
+    if (startMinutes <= endMinutes) {
+      // Same-day range, e.g. 01:00 - 07:00
+      return nowMinutes >= startMinutes && nowMinutes < endMinutes;
+    }
+    // Midnight-crossing range, e.g. 22:00 - 07:00
+    return nowMinutes >= startMinutes || nowMinutes < endMinutes;
+  }
+
+  // ----------------------------------------------------------------
+  // Deduplication helpers
+  // ----------------------------------------------------------------
+
+  /**
+   * Remove entries older than the TTL from the deduplication cache.
+   * Called lazily before each dedup check to keep memory bounded.
+   */
+  private pruneDedupeCache(): void {
+    const cutoff = Date.now() - NotificationsService.DEDUPE_TTL_MS;
+    for (const [key, ts] of this.dedupeCache) {
+      if (ts < cutoff) {
+        this.dedupeCache.delete(key);
       }
     }
   }

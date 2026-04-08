@@ -6,17 +6,14 @@ import {
   Param,
   Patch,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { MealsService } from './meals.service';
 import { CreateMealDto } from './dto/create-meal.dto';
 import { UpdateMealDto } from './dto/update-meal.dto';
 
 @ApiTags('meals')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('diet-plans/:planId/meals')
 export class MealsController {
   constructor(private readonly meals: MealsService) {}

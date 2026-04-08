@@ -1,23 +1,11 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsString, Min } from 'class-validator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 import { WaterService } from './water.service';
-
-class LogWaterDto {
-  @IsInt()
-  @Min(1)
-  amountMl!: number;
-
-  @IsOptional()
-  @IsString()
-  date?: string;
-}
+import { LogWaterDto } from './dto/log-water.dto';
 
 @ApiTags('water')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('water')
 export class WaterController {
   constructor(private readonly water: WaterService) {}

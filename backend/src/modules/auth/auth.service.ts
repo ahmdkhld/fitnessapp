@@ -3,10 +3,14 @@ import {
   Logger,
   UnauthorizedException,
   ConflictException,
+  BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailerService } from '../mailer/mailer.service';
 import { RegisterDto } from './dto/register.dto';
@@ -14,27 +18,61 @@ import { LoginDto } from './dto/login.dto';
 
 const REFRESH_TTL_DAYS = 30;
 const RESET_TTL_MINUTES = 30;
+const VERIFY_TTL_HOURS = 24;
+const RESEND_COOLDOWN_MS = 60_000; // 1 minute between resend attempts
+
+/** Apple JWKS is cached per jose best practice (createRemoteJWKSet handles rotation). */
+const APPLE_JWKS = createRemoteJWKSet(
+  new URL('https://appleid.apple.com/auth/keys'),
+);
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private readonly googleClient: OAuth2Client;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly mailer: MailerService,
-  ) {}
+  ) {
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+    this.googleClient = new OAuth2Client(googleClientId);
+  }
 
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existing) throw new ConflictException('Email already registered');
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
+
+    // Generate email verification token
+    const rawVerifyToken = crypto.randomBytes(32).toString('hex');
+    const emailVerifyToken = this.hash(rawVerifyToken);
+    const emailVerifyExpires = new Date();
+    emailVerifyExpires.setUTCHours(emailVerifyExpires.getUTCHours() + VERIFY_TTL_HOURS);
+
     const user = await this.prisma.user.create({
-      data: { email: dto.email, passwordHash, fullName: dto.fullName },
+      data: {
+        email: dto.email,
+        passwordHash,
+        fullName: dto.fullName,
+        emailVerified: false,
+        emailVerifyToken,
+        emailVerifyExpires,
+      },
     });
 
-    return this.issueTokens(user.id, user.email);
+    // Send verification email (fire-and-forget so registration isn't blocked)
+    const frontendUrl = process.env.FRONTEND_URL ?? 'https://app.nutritrack.app';
+    const verifyUrl = `${frontendUrl}/verify-email?token=${rawVerifyToken}`;
+    this.mailer
+      .sendEmailVerification(user.email, verifyUrl)
+      .catch((err) =>
+        this.logger.error(`Verification email failed: ${(err as Error).message}`),
+      );
+
+    return this.issueTokens(user.id, user.email, user.role);
   }
 
   async login(dto: LoginDto) {
@@ -42,7 +80,7 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('Invalid credentials');
     const ok = await bcrypt.compare(dto.password, user.passwordHash);
     if (!ok) throw new UnauthorizedException('Invalid credentials');
-    return this.issueTokens(user.id, user.email);
+    return this.issueTokens(user.id, user.email, user.role);
   }
 
   /**
@@ -91,7 +129,11 @@ export class AuthService {
       data: { revokedAt: new Date() },
     });
 
-    return this.issueTokens(payload.sub, payload.email);
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: { role: true },
+    });
+    return this.issueTokens(payload.sub, payload.email, user?.role ?? 'user');
   }
 
   async logout(refreshToken: string) {
@@ -105,6 +147,77 @@ export class AuthService {
       data: { revokedAt: new Date() },
     });
     return { success: true };
+  }
+
+  /**
+   * Verifies a user's email by matching the hashed token and checking
+   * that it has not expired. Clears the token fields on success.
+   */
+  async verifyEmail(rawToken: string) {
+    const tokenHash = this.hash(rawToken);
+    const user = await this.prisma.user.findFirst({
+      where: {
+        emailVerifyToken: tokenHash,
+        emailVerifyExpires: { gt: new Date() },
+      },
+    });
+    if (!user) {
+      throw new BadRequestException('Invalid or expired verification token');
+    }
+    if (user.emailVerified) {
+      return { success: true, message: 'Email already verified' };
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerified: true,
+        emailVerifyToken: null,
+        emailVerifyExpires: null,
+      },
+    });
+
+    return { success: true, message: 'Email verified successfully' };
+  }
+
+  /**
+   * Generates a new verification token and re-sends the verification
+   * email. Rate-limited to one request per minute to prevent abuse.
+   */
+  async resendVerification(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException('User not found');
+
+    if (user.emailVerified) {
+      return { success: true, message: 'Email already verified' };
+    }
+
+    // Rate-limit: if a token was issued less than RESEND_COOLDOWN_MS ago, reject
+    if (
+      user.emailVerifyExpires &&
+      user.emailVerifyExpires.getTime() >
+        Date.now() + (VERIFY_TTL_HOURS * 3600_000 - RESEND_COOLDOWN_MS)
+    ) {
+      throw new ForbiddenException(
+        'Please wait at least one minute before requesting another verification email',
+      );
+    }
+
+    const rawVerifyToken = crypto.randomBytes(32).toString('hex');
+    const emailVerifyToken = this.hash(rawVerifyToken);
+    const emailVerifyExpires = new Date();
+    emailVerifyExpires.setUTCHours(emailVerifyExpires.getUTCHours() + VERIFY_TTL_HOURS);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { emailVerifyToken, emailVerifyExpires },
+    });
+
+    const frontendUrl = process.env.FRONTEND_URL ?? 'https://app.nutritrack.app';
+    const verifyUrl = `${frontendUrl}/verify-email?token=${rawVerifyToken}`;
+    await this.mailer.sendEmailVerification(user.email, verifyUrl);
+
+    return { success: true, message: 'Verification email sent' };
   }
 
   /**
@@ -170,11 +283,9 @@ export class AuthService {
   }
 
   /**
-   * Stub for social auth. Validates the provider token (placeholder),
-   * upserts a user by verified email, and issues the usual token pair.
-   * Real implementations would verify the Google/Apple id_token against
-   * the provider's JWKS — the shape is ready, the verification call is
-   * intentionally left as a TODO until we have credentials.
+   * Social auth login. Verifies the provider's id_token cryptographically
+   * (Google via google-auth-library, Apple via jose + JWKS), upserts a
+   * user by verified email, and issues the usual token pair.
    */
   async socialLogin(provider: 'google' | 'apple', idToken: string, fullName?: string) {
     const claims = await this.verifySocialToken(provider, idToken);
@@ -193,66 +304,140 @@ export class AuthService {
           email: claims.email,
           passwordHash: await bcrypt.hash(randomPassword, 12),
           fullName: fullName ?? claims.name ?? claims.email,
+          emailVerified: true, // Social provider already verified the email
         },
       });
+    } else if (!user.emailVerified) {
+      // Existing user logging in via social — trust the provider's verification
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true, emailVerifyToken: null, emailVerifyExpires: null },
+      });
     }
-    return this.issueTokens(user.id, user.email);
+    return this.issueTokens(user.id, user.email, user.role);
   }
 
   /**
-   * Verifies the provider's id_token against its JWKS endpoint and
-   * returns the verified email/name claims. Falls back to an unsigned
-   * decode in dev when `jose` isn't installed yet — production must
-   * set GOOGLE_CLIENT_ID / APPLE_CLIENT_ID so the audience is checked.
+   * Dispatches to the provider-specific verification method.
+   * Both Google and Apple paths perform full cryptographic verification
+   * of the id_token signature, expiry, issuer, and audience.
+   *
+   * In non-production environments where the client ID is not configured,
+   * an unsigned decode fallback is allowed so local development works
+   * without real provider credentials. This fallback is blocked entirely
+   * in production.
    */
   private async verifySocialToken(
     provider: 'google' | 'apple',
     idToken: string,
   ): Promise<{ email: string | null; name: string | null }> {
-    const audience =
-      provider === 'google'
-        ? process.env.GOOGLE_CLIENT_ID
-        : process.env.APPLE_CLIENT_ID;
+    if (provider === 'google') {
+      return this.verifyGoogleToken(idToken);
+    }
+    return this.verifyAppleToken(idToken);
+  }
 
-    if (audience) {
-      try {
-        // Lazy require so the dependency is optional at boot time.
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const jose = require('jose');
-        const issuer =
-          provider === 'google'
-            ? 'https://accounts.google.com'
-            : 'https://appleid.apple.com';
-        const jwksUrl =
-          provider === 'google'
-            ? 'https://www.googleapis.com/oauth2/v3/certs'
-            : 'https://appleid.apple.com/auth/keys';
-        const jwks = jose.createRemoteJWKSet(new URL(jwksUrl));
-        const { payload } = await jose.jwtVerify(idToken, jwks, {
-          issuer,
-          audience,
-        });
-        return {
-          email: (payload.email as string | undefined) ?? null,
-          name:
-            (payload.name as string | undefined) ??
-            (payload.given_name as string | undefined) ??
-            null,
-        };
-      } catch (err) {
-        this.logger.warn(
-          `${provider} token verification failed: ${(err as Error).message}`,
-        );
-        throw new UnauthorizedException('Invalid social token');
-      }
+  /**
+   * Verifies a Google ID token using google-auth-library.
+   * This validates the token signature against Google's JWKS, checks
+   * expiry, and verifies the audience matches GOOGLE_CLIENT_ID.
+   */
+  private async verifyGoogleToken(
+    idToken: string,
+  ): Promise<{ email: string | null; name: string | null }> {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      return this.devFallbackDecode('google', idToken);
     }
 
-    // Dev fallback: decode without verification.
     try {
-      const [, payload] = idToken.split('.');
-      if (!payload) throw new Error('malformed token');
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken,
+        audience: clientId,
+      });
+      const payload = ticket.getPayload();
+      if (!payload) {
+        throw new Error('Google token payload is empty');
+      }
+      if (!payload.email_verified) {
+        throw new Error('Google email is not verified');
+      }
+      return {
+        email: payload.email ?? null,
+        name: payload.name ?? payload.given_name ?? null,
+      };
+    } catch (err) {
+      this.logger.warn(
+        `Google token verification failed: ${(err as Error).message}`,
+      );
+      throw new UnauthorizedException('Invalid Google token');
+    }
+  }
+
+  /**
+   * Verifies an Apple ID token using jose against Apple's JWKS endpoint.
+   * This validates the token signature, expiry, issuer
+   * (https://appleid.apple.com), and audience (APPLE_CLIENT_ID).
+   */
+  private async verifyAppleToken(
+    idToken: string,
+  ): Promise<{ email: string | null; name: string | null }> {
+    const clientId = process.env.APPLE_CLIENT_ID;
+    if (!clientId) {
+      return this.devFallbackDecode('apple', idToken);
+    }
+
+    try {
+      const { payload } = await jwtVerify(idToken, APPLE_JWKS, {
+        issuer: 'https://appleid.apple.com',
+        audience: clientId,
+      });
+      return {
+        email: (payload.email as string | undefined) ?? null,
+        name:
+          (payload.name as string | undefined) ??
+          (payload.given_name as string | undefined) ??
+          null,
+      };
+    } catch (err) {
+      this.logger.warn(
+        `Apple token verification failed: ${(err as Error).message}`,
+      );
+      throw new UnauthorizedException('Invalid Apple token');
+    }
+  }
+
+  /**
+   * Decodes a JWT payload WITHOUT signature verification.
+   * Only allowed in development/test environments. In production this
+   * throws immediately so that a missing client ID config does not
+   * silently disable token verification.
+   */
+  private devFallbackDecode(
+    provider: string,
+    idToken: string,
+  ): { email: string | null; name: string | null } {
+    const env = process.env.NODE_ENV ?? 'development';
+    if (env === 'production') {
+      this.logger.error(
+        `${provider.toUpperCase()}_CLIENT_ID is not configured — ` +
+          `social login is disabled in production without it.`,
+      );
+      throw new UnauthorizedException(
+        `${provider} login is not configured on this server`,
+      );
+    }
+
+    this.logger.warn(
+      `[DEV ONLY] Decoding ${provider} token without signature verification. ` +
+        `Set ${provider.toUpperCase()}_CLIENT_ID to enable proper verification.`,
+    );
+
+    try {
+      const [, payloadB64] = idToken.split('.');
+      if (!payloadB64) throw new Error('malformed token');
       const decoded = JSON.parse(
-        Buffer.from(payload, 'base64url').toString('utf8'),
+        Buffer.from(payloadB64, 'base64url').toString('utf8'),
       );
       return {
         email: decoded.email ?? null,
@@ -265,8 +450,8 @@ export class AuthService {
     }
   }
 
-  private async issueTokens(userId: string, email: string) {
-    const payload = { sub: userId, email };
+  private async issueTokens(userId: string, email: string, role: string) {
+    const payload = { sub: userId, email, role };
     const accessToken = this.jwt.sign(payload);
     const refreshToken = this.jwt.sign(payload, {
       secret: process.env.JWT_REFRESH_SECRET ?? 'dev-refresh-secret',

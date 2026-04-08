@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getToken } from '@/lib/auth';
+import { getToken, refreshAccessToken } from '@/lib/auth';
 
 const API_BASE =
   process.env.API_BASE_URL || 'http://localhost:3000/api';
@@ -10,19 +10,32 @@ async function forward(req: NextRequest, pathSegments: string[]) {
   const url = new URL(`${API_BASE}/${path}`);
   req.nextUrl.searchParams.forEach((v, k) => url.searchParams.set(k, v));
 
-  const init: RequestInit = {
+  // Read body once so we can replay it on retry
+  let reqBody: string | undefined;
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    reqBody = await req.text();
+  }
+
+  const buildInit = (t: string | null): RequestInit => ({
     method: req.method,
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(t ? { Authorization: `Bearer ${t}` } : {}),
     },
     cache: 'no-store',
-  };
-  if (req.method !== 'GET' && req.method !== 'HEAD') {
-    init.body = await req.text();
+    ...(reqBody !== undefined ? { body: reqBody } : {}),
+  });
+
+  let res = await fetch(url, buildInit(token));
+
+  // On 401, attempt a silent token refresh and retry once
+  if (res.status === 401) {
+    const newToken = await refreshAccessToken();
+    if (newToken) {
+      res = await fetch(url, buildInit(newToken));
+    }
   }
 
-  const res = await fetch(url, init);
   const body = await res.text();
   return new NextResponse(body, {
     status: res.status,

@@ -6,10 +6,8 @@ import {
   Param,
   Patch,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 import { WorkoutPlansService } from './workout-plans.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
@@ -20,7 +18,6 @@ import { UpdateDayExerciseDto } from './dto/update-day-exercise.dto';
 
 @ApiTags('workout-plans')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('workout-plans')
 export class WorkoutPlansController {
   constructor(private readonly service: WorkoutPlansService) {}

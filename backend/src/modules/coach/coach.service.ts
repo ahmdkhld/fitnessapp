@@ -6,6 +6,12 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailerService } from '../mailer/mailer.service';
+import { DietPlansService } from '../diet-plans/diet-plans.service';
+import { WorkoutPlansService } from '../workouts/workout-plans.service';
+import { CreateDietPlanDto } from '../diet-plans/dto/create-diet-plan.dto';
+import { UpdateDietPlanDto } from '../diet-plans/dto/update-diet-plan.dto';
+import { CreatePlanDto } from '../workouts/dto/create-plan.dto';
+import { UpdatePlanDto } from '../workouts/dto/update-plan.dto';
 
 @Injectable()
 export class CoachService {
@@ -14,6 +20,8 @@ export class CoachService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mailer: MailerService,
+    private readonly dietPlans: DietPlansService,
+    private readonly workoutPlans: WorkoutPlansService,
   ) {}
 
   /**
@@ -171,6 +179,95 @@ export class CoachService {
         achievedAt: pr.achievedAt,
       })),
     };
+  }
+
+  // ==================== COACH PLAN MANAGEMENT ====================
+
+  /**
+   * Verifies that an accepted coach-client link exists.
+   * Throws ForbiddenException if not.
+   */
+  async assertCoachLink(coachId: string, clientId: string): Promise<void> {
+    const link = await this.prisma.coachLink.findFirst({
+      where: {
+        coachId,
+        clientId,
+        acceptedAt: { not: null },
+      },
+    });
+    if (!link) {
+      throw new ForbiddenException('No active coaching link with this client');
+    }
+  }
+
+  // ---------- Diet Plans ----------
+
+  async listClientDietPlans(coachId: string, clientId: string) {
+    await this.assertCoachLink(coachId, clientId);
+    return this.dietPlans.list(clientId);
+  }
+
+  async createClientDietPlan(
+    coachId: string,
+    clientId: string,
+    dto: CreateDietPlanDto,
+  ) {
+    await this.assertCoachLink(coachId, clientId);
+    return this.dietPlans.create(clientId, dto);
+  }
+
+  async updateClientDietPlan(
+    coachId: string,
+    clientId: string,
+    planId: string,
+    dto: UpdateDietPlanDto,
+  ) {
+    await this.assertCoachLink(coachId, clientId);
+    return this.dietPlans.update(clientId, planId, dto);
+  }
+
+  async removeClientDietPlan(
+    coachId: string,
+    clientId: string,
+    planId: string,
+  ) {
+    await this.assertCoachLink(coachId, clientId);
+    return this.dietPlans.remove(clientId, planId);
+  }
+
+  // ---------- Workout Plans ----------
+
+  async listClientWorkoutPlans(coachId: string, clientId: string) {
+    await this.assertCoachLink(coachId, clientId);
+    return this.workoutPlans.list(clientId);
+  }
+
+  async createClientWorkoutPlan(
+    coachId: string,
+    clientId: string,
+    dto: CreatePlanDto,
+  ) {
+    await this.assertCoachLink(coachId, clientId);
+    return this.workoutPlans.create(clientId, dto);
+  }
+
+  async updateClientWorkoutPlan(
+    coachId: string,
+    clientId: string,
+    planId: string,
+    dto: UpdatePlanDto,
+  ) {
+    await this.assertCoachLink(coachId, clientId);
+    return this.workoutPlans.update(clientId, planId, dto);
+  }
+
+  async removeClientWorkoutPlan(
+    coachId: string,
+    clientId: string,
+    planId: string,
+  ) {
+    await this.assertCoachLink(coachId, clientId);
+    return this.workoutPlans.remove(clientId, planId);
   }
 
   private async ensureCoach(userId: string) {

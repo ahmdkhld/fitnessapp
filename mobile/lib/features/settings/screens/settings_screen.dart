@@ -40,6 +40,11 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         children: [
           ListTile(
+            leading: const Icon(Icons.person),
+            title: Text(l.profileTitle),
+            onTap: () => context.push('/settings/profile'),
+          ),
+          ListTile(
             leading: const Icon(Icons.notifications),
             title: Text(l.notifications),
             onTap: () => context.push('/settings/notifications'),
@@ -68,6 +73,12 @@ class SettingsScreen extends StatelessWidget {
             leading: const Icon(Icons.upload_file),
             title: Text(l.importPlan),
             onTap: () => context.push('/plan-import'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.summarize),
+            title: Text(l.coachReportTitle),
+            subtitle: Text(l.coachReportSubtitle),
+            onTap: () => context.push('/coach-report'),
           ),
           const Divider(),
           ListTile(

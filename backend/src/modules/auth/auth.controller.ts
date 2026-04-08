@@ -1,5 +1,6 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Param, Post, Request, SetMetadata } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Public, IS_PUBLIC_KEY } from './decorators/public.decorator';
 import { IsString, MinLength } from 'class-validator';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -7,6 +8,7 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { SocialLoginDto } from './dto/social-login.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 class ResetPasswordDto {
   @IsString() token!: string;
@@ -17,6 +19,7 @@ class ResetPasswordDto {
 }
 
 @ApiTags('auth')
+@Public()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
@@ -39,6 +42,17 @@ export class AuthController {
   @Post('logout')
   logout(@Body() dto: RefreshDto) {
     return this.auth.logout(dto.refreshToken);
+  }
+
+  @Post('verify-email')
+  verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.auth.verifyEmail(dto.token);
+  }
+
+  @Post('resend-verification')
+  @SetMetadata(IS_PUBLIC_KEY, false) // Override class-level @Public() — requires JWT
+  resendVerification(@Request() req: { user: { userId: string } }) {
+    return this.auth.resendVerification(req.user.userId);
   }
 
   @Post('forgot-password')

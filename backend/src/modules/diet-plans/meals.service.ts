@@ -35,12 +35,15 @@ export class MealsService {
   }
 
   update(mealId: string, dto: UpdateMealDto) {
-    const { scheduledTime, ...rest } = dto;
+    const { scheduledTime, ingredients, ...rest } = dto;
     return this.prisma.meal.update({
       where: { id: mealId },
       data: {
         ...rest,
         ...(scheduledTime ? { scheduledTime: timeToDate(scheduledTime) } : {}),
+        ...(ingredients !== undefined
+          ? { ingredients: { deleteMany: {}, create: ingredients } }
+          : {}),
       },
     });
   }

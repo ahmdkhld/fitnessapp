@@ -6,11 +6,16 @@ terraform {
       version = "~> 5.40"
     }
   }
-  # Configure remote state in your own S3 bucket before running plan/apply.
-  # backend "s3" {
-  #   bucket = "nutritrack-tfstate"
-  #   key    = "prod/terraform.tfstate"
-  #   region = "us-east-1"
+
+  # Uncomment and configure before first apply:
+  # terraform {
+  #   backend "s3" {
+  #     bucket         = "nutritrack-terraform-state"
+  #     key            = "prod/terraform.tfstate"
+  #     region         = "us-east-1"
+  #     dynamodb_table = "nutritrack-terraform-locks"
+  #     encrypt        = true
+  #   }
   # }
 }
 
@@ -36,6 +41,24 @@ variable "db_password" {
 variable "container_image" {
   type        = string
   description = "ECR image URI for the API container"
+}
+
+variable "cors_allowed_origins" {
+  type        = list(string)
+  description = "Allowed origins for S3 CORS configuration"
+  default     = ["https://app.nutritrack.com"]
+}
+
+variable "domain_name" {
+  type        = string
+  description = "Primary domain name for the application (used for ACM certificate)"
+  default     = "api.nutritrack.com"
+}
+
+variable "sns_alert_email" {
+  type        = string
+  description = "Email address for CloudWatch alarm notifications"
+  default     = ""
 }
 
 locals {

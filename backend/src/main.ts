@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { SentryExceptionFilter } from './common/filters/sentry.filter';
 
@@ -14,7 +15,18 @@ async function bootstrap() {
     });
   }
 
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule);
+
+  // Security headers (CSP, X-Frame-Options, X-XSS-Protection, etc.)
+  app.use(helmet());
+
+  // Restrict CORS to explicit origins
+  app.enableCors({
+    origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3001'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   app.setGlobalPrefix('api');
   app.useGlobalPipes(

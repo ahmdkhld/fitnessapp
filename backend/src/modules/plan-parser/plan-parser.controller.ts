@@ -6,13 +6,12 @@ import {
   Param,
   Post,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import type { File as MulterFile } from 'multer';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 import { PlanParserService } from './plan-parser.service';
 
@@ -26,7 +25,6 @@ class ConfirmDto {
 
 @ApiTags('plan-parser')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('plan-parser')
 export class PlanParserController {
   constructor(private readonly parser: PlanParserService) {}
@@ -41,7 +39,7 @@ export class PlanParserController {
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
   uploadPdf(
     @CurrentUser() user: AuthUser,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: MulterFile,
   ) {
     if (!file) throw new BadRequestException('PDF file required');
     if (!file.mimetype.includes('pdf')) {

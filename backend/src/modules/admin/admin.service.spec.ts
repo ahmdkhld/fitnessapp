@@ -79,7 +79,7 @@ describe('AdminService', () => {
     const prisma = makePrisma('admin');
     prisma.user.findUnique = jest.fn(async ({ where }: any) =>
       where.id === 'actor' ? { id: 'actor', role: 'admin' } : null,
-    );
+    ) as any;
     const svc = new AdminService(prisma as any);
     await expect(svc.setRole('actor', 'ghost', 'coach')).rejects.toBeInstanceOf(
       NotFoundException,

@@ -1,0 +1,77 @@
+name: lint-pr
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  pr-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR title length
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          title_len=${#PR_TITLE}
+          if [ "$title_len" -gt 72 ]; then
+            echo "::error::PR title is too long ($title_len chars). Keep it under 72 characters."
+            exit 1
+          fi
+          if [ "$title_len" -lt 10 ]; then
+            echo "::error::PR title is too short ($title_len chars). Please be more descriptive."
+            exit 1
+          fi
+          echo "PR title length OK ($title_len chars)"
+
+      - name: Check commit message format
+        run: |
+          bad=0
+          while IFS= read -r sha; do
+            msg=$(git log --format='%s' -n 1 "$sha")
+            len=${#msg}
+            if [ "$len" -gt 100 ]; then
+              echo "::warning::Commit $sha subject too long ($len chars): $msg"
+              bad=1
+            fi
+            if [ "$len" -lt 5 ]; then
+              echo "::warning::Commit $sha subject too short ($len chars): $msg"
+              bad=1
+            fi
+          done < <(git log --format='%H' origin/${{ github.event.pull_request.base.ref }}..${{ github.event.pull_request.head.sha }})
+
+          if [ "$bad" -eq 1 ]; then
+            echo "::warning::Some commit messages need attention (see above). This is advisory only."
+          fi
+
+      - name: Check for debug leftovers
+        run: |
+          found=0
+          for pattern in 'console\.log' 'debugger' 'TODO.*HACK' 'FIXME.*URGENT'; do
+            if git diff origin/${{ github.event.pull_request.base.ref }}..HEAD -- '*.ts' '*.tsx' '*.dart' | grep -qE "^\+.*$pattern"; then
+              echo "::warning::Found '$pattern' in diff — please review before merging."
+              found=1
+            fi
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "No debug leftovers found."
+          fi
+
+      - name: Check for large files
+        run: |
+          large=$(git diff --name-only --diff-filter=A origin/${{ github.event.pull_request.base.ref }}..HEAD | while read f; do
+            if [ -f "$f" ]; then
+              size=$(wc -c < "$f")
+              if [ "$size" -gt 1048576 ]; then
+                echo "$f ($(( size / 1024 ))KB)"
+              fi
+            fi
+          done)
+          if [ -n "$large" ]; then
+            echo "::warning::Large files added (>1MB): $large"
+          else
+            echo "No large files detected."
+          fi

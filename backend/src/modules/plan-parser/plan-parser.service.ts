@@ -76,7 +76,7 @@ export class PlanParserService {
       include: { meals: { include: { ingredients: true } } },
     });
 
-    let supplementPlan = null;
+    let supplementPlan: Awaited<ReturnType<typeof this.prisma.supplementPlan.create>> | null = null;
     if (parsed.supplements?.length) {
       supplementPlan = await this.prisma.supplementPlan.create({
         data: {

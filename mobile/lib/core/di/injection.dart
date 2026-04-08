@@ -3,6 +3,7 @@ import '../../features/auth/repositories/auth_repository.dart';
 import '../../features/diet_plan/repositories/diet_plan_repository.dart';
 import '../../features/plan_import/repositories/plan_import_repository.dart';
 import '../../features/settings/repositories/notification_settings_repository.dart';
+import '../../features/settings/repositories/profile_repository.dart';
 import '../../features/supplements/repositories/supplement_repository.dart';
 import '../../features/timeline/repositories/timeline_cache.dart';
 import '../../features/timeline/repositories/timeline_repository.dart';
@@ -15,10 +16,13 @@ import '../../features/workouts/repositories/session_cache.dart';
 import '../../features/workouts/repositories/workout_analytics_repository.dart';
 import '../../features/workouts/repositories/workout_plans_repository.dart';
 import '../../features/workouts/repositories/workout_sessions_repository.dart';
+import '../../features/export/repositories/export_repository.dart';
 import '../api/api_client.dart';
 import '../auth/token_manager.dart';
 import '../connectivity/connectivity_monitor.dart';
+import '../database/app_database.dart';
 import '../notifications/local_notification_service.dart';
+import '../notifications/push_notification_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -34,11 +38,24 @@ Future<void> setupDependencies() async {
 
   getIt.registerLazySingleton<ConnectivityMonitor>(() => ConnectivityMonitor());
 
+  // Offline database (Drift / SQLite)
+  getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
+
+  // Push notifications (FCM) — initialised lazily; call init() from main.
+  getIt.registerLazySingleton<PushNotificationService>(
+    () => PushNotificationService(
+      localNotifications: getIt<LocalNotificationService>(),
+      settingsRepository: getIt<NotificationSettingsRepository>(),
+    ),
+  );
+
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepository(getIt<ApiClient>(), getIt<TokenManager>()),
   );
-  getIt.registerLazySingleton<TimelineCache>(() => TimelineCache());
+  getIt.registerLazySingleton<TimelineCache>(
+    () => TimelineCache(getIt<AppDatabase>()),
+  );
   getIt.registerLazySingleton<TimelineRepository>(
     () => TimelineRepository(getIt<ApiClient>(), getIt<TimelineCache>()),
   );
@@ -66,6 +83,9 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<NotificationSettingsRepository>(
     () => NotificationSettingsRepository(getIt<ApiClient>()),
   );
+  getIt.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepository(getIt<ApiClient>()),
+  );
 
   // Workouts
   getIt.registerLazySingleton<ExercisesRepository>(
@@ -74,7 +94,9 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<WorkoutPlansRepository>(
     () => WorkoutPlansRepository(getIt<ApiClient>()),
   );
-  getIt.registerLazySingleton<SessionSetCache>(() => SessionSetCache());
+  getIt.registerLazySingleton<SessionSetCache>(
+    () => SessionSetCache(getIt<AppDatabase>()),
+  );
   getIt.registerLazySingleton<WorkoutSessionsRepository>(
     () => WorkoutSessionsRepository(
       getIt<ApiClient>(),
@@ -83,5 +105,10 @@ Future<void> setupDependencies() async {
   );
   getIt.registerLazySingleton<WorkoutAnalyticsRepository>(
     () => WorkoutAnalyticsRepository(getIt<ApiClient>()),
+  );
+
+  // Export
+  getIt.registerLazySingleton<ExportRepository>(
+    () => ExportRepository(getIt<ApiClient>()),
   );
 }

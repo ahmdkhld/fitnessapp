@@ -6,10 +6,8 @@ import {
   Param,
   Patch,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 import { SupplementsService } from './supplements.service';
 import { CreateSupplementPlanDto } from './dto/create-supplement-plan.dto';
@@ -18,7 +16,6 @@ import { UpdateSupplementDto } from './dto/update-supplement.dto';
 
 @ApiTags('supplements')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('supplement-plans')
 export class SupplementsController {
   constructor(private readonly service: SupplementsService) {}

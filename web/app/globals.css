@@ -28,6 +28,29 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
+/* ── Responsive layout ─────────────────────────────────── */
+
+/* On desktop (>768px): show sidebar, hide mobile hamburger/drawer */
+@media (min-width: 769px) {
+  .mobile-menu-btn,
+  .mobile-nav-overlay,
+  .mobile-nav-drawer {
+    display: none !important;
+  }
+}
+
+/* On mobile (<=768px): hide desktop sidebar, show hamburger */
+@media (max-width: 768px) {
+  .desktop-sidebar {
+    display: none !important;
+  }
+
+  .dashboard-main {
+    padding: 1rem !important;
+    padding-top: 4rem !important; /* room for hamburger button */
+  }
+}
+
 /* Print layout — used by the coach report page so users can "Save as PDF"
    from the browser without hitting the backend pdf endpoint. */
 @media print {

@@ -1,4 +1,12 @@
+import Link from 'next/link';
 import { logoutAction } from './actions';
+
+const settingsLinks: { label: string; href: string | null }[] = [
+  { label: 'Profile', href: '/dashboard/profile' },
+  { label: 'Notifications', href: '/dashboard/notifications' },
+  { label: 'Devices', href: null },
+  { label: 'Export data', href: '/dashboard/export' },
+];
 
 export default function SettingsPage() {
   return (
@@ -15,19 +23,36 @@ export default function SettingsPage() {
           maxWidth: 500,
         }}
       >
-        {['Profile', 'Notifications', 'Devices', 'Export data'].map((label) => (
-          <div
-            key={label}
-            style={{
-              background: 'var(--card)',
-              border: '1px solid var(--border)',
-              padding: '1rem 1.25rem',
-              borderRadius: 8,
-            }}
-          >
-            {label}
-          </div>
-        ))}
+        {settingsLinks.map(({ label, href }) =>
+          href ? (
+            <Link
+              key={label}
+              href={href}
+              style={{
+                background: 'var(--card)',
+                border: '1px solid var(--border)',
+                padding: '1rem 1.25rem',
+                borderRadius: 8,
+                color: 'inherit',
+                textDecoration: 'none',
+              }}
+            >
+              {label}
+            </Link>
+          ) : (
+            <div
+              key={label}
+              style={{
+                background: 'var(--card)',
+                border: '1px solid var(--border)',
+                padding: '1rem 1.25rem',
+                borderRadius: 8,
+              }}
+            >
+              {label}
+            </div>
+          ),
+        )}
         <form action={logoutAction}>
           <button
             type="submit"

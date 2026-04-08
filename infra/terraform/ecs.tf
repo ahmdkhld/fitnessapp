@@ -76,16 +76,85 @@ resource "aws_lb_target_group" "api" {
   }
 }
 
-resource "aws_lb_listener" "http" {
+# --- ACM Certificate for HTTPS ---
+
+resource "aws_acm_certificate" "main" {
+  domain_name       = var.domain_name
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = local.tags
+}
+
+# --- ALB Listeners ---
+
+resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.api.arn
-  port              = 80
-  protocol          = "HTTP"
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = aws_acm_certificate.main.arn
 
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.api.arn
   }
 }
+
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.api.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+# --- Secrets Manager ---
+
+resource "aws_secretsmanager_secret" "jwt_secret" {
+  name        = "${var.project}/jwt-secret"
+  description = "JWT signing secret for NutriTrack API"
+  tags        = local.tags
+}
+
+resource "aws_secretsmanager_secret_version" "jwt_secret" {
+  secret_id     = aws_secretsmanager_secret.jwt_secret.id
+  secret_string = "CHANGE_ME_BEFORE_PRODUCTION"
+}
+
+resource "aws_secretsmanager_secret" "jwt_refresh_secret" {
+  name        = "${var.project}/jwt-refresh-secret"
+  description = "JWT refresh token secret for NutriTrack API"
+  tags        = local.tags
+}
+
+resource "aws_secretsmanager_secret_version" "jwt_refresh_secret" {
+  secret_id     = aws_secretsmanager_secret.jwt_refresh_secret.id
+  secret_string = "CHANGE_ME_BEFORE_PRODUCTION"
+}
+
+resource "aws_secretsmanager_secret" "database_password" {
+  name        = "${var.project}/database-password"
+  description = "RDS database password for NutriTrack"
+  tags        = local.tags
+}
+
+resource "aws_secretsmanager_secret_version" "database_password" {
+  secret_id     = aws_secretsmanager_secret.database_password.id
+  secret_string = var.db_password
+}
+
+# --- IAM Roles ---
 
 resource "aws_iam_role" "task_execution" {
   name = "${var.project}-task-execution"
@@ -106,6 +175,30 @@ resource "aws_iam_role_policy_attachment" "task_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+resource "aws_iam_role_policy" "task_execution_secrets" {
+  name = "${var.project}-secrets-access"
+  role = aws_iam_role.task_execution.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = [
+          aws_secretsmanager_secret.jwt_secret.arn,
+          aws_secretsmanager_secret.jwt_refresh_secret.arn,
+          aws_secretsmanager_secret.database_password.arn
+        ]
+      }
+    ]
+  })
+}
+
+# --- ECS Task Definition ---
+
 resource "aws_ecs_task_definition" "api" {
   family                   = "${var.project}-api"
   requires_compatibilities = ["FARGATE"]
@@ -124,12 +217,29 @@ resource "aws_ecs_task_definition" "api" {
       ]
       environment = [
         {
-          name  = "DATABASE_URL",
-          value = "postgresql://nutritrack:${var.db_password}@${aws_db_instance.postgres.address}:5432/nutritrack?schema=public"
+          name  = "DATABASE_HOST",
+          value = aws_db_instance.postgres.address
         },
+        { name = "DATABASE_NAME", value = "nutritrack" },
+        { name = "DATABASE_USER", value = "nutritrack" },
+        { name = "DATABASE_PORT", value = "5432" },
         { name = "S3_BUCKET", value = aws_s3_bucket.uploads.id },
         { name = "S3_REGION", value = var.region },
         { name = "NODE_ENV", value = "production" }
+      ]
+      secrets = [
+        {
+          name      = "JWT_SECRET"
+          valueFrom = aws_secretsmanager_secret.jwt_secret.arn
+        },
+        {
+          name      = "JWT_REFRESH_SECRET"
+          valueFrom = aws_secretsmanager_secret.jwt_refresh_secret.arn
+        },
+        {
+          name      = "DATABASE_PASSWORD"
+          valueFrom = aws_secretsmanager_secret.database_password.arn
+        }
       ]
       logConfiguration = {
         logDriver = "awslogs"
@@ -144,6 +254,8 @@ resource "aws_ecs_task_definition" "api" {
   ])
 }
 
+# --- ECS Service (in private subnets) ---
+
 resource "aws_ecs_service" "api" {
   name            = "${var.project}-api"
   cluster         = aws_ecs_cluster.main.id
@@ -152,9 +264,9 @@ resource "aws_ecs_service" "api" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = aws_subnet.public[*].id
+    subnets          = aws_subnet.private[*].id
     security_groups  = [aws_security_group.api.id]
-    assign_public_ip = true
+    assign_public_ip = false
   }
 
   load_balancer {
@@ -163,8 +275,10 @@ resource "aws_ecs_service" "api" {
     container_port   = 3000
   }
 
-  depends_on = [aws_lb_listener.http]
+  depends_on = [aws_lb_listener.https]
 }
+
+# --- Outputs ---
 
 output "alb_dns" {
   value = aws_lb.api.dns_name
@@ -176,4 +290,13 @@ output "db_endpoint" {
 
 output "uploads_bucket" {
   value = aws_s3_bucket.uploads.id
+}
+
+output "acm_certificate_arn" {
+  value = aws_acm_certificate.main.arn
+}
+
+output "acm_domain_validation_options" {
+  description = "DNS records to create for ACM certificate validation"
+  value       = aws_acm_certificate.main.domain_validation_options
 }
