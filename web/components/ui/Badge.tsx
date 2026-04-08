@@ -9,11 +9,11 @@ interface BadgeProps {
 }
 
 const variantColors: Record<BadgeVariant, { bg: string; fg: string }> = {
-  success: { bg: 'rgba(34,197,94,0.15)', fg: '#22C55E' },
-  warning: { bg: 'rgba(245,158,11,0.15)', fg: '#F59E0B' },
-  error: { bg: 'rgba(239,68,68,0.15)', fg: '#EF4444' },
-  info: { bg: 'rgba(0,0,255,0.15)', fg: '#0000FF' },
-  neutral: { bg: '#333333', fg: '#A9A9A9' },
+  success: { bg: 'rgba(34,197,94,0.15)', fg: 'var(--success, #22C55E)' },
+  warning: { bg: 'rgba(245,158,11,0.15)', fg: 'var(--warning, #F59E0B)' },
+  error: { bg: 'rgba(239,68,68,0.15)', fg: 'var(--danger, #EF4444)' },
+  info: { bg: 'rgba(0,0,255,0.10)', fg: 'var(--accent)' },
+  neutral: { bg: 'var(--hover-overlay)', fg: 'var(--muted)' },
 };
 
 export function Badge({ variant = 'neutral', children, style }: BadgeProps) {

@@ -15,21 +15,20 @@ interface DataTableProps<T = Record<string, unknown>> {
 
 const cellStyle: React.CSSProperties = {
   padding: '0.6rem 0.75rem',
-  borderBottom: '1px solid #333333',
+  borderBottom: '1px solid var(--border)',
   textAlign: 'left',
   fontSize: 14,
-  color: '#FFFFFF',
-  fontFamily: "'Inter', sans-serif",
+  color: 'var(--fg)',
 };
 
 const headerCellStyle: React.CSSProperties = {
   ...cellStyle,
   fontSize: 12,
   fontWeight: 600,
-  color: '#A9A9A9',
+  color: 'var(--muted)',
   textTransform: 'uppercase',
   letterSpacing: '0.04em',
-  background: '#121212',
+  background: 'var(--bg)',
 };
 
 export function DataTable<T extends Record<string, unknown>>({
@@ -42,8 +41,8 @@ export function DataTable<T extends Record<string, unknown>>({
     <div
       style={{
         overflowX: 'auto',
-        background: '#1E1E1E',
-        border: '1px solid #333333',
+        background: 'var(--card)',
+        border: '1px solid var(--border)',
         borderRadius: 12,
         ...style,
       }}
@@ -72,7 +71,7 @@ export function DataTable<T extends Record<string, unknown>>({
                 style={{
                   ...cellStyle,
                   textAlign: 'center',
-                  color: '#A9A9A9',
+                  color: 'var(--muted)',
                   padding: '2rem 1rem',
                   borderBottom: 'none',
                 }}
@@ -82,7 +81,7 @@ export function DataTable<T extends Record<string, unknown>>({
             </tr>
           ) : (
             data.map((row, i) => (
-              <tr key={i} style={{ background: i % 2 === 0 ? '#1E1E1E' : '#191919' }}>
+              <tr key={i} style={{ background: i % 2 === 0 ? 'var(--card)' : 'var(--hover-overlay)' }}>
                 {columns.map((col) => (
                   <td key={col.key} style={i === data.length - 1 ? { ...cellStyle, borderBottom: 'none' } : cellStyle}>
                     {col.render

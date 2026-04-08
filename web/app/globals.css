@@ -28,6 +28,26 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
   --topnav-height: 64px;
+  --modal-backdrop: rgba(0, 0, 0, 0.75);
+
+  /* ── Semantic colors (severity / state) ───────────────── */
+  --success: #22C55E;
+  --success-bg: rgba(34, 197, 94, 0.15);
+  --warning: #D8A24A;
+  --warning-bg: rgba(216, 162, 74, 0.15);
+  --danger: #E07B5F;
+  --danger-bg: rgba(224, 123, 95, 0.10);
+  --danger-border: rgba(224, 123, 95, 0.35);
+  --info: #6AD1E0;
+  --info-bg: rgba(106, 209, 224, 0.15);
+
+  /* ── Button size scale ────────────────────────────────── */
+  --btn-pad-sm: 0.4rem 0.85rem;
+  --btn-pad-md: 0.6rem 1.25rem;
+  --btn-pad-lg: 0.85rem 1.75rem;
+  --btn-fs-sm: 12px;
+  --btn-fs-md: 14px;
+  --btn-fs-lg: 16px;
 }
 
 /* ── Light Theme Overrides ─────────────────────────────── */
@@ -47,6 +67,7 @@
   --decorative-2: rgba(75, 0, 130, 0.04);
   --glow-blue: 0 0 12px rgba(0, 0, 255, 0.18);
   --glow-purple: 0 0 12px rgba(160, 32, 240, 0.18);
+  --modal-backdrop: rgba(20, 20, 20, 0.45);
 }
 
 /* ── Reset & Base ──────────────────────────────────────── */
@@ -275,15 +296,16 @@ body::after {
 .btn-danger {
   padding: 0.4rem 0.75rem;
   background: transparent;
-  color: #e07b5f;
-  border: 1px solid #6a2a2a;
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
   border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
+  transition: background 0.15s ease;
 }
 
 .btn-danger:hover {
-  background: rgba(224,123,95,0.1);
+  background: var(--danger-bg);
 }
 
 .progress-track {
@@ -314,20 +336,92 @@ body::after {
 
 .error-banner {
   padding: 0.75rem 1rem;
-  background: rgba(224,123,95,0.1);
-  border: 1px solid #6a2a2a;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
   border-radius: 8px;
-  color: #e07b5f;
+  color: var(--danger);
   margin-bottom: 1.5rem;
+  font-size: 14px;
+}
+
+.success-banner {
+  padding: 0.75rem 1rem;
+  background: var(--success-bg);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  border-radius: 8px;
+  color: var(--success);
+  margin-bottom: 1.5rem;
+  font-size: 14px;
+}
+
+/* ── Empty State ───────────────────────────────────────── */
+.empty-state {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+.empty-state__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hover-overlay);
+  color: var(--muted);
+}
+.empty-state__title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin: 0;
+}
+.empty-state__body {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0;
+  max-width: 32ch;
+}
+.empty-state__cta {
+  margin-top: 0.5rem;
+}
+
+/* ── Button size scale ─────────────────────────────────── */
+.btn--sm { padding: var(--btn-pad-sm); font-size: var(--btn-fs-sm); }
+.btn--md { padding: var(--btn-pad-md); font-size: var(--btn-fs-md); }
+.btn--lg { padding: var(--btn-pad-lg); font-size: var(--btn-fs-lg); }
+
+/* ── Animations ────────────────────────────────────────── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.reveal {
+  opacity: 0;
+  animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .badge-pending {
   display: inline-flex;
   align-items: center;
   padding: 3px 10px;
-  background: rgba(216,162,74,0.15);
-  color: #d8a24a;
-  border: 1px solid rgba(216,162,74,0.3);
+  background: var(--warning-bg);
+  color: var(--warning);
+  border: 1px solid rgba(216, 162, 74, 0.3);
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 500;
@@ -337,9 +431,9 @@ body::after {
   display: inline-flex;
   align-items: center;
   padding: 3px 10px;
-  background: rgba(106,209,224,0.15);
-  color: #6ad1e0;
-  border: 1px solid rgba(106,209,224,0.3);
+  background: var(--info-bg);
+  color: var(--info);
+  border: 1px solid rgba(106, 209, 224, 0.3);
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 500;

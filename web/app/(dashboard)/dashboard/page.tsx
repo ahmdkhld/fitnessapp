@@ -33,25 +33,25 @@ export default async function DashboardOverviewPage() {
       label: t('adherence7d'),
       value: summary ? `${summary.overallPercentage}%` : '—',
       icon: '📊',
-      accentColor: '#22C55E',
+      accentColor: 'var(--success)',
     },
     {
       label: t('currentStreak'),
       value: streak ? `${streak} ${t('days')}` : `0 ${t('days')}`,
       icon: '🔥',
-      accentColor: '#A020F0',
+      accentColor: 'var(--accent-purple)',
     },
     {
       label: t('completed7d'),
       value: summary ? `${summary.completed} / ${summary.total}` : '—',
       icon: '✅',
-      accentColor: '#0000FF',
+      accentColor: 'var(--accent)',
     },
     {
       label: t('skipped7d'),
       value: summary ? `${summary.skipped}` : '—',
       icon: '⏭',
-      accentColor: '#666666',
+      accentColor: 'var(--muted)',
     },
   ];
 

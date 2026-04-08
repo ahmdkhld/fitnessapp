@@ -33,9 +33,9 @@ async function load(): Promise<{
 }
 
 const severityColor: Record<string, string> = {
-  info: '#22C55E',
-  warn: '#d8a24a',
-  critical: '#e07b5f',
+  info: 'var(--success)',
+  warn: 'var(--warning)',
+  critical: 'var(--danger)',
 };
 
 export default async function AnalyticsPage() {

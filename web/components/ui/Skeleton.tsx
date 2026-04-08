@@ -45,7 +45,7 @@ export function Skeleton({ width, height, variant = 'text', style }: SkeletonPro
     <div
       aria-hidden="true"
       style={{
-        background: 'linear-gradient(90deg, #333333 25%, #1E1E1E 50%, #333333 75%)',
+        background: 'linear-gradient(90deg, var(--border) 25%, var(--card) 50%, var(--border) 75%)',
         backgroundSize: '200% 100%',
         animation: 'ui-skeleton-shimmer 1.5s ease-in-out infinite',
         ...defaults,

@@ -42,27 +42,25 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
+          background: 'var(--modal-backdrop)',
         }}
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Content — glass card */}
+      {/* Content — surface */}
       <div
         style={{
           position: 'relative',
-          background: 'rgba(30,30,30,0.6)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          border: '1px solid #333333',
+          background: 'var(--card)',
+          border: '1px solid var(--border)',
           borderRadius: 16,
           padding: '1.5rem',
           width: '100%',
           maxWidth: 480,
           maxHeight: '90vh',
           overflowY: 'auto',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+          boxShadow: 'var(--shadow-hover)',
         }}
       >
         {/* Header */}
@@ -74,14 +72,14 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
             marginBottom: '1rem',
           }}
         >
-          <h2 style={{ margin: 0, fontSize: '1.15rem', color: '#FFFFFF', fontFamily: "'Inter', sans-serif" }}>{title}</h2>
+          <h2 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--fg)' }}>{title}</h2>
           <button
             onClick={onClose}
             aria-label="Close dialog"
             style={{
               background: 'none',
               border: 'none',
-              color: '#A9A9A9',
+              color: 'var(--muted)',
               cursor: 'pointer',
               fontSize: 20,
               lineHeight: 1,
