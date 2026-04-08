@@ -1,0 +1,53 @@
+# Render Blueprint — one-click backend deploy on the free tier.
+#
+# Usage:
+#   1. Push this repo to GitHub (or fork it).
+#   2. Go to https://dashboard.render.com/blueprints and pick the repo.
+#   3. Render reads this file, provisions the service, and asks you
+#      to fill in DATABASE_URL + APP_URL (see DEPLOY.md for values).
+#
+# The free tier spins the service down after 15 minutes of inactivity.
+# Use UptimeRobot or cron-job.org to ping /api/health/live every 5
+# minutes if you want it warm.
+
+services:
+  - type: web
+    name: nutritrack-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /api/health/live
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: '3000'
+
+      # Neon Postgres pooled connection string — paste this in the
+      # Render dashboard after creating the Neon project (see DEPLOY.md).
+      - key: DATABASE_URL
+        sync: false
+
+      # Auto-generated secrets. Rotate via the dashboard if they leak.
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: '15m'
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: '30d'
+
+      # Public-facing URL for password-reset / coach-invite links.
+      # Set this to your Vercel URL (e.g. https://nutritrack.vercel.app).
+      - key: APP_URL
+        sync: false
+
+      # Skip the workout seed on cold starts to stay under the 90-second
+      # Render startup budget. Flip to "false" once and redeploy to seed.
+      - key: SKIP_WORKOUT_SEED
+        value: 'false'

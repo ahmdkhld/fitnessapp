@@ -14,8 +14,17 @@ export class WorkoutSeedService implements OnModuleInit {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async onModuleInit() {
+  onModuleInit() {
     if (process.env.SKIP_WORKOUT_SEED === 'true') return;
+    // Fire-and-forget so a slow seed (e.g. first run seeding ~100 rows
+    // on a cold Neon connection) can't block the Nest bootstrap and
+    // miss the Render/Fly health check window. Errors are logged and
+    // swallowed; subsequent boots are cheap anyway because the seed
+    // guards on existing rows.
+    void this.runSeed();
+  }
+
+  private async runSeed() {
     try {
       await this.seedExercises();
       await this.seedTemplates();
