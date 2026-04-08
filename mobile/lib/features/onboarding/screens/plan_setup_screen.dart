@@ -62,7 +62,7 @@ class PlanSetupScreen extends StatelessWidget {
             const SizedBox(height: 12),
             _PlanOption(
               icon: Icons.skip_next,
-              iconColor: AppColors.muted,
+              iconColor: c.muted,
               title: 'Skip for now',
               subtitle: "I'll set this up later",
               onTap: () => context.go('/timeline'),

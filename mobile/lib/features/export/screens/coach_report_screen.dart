@@ -114,16 +114,16 @@ class _CoachReportScreenState extends State<CoachReportScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.card,
+              color: c.card,
               borderRadius: BorderRadius.circular(AppColors.radiusMd),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: c.border),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(l.coachReportDateRange.toUpperCase(),
-                    style: const TextStyle(
-                      color: AppColors.muted,
+                    style: TextStyle(
+                      color: c.muted,
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.5,
@@ -135,20 +135,20 @@ class _CoachReportScreenState extends State<CoachReportScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 12),
                     decoration: BoxDecoration(
-                      color: AppColors.bg,
-                      border: Border.all(color: AppColors.border),
+                      color: c.bg,
+                      border: Border.all(color: c.border),
                       borderRadius:
                           BorderRadius.circular(AppColors.radiusSm),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.date_range,
-                            size: 20, color: AppColors.muted),
+                        Icon(Icons.date_range,
+                            size: 20, color: c.muted),
                         const SizedBox(width: 8),
                         Text('${_formatDate(_from)}  \u2014  ${_formatDate(_to)}'),
                         const Spacer(),
-                        const Icon(Icons.edit,
-                            size: 16, color: AppColors.muted),
+                        Icon(Icons.edit,
+                            size: 16, color: c.muted),
                       ],
                     ),
                   ),
@@ -163,7 +163,7 @@ class _CoachReportScreenState extends State<CoachReportScreen> {
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: AppColors.fg),
+                                strokeWidth: 2, color: c.fg),
                           )
                         : const Icon(Icons.assessment),
                     label: Text(l.coachReportGenerate),
@@ -223,20 +223,21 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     final l = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: c.card,
         borderRadius: BorderRadius.circular(AppColors.radiusMd),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: c.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(l.coachReportSummary.toUpperCase(),
-              style: const TextStyle(
-                color: AppColors.muted,
+              style: TextStyle(
+                color: c.muted,
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 0.5,
@@ -244,7 +245,7 @@ class _SummaryCard extends StatelessWidget {
           if (report.userName.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(report.userName,
-                style: const TextStyle(color: AppColors.muted, fontSize: 13)),
+                style: TextStyle(color: c.muted, fontSize: 13)),
           ],
           const SizedBox(height: 16),
           Row(
@@ -259,15 +260,15 @@ class _SummaryCard extends StatelessWidget {
                       child: CircularProgressIndicator(
                         value: report.adherencePct / 100,
                         strokeWidth: 6,
-                        backgroundColor: AppColors.border,
+                        backgroundColor: c.border,
                         color: AppColors.accentGreen,
                       ),
                     ),
                     Text('${report.adherencePct}%',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.fg,
+                          color: c.fg,
                         )),
                   ],
                 ),
@@ -284,13 +285,13 @@ class _SummaryCard extends StatelessWidget {
                     Text(
                       '${report.completed} / ${report.totalItems} ${l.coachReportItemsCompleted}',
                       style:
-                          const TextStyle(color: AppColors.muted, fontSize: 13),
+                          TextStyle(color: c.muted, fontSize: 13),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '${report.from} \u2014 ${report.to}',
                       style:
-                          const TextStyle(color: AppColors.muted, fontSize: 13),
+                          TextStyle(color: c.muted, fontSize: 13),
                     ),
                   ],
                 ),
@@ -309,20 +310,21 @@ class _WorkoutsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemedColors.of(context);
     final l = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: c.card,
         borderRadius: BorderRadius.circular(AppColors.radiusMd),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: c.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(l.coachReportWorkouts.toUpperCase(),
-              style: const TextStyle(
-                color: AppColors.muted,
+              style: TextStyle(
+                color: c.muted,
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 0.5,
