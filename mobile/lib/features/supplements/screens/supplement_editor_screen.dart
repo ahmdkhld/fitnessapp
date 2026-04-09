@@ -40,7 +40,7 @@ class _SupplementEditorScreenState extends State<SupplementEditorScreen> {
             '${_time.hour.toString().padLeft(2, '0')}:${_time.minute.toString().padLeft(2, '0')}:00',
         dosage: _dosage.text.isEmpty ? null : _dosage.text,
         frequency: _frequency,
-        frequencyDays: _frequency == 'custom' ? _days.toList()..sort() : null,
+        frequencyDays: _frequency == 'custom' ? (_days.toList()..sort()) : null,
         stockQuantity: int.tryParse(_stock.text),
       );
       if (mounted) Navigator.pop(context, true);
